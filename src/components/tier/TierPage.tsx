@@ -49,7 +49,7 @@ export function TierPage({ inventory }: TierPageProps) {
         天梯與推薦配置
       </h2>
       <p className="page-desc">
-        Blade 天梯階級與實戰組合排行（資料轉錄自 stan-yao 天梯站）。亮綠點代表你已擁有該零件。
+        戰刃天梯階級與實戰組合排行（資料轉錄自 stan-yao 天梯站）。橘點代表你已擁有該零件。
       </p>
 
       <div className="tier-rows">

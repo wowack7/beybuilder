@@ -125,7 +125,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
             最強戰隊
           </h2>
           <p className="page-desc">
-            依你的庫存，在「同一 deck 內 戰刃／固鎖／軸心 不得重複」的 3on3 規則下算出的最佳三顆。
+            依 3on3 規則（同一 deck 的戰刃／固鎖／軸心不得重複），從你的庫存算出最強三顆。
           </p>
         </div>
         <div className="deck-actions">
@@ -215,7 +215,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
       )}
 
       <p className="score-note">
-        組合只來自兩個來源：實戰組合（stan-yao 天梯站賽事統計）與站方推薦（該站「建議配置」欄），不做零件自由重組；排列順序依實戰統計與零件階級的綜合權重（本站自訂近似模型，不顯示分數）。實際勝負仍取決於操作技術與環境，資料轉錄自第三方站點、未必完全準確，僅供參考。
+        組合僅取自實戰組合（天梯站賽事統計）與站方推薦（建議配置），不自由重組零件；排序依實戰與階級的自訂權重，不顯示分數。實際勝負仍看技術，資料轉錄自第三方站點，僅供參考。
       </p>
     </section>
   )
