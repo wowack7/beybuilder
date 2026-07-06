@@ -1,0 +1,143 @@
+.tier-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+}
+
+.tier-row {
+  display: grid;
+  grid-template-columns: 3.4rem 1fr;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-raised);
+}
+
+.tier-row .tier-label {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: var(--bg);
+  background: var(--row-color, var(--tier-c));
+}
+
+.tier-row[data-group='d'] .tier-label,
+.tier-row[data-group='e'] .tier-label {
+  color: var(--text);
+}
+
+.tier-row .tier-blades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.blade-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.25em 0.75em;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-overlay);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.blade-chip[data-owned='true'] {
+  border-color: var(--accent-deep);
+  color: var(--text);
+}
+
+.blade-chip .dot {
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.blade-chip[data-owned='true'] .dot {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+.combo-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+}
+
+.combo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  min-width: 40rem;
+}
+
+.combo-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 500;
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--line-strong);
+  position: sticky;
+  top: 0;
+  background: var(--bg-raised);
+}
+
+.combo-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.combo-table tr:last-child td {
+  border-bottom: none;
+}
+
+.combo-table tr:hover td {
+  background: color-mix(in oklch, var(--bg-overlay) 70%, transparent);
+}
+
+.combo-table .rank {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-faint);
+}
+
+.combo-table tr:nth-child(-n + 3) .rank {
+  color: var(--gold);
+}
+
+.combo-table .combo-name {
+  font-weight: 600;
+}
+
+.buildable {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1em 0.6em;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  border: 1px solid var(--accent-deep);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.buildable[data-ok='false'] {
+  border-color: var(--line);
+  color: var(--text-faint);
+}
+
+.tier-note {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  margin-top: var(--space-3);
+}

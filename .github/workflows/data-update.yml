@@ -1,0 +1,38 @@
+name: Weekly data update
+
+on:
+  schedule:
+    # 週一 01:00 UTC = 台北 09:00
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Fetch latest data
+        run: npm run data:update
+      - name: Verify engine still passes
+        run: npm test
+      - run: npm run build
+      - name: Commit and push if data changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # meta.json 每次都會變（時間戳）；只有其他資料檔也變了才算真更新
+          if git diff --name-only -- src/data | grep -v 'meta.json' | grep -q .; then
+            git add src/data
+            git commit -m "chore: weekly data update"
+            git push
+          else
+            echo "資料無變動，略過 commit"
+          fi

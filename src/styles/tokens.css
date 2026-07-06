@@ -1,0 +1,62 @@
+/* 設計 tokens：深色競技場（dark arena）方向，熾焰橘 X accent */
+:root {
+  --bg: oklch(15% 0.018 265);
+  --bg-raised: oklch(20% 0.022 265);
+  --bg-overlay: oklch(25% 0.028 265);
+  --line: oklch(31% 0.02 265);
+  --line-strong: oklch(40% 0.03 265);
+
+  --text: oklch(94% 0.008 250);
+  --text-dim: oklch(72% 0.015 255);
+  --text-faint: oklch(56% 0.015 255);
+
+  --accent: oklch(76% 0.19 55);
+  --accent-deep: oklch(62% 0.17 50);
+  --accent-ink: oklch(20% 0.05 55);
+  --accent-glow: oklch(76% 0.19 55 / 0.16);
+
+  --gold: oklch(82% 0.13 85);
+  --silver: oklch(80% 0.02 260);
+  --danger: oklch(66% 0.19 25);
+
+  --tier-x: oklch(76% 0.19 55);
+  --tier-s: oklch(82% 0.13 85);
+  --tier-a: oklch(78% 0.11 230);
+  --tier-b: oklch(74% 0.1 180);
+  --tier-c: oklch(66% 0.02 260);
+  --tier-d: oklch(52% 0.02 260);
+  --tier-e: oklch(44% 0.02 260);
+
+  --type-attack: oklch(66% 0.19 25);
+  --type-defense: oklch(70% 0.12 230);
+  --type-stamina: oklch(75% 0.13 145);
+  --type-balance: oklch(78% 0.12 85);
+  --type-special: oklch(70% 0.15 310);
+
+  --font-display: 'Barlow Condensed', 'Noto Sans TC', sans-serif;
+  --font-body: 'Noto Sans TC', system-ui, sans-serif;
+
+  --text-base: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+  --text-lg: 1.125rem;
+  --text-xl: clamp(1.4rem, 1.2rem + 0.8vw, 1.9rem);
+  --text-hero: clamp(2.2rem, 1.6rem + 2.6vw, 3.6rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-section: clamp(2rem, 1.4rem + 2.5vw, 4rem);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --duration-fast: 150ms;
+  --duration-normal: 280ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --shadow-card: 0 2px 10px oklch(0% 0 0 / 0.35);
+  --shadow-pop: 0 8px 28px oklch(0% 0 0 / 0.5);
+}

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:stan-yao.github.io)",
+      "WebFetch(domain:beyblade.phstudy.org)",
+      "Bash(curl -s https://stan-yao.github.io/beyblade_x_tier/)",
+      "Bash(curl -s https://beyblade.phstudy.org/index.html)",
+      "Bash(gh api *)",
+      "Bash(curl -s \"https://api.github.com/repos/stan-yao/beyblade_x_tier/git/trees/main?recursive=1\")"
+    ]
+  }
+}
