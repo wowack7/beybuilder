@@ -14,6 +14,29 @@ interface InventoryPageProps {
   onClearAll: () => void
 }
 
+interface ExtraChipProps {
+  label: string
+  isExtra: boolean
+  isCovered: boolean
+  onToggle: () => void
+}
+
+/** 額外零件 chip：手動加入或被套組覆蓋都標亮；被套組覆蓋者不可在此移除 */
+function ExtraChip({ label, isExtra, isCovered, onToggle }: ExtraChipProps) {
+  return (
+    <button
+      type="button"
+      className="filter-chip"
+      aria-pressed={isCovered || isExtra}
+      disabled={isCovered}
+      title={isCovered ? '已由擁有的產品提供（如需移除請取消該產品）' : undefined}
+      onClick={onToggle}
+    >
+      {label}
+    </button>
+  )
+}
+
 export function InventoryPage({
   inventory,
   onToggleProduct,
@@ -28,6 +51,21 @@ export function InventoryPage({
 
   const ownedSet = useMemo(() => new Set(inventory.productIds), [inventory.productIds])
   const owned = useMemo(() => resolveOwnedParts(inventory, products, partsDb), [inventory])
+
+  // 由「擁有的產品」提供的零件——額外零件 chip 也要跟著標亮（且不可在此移除，須從產品卡）
+  const covered = useMemo(() => {
+    const c = resolveOwnedParts(
+      { productIds: inventory.productIds, extraBlades: [], extraRatchets: [], extraBits: [], extraAssists: [] },
+      products,
+      partsDb,
+    )
+    return {
+      blades: new Set(c.blades.map((b) => b.name)),
+      ratchets: new Set(c.ratchets.map((r) => r.id)),
+      bits: new Set(c.bits.map((b) => b.id)),
+      assists: new Set(c.assists.map((a) => a.id)),
+    }
+  }, [inventory.productIds])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -151,15 +189,13 @@ export function InventoryPage({
             <h4>戰刃</h4>
             <div className="chip-row">
               {partsDb.blades.map((b) => (
-                <button
+                <ExtraChip
                   key={b.name}
-                  type="button"
-                  className="filter-chip"
-                  aria-pressed={inventory.extraBlades.includes(b.name)}
-                  onClick={() => onToggleExtra('extraBlades', b.name)}
-                >
-                  {b.name}
-                </button>
+                  label={b.name}
+                  isExtra={inventory.extraBlades.includes(b.name)}
+                  isCovered={covered.blades.has(b.name)}
+                  onToggle={() => onToggleExtra('extraBlades', b.name)}
+                />
               ))}
             </div>
           </div>
@@ -167,15 +203,13 @@ export function InventoryPage({
             <h4>固鎖</h4>
             <div className="chip-row">
               {partsDb.ratchets.map((r) => (
-                <button
+                <ExtraChip
                   key={r.id}
-                  type="button"
-                  className="filter-chip"
-                  aria-pressed={inventory.extraRatchets.includes(r.id)}
-                  onClick={() => onToggleExtra('extraRatchets', r.id)}
-                >
-                  {r.id}
-                </button>
+                  label={r.id}
+                  isExtra={inventory.extraRatchets.includes(r.id)}
+                  isCovered={covered.ratchets.has(r.id)}
+                  onToggle={() => onToggleExtra('extraRatchets', r.id)}
+                />
               ))}
             </div>
           </div>
@@ -183,15 +217,13 @@ export function InventoryPage({
             <h4>軸心</h4>
             <div className="chip-row">
               {partsDb.bits.map((b) => (
-                <button
+                <ExtraChip
                   key={b.id}
-                  type="button"
-                  className="filter-chip"
-                  aria-pressed={inventory.extraBits.includes(b.id)}
-                  onClick={() => onToggleExtra('extraBits', b.id)}
-                >
-                  {b.id}
-                </button>
+                  label={b.id}
+                  isExtra={inventory.extraBits.includes(b.id)}
+                  isCovered={covered.bits.has(b.id)}
+                  onToggle={() => onToggleExtra('extraBits', b.id)}
+                />
               ))}
             </div>
           </div>
@@ -199,15 +231,13 @@ export function InventoryPage({
             <h4>輔助刃（CX）</h4>
             <div className="chip-row">
               {partsDb.assists.map((a) => (
-                <button
+                <ExtraChip
                   key={a.id}
-                  type="button"
-                  className="filter-chip"
-                  aria-pressed={(inventory.extraAssists ?? []).includes(a.id)}
-                  onClick={() => onToggleExtra('extraAssists', a.id)}
-                >
-                  輔助{a.id}
-                </button>
+                  label={`輔助${a.id}`}
+                  isExtra={(inventory.extraAssists ?? []).includes(a.id)}
+                  isCovered={covered.assists.has(a.id)}
+                  onToggle={() => onToggleExtra('extraAssists', a.id)}
+                />
               ))}
             </div>
           </div>
