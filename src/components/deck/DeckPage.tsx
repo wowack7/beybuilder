@@ -125,7 +125,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
             最強戰隊
           </h2>
           <p className="page-desc">
-            依 3on3 規則（同一 deck 的戰刃／固鎖／軸心不得重複），從你的庫存算出最強三顆。
+            從你的庫存算出最強的三顆出戰組合，同一 deck 內零件不重複。
           </p>
         </div>
         <div className="deck-actions">
