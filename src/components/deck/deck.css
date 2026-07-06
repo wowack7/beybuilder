@@ -6,26 +6,10 @@
   margin-bottom: var(--space-6);
 }
 
-.deck-total {
+.deck-actions {
   margin-left: auto;
   text-align: right;
-}
-
-.deck-total .label {
-  display: block;
-  font-size: 0.8rem;
-  letter-spacing: 0.14em;
-  color: var(--text-faint);
-  text-transform: uppercase;
-}
-
-.deck-total .value {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: var(--text-hero);
-  line-height: 1;
-  color: var(--accent);
-  text-shadow: 0 0 24px var(--accent-glow);
+  align-self: center;
 }
 
 .deck-grid {
@@ -100,13 +84,6 @@
   font-size: 1.35rem;
   letter-spacing: 0.03em;
   line-height: 1.2;
-}
-
-.bey-score {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.15rem;
-  color: var(--accent);
 }
 
 .bey-parts {
@@ -258,14 +235,6 @@
 .alt-group .alt-count {
   color: var(--text-faint);
   font-size: 0.82rem;
-}
-
-.alt-group .alt-best {
-  margin-left: auto;
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--accent);
-  white-space: nowrap;
 }
 
 .alt-group table {

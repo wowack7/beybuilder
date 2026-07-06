@@ -31,7 +31,6 @@ export function BeyCard({ bey, slot }: BeyCardProps) {
             {bey.bit}
             {bey.assist ? `（輔助${bey.assist}）` : ''}
           </h3>
-          <span className="bey-score">{bey.score.toFixed(1)} 分</span>
         </div>
       </div>
 

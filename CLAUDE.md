@@ -40,7 +40,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 
 - `src/lib/recommend.ts` — 純函式推薦引擎：`resolveOwnedParts`（庫存→零件集合）→ `buildCandidates`（已知實戰組合 meta ＋自組 synth，裁剪 per-blade/全域上限）→ `pickBestDeck`（排序後 O(K²) 上界剪枝搜尋**全域最佳**互不衝突三顆——不是貪婪法，這是測試明確保護的行為）。引擎不 import JSON，資料一律由參數注入，測試用合成 fixture
 - **候選組合只有兩個來源，絕不自由重組零件**（用戶明確要求）：①實戰組合（combos.json，賽事統計）②站方推薦（site_combos.json，解析天梯站「建議配置」欄，解析器在 fetch-data.mjs 的 `parseSiteCombos`）。同組合兩來源並存時取實戰版。測試保護於 recommend.test.ts「only complete known combos」「site-recommended combos」
-- `src/lib/score.ts` — 所有評分權重常數集中於此，檔頭標明「未抗辯假設」：權重是自訂近似值，調整只改這檔
+- `src/lib/score.ts` — 所有評分權重常數集中於此，檔頭標明「未抗辯假設」：權重是自訂近似值，調整只改這檔。**分數僅供引擎內部排序，UI 與分享圖一律不顯示數字**（用戶決策 2026-07-06：實戰關乎技術、來源站非官方，只展示勝場/奪冠率/階級等真實資料）
 - `src/lib/data.ts` — 唯一 import `src/data/*.json` 的模組，提供型別化資料與 Map 索引
 - `src/hooks/useInventory.ts` — 庫存狀態＋localStorage 持久化（key: `beybuilder.inventory.v1`）
 - `src/components/{deck,inventory,tier}/` — 三個分頁，各自帶同目錄 css；共用小元件在 `components/ui/`

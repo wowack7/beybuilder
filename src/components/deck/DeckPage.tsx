@@ -32,9 +32,9 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
     setShareState('busy')
     try {
       const blob = await renderDeckCard(deck)
-      const file = new File([blob], `beybuilder-deck-${deck.totalScore.toFixed(0)}.png`, {
-        type: 'image/png',
-      })
+      const today = new Date()
+      const stamp = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`
+      const file = new File([blob], `beybuilder-deck-${stamp}.png`, { type: 'image/png' })
       // 行動裝置優先走原生分享；不支援就下載
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: '我的 Beyblade X 最強戰隊' })
@@ -116,9 +116,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
             依你的庫存，在「同一 deck 內 Blade / Ratchet / Bit 不得重複」的 3on3 規則下算出的最佳三顆。
           </p>
         </div>
-        <div className="deck-total">
-          <span className="label">Deck Score</span>
-          <span className="value">{deck.totalScore.toFixed(0)}</span>
+        <div className="deck-actions">
           {deck.beys.length > 0 && (
             <button
               type="button"
@@ -167,15 +165,14 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
                   <span className="alt-blade">{blade}</span>
                   <TierBadge tier={info?.tier ?? ''} inherited={info?.tierInherited} />
                   <span className="alt-count">{combos.length} 組</span>
-                  <span className="alt-best">最佳 {combos[0].score.toFixed(1)} 分</span>
                 </summary>
                 <table>
                   <thead>
                     <tr>
                       <th scope="col">組合</th>
-                      <th scope="col">分數</th>
                       <th scope="col">來源</th>
                       <th scope="col">勝場</th>
+                      <th scope="col">奪冠率</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -186,9 +183,9 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
                           {c.bit}
                           {c.assist ? `（輔助${c.assist}）` : ''}
                         </td>
-                        <td>{c.score.toFixed(1)}</td>
                         <td>{COMBO_SOURCE_LABEL[c.source] ?? c.source}</td>
                         <td>{c.meta?.wins ?? '—'}</td>
+                        <td>{c.meta ? `${(c.meta.champRate * 100).toFixed(0)}%` : '—'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -200,8 +197,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
       )}
 
       <p className="score-note">
-        候選組合只來自兩個來源：實戰組合（stan-yao 天梯站賽事統計，60% 實戰分＋40% 零件階級分）與站方推薦（該站「建議配置」欄，零件階級分
-        ×0.9）——不做零件自由重組。權重為本站自訂近似值，僅供參考。
+        組合只來自兩個來源：實戰組合（stan-yao 天梯站賽事統計）與站方推薦（該站「建議配置」欄），不做零件自由重組；排列順序依實戰統計與零件階級的綜合權重（本站自訂近似模型，不顯示分數）。實際勝負仍取決於操作技術與環境，資料轉錄自第三方站點、未必完全準確，僅供參考。
       </p>
     </section>
   )

@@ -130,36 +130,28 @@ function drawBeyCard(
 
   const blade = bladeByName.get(bey.blade)
 
-  // 分數
-  ctx.fillStyle = C.text
-  ctx.font = `900 40px ${DISPLAY}`
-  ctx.fillText(`${bey.score.toFixed(1)}`, x + w / 2, y + 290)
-  ctx.fillStyle = C.faint
-  ctx.font = `500 16px ${BODY}`
-  ctx.fillText('SCORE', x + w / 2, y + 312)
-
-  // 來源與戰績
+  // 來源與戰績（不放本站自訂分數——實戰勝負另關乎技術，僅列真實統計）
   const isMeta = bey.source === 'meta'
   const tagText = isMeta ? '實戰組合' : '站方推薦'
   const tagColor = isMeta ? C.accent : C.gold
-  ctx.font = `600 18px ${BODY}`
-  const tagW = ctx.measureText(tagText).width + 28
+  ctx.font = `600 20px ${BODY}`
+  const tagW = ctx.measureText(tagText).width + 32
   const tagX = x + (w - tagW) / 2
-  const tagY = y + h - 76
+  const tagY = y + 262
   ctx.strokeStyle = tagColor
   ctx.lineWidth = 1.5
   ctx.beginPath()
-  ctx.roundRect(tagX, tagY, tagW, 32, 16)
+  ctx.roundRect(tagX, tagY, tagW, 38, 19)
   ctx.stroke()
   ctx.fillStyle = tagColor
-  ctx.fillText(tagText, x + w / 2, tagY + 23)
+  ctx.fillText(tagText, x + w / 2, tagY + 27)
 
   ctx.fillStyle = C.dim
-  ctx.font = `500 17px ${BODY}`
+  ctx.font = `500 18px ${BODY}`
   const record = bey.meta
     ? `勝場 ${bey.meta.wins}｜奪冠率 ${(bey.meta.champRate * 100).toFixed(0)}%`
     : '站方建議配置'
-  ctx.fillText(record, x + w / 2, y + h - 22)
+  ctx.fillText(record, x + w / 2, y + h - 28)
 
   // blade 階級徽章（圖右上）
   const tier = blade?.tier
@@ -217,21 +209,21 @@ export async function renderDeckCard(deck: DeckResult): Promise<Blob> {
   ctx.font = `500 20px ${BODY}`
   ctx.fillText('我的最強戰隊｜Beyblade X 3on3', 50, 118)
 
-  // Deck Score（右上）
+  // 右上：3 ON 3 標記（不放本站自訂分數）
   ctx.textAlign = 'right'
   ctx.fillStyle = C.faint
   ctx.font = `500 16px ${BODY}`
-  ctx.fillText('DECK SCORE', W - 48, 58)
+  ctx.fillText('DECK BATTLE', W - 48, 66)
   ctx.fillStyle = C.accent
-  ctx.font = `900 76px ${DISPLAY}`
-  ctx.fillText(deck.totalScore.toFixed(0), W - 48, 124)
+  ctx.font = `900 54px ${DISPLAY}`
+  ctx.fillText('3 ON 3', W - 48, 116)
 
   // 三張卡
   const pad = 48
   const gap = 24
   const cardW = (W - pad * 2 - gap * (beys.length - 1)) / beys.length
-  const cardY = 152
-  const cardH = 430
+  const cardY = 165
+  const cardH = 400
   beys.forEach((bey, i) => {
     drawBeyCard(ctx, bey, images[i], pad + i * (cardW + gap), cardY, cardW, cardH, i + 1)
   })
