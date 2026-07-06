@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { ExtraKind } from '../../hooks/useInventory'
 import { SERIES_OPTIONS, partsDb, productById, products, productSeries } from '../../lib/data'
 import { resolveOwnedParts } from '../../lib/recommend'
+import { tierValue } from '../../lib/score'
 import type { Inventory } from '../../types'
 import { Modal } from '../ui/Modal'
 import { ProductCard } from './ProductCard'
@@ -69,17 +70,21 @@ export function InventoryPage({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return products.filter((p) => {
-      if (series !== '全部' && productSeries(p.id) !== series) return false
-      if (ownedOnly && !ownedSet.has(p.id)) return false
-      if (!q) return true
-      return (
-        p.id.toLowerCase().includes(q) ||
-        p.name.toLowerCase().includes(q) ||
-        p.ratchet.toLowerCase().includes(q) ||
-        p.bit.toLowerCase().includes(q)
-      )
-    })
+    // 依天梯階級排序（X 最前、無階級排最後）；同階級維持原始順序
+    const rank = (tier: string) => (tier ? tierValue(tier) : -1)
+    return products
+      .filter((p) => {
+        if (series !== '全部' && productSeries(p.id) !== series) return false
+        if (ownedOnly && !ownedSet.has(p.id)) return false
+        if (!q) return true
+        return (
+          p.id.toLowerCase().includes(q) ||
+          p.name.toLowerCase().includes(q) ||
+          p.ratchet.toLowerCase().includes(q) ||
+          p.bit.toLowerCase().includes(q)
+        )
+      })
+      .sort((a, b) => rank(b.tier) - rank(a.tier))
   }, [query, series, ownedOnly, ownedSet])
 
   const handleClearConfirmed = () => {
