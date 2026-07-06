@@ -20,6 +20,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - push main → `.github/workflows/deploy.yml` 自動 test+build+部署；`data-update.yml` 每週一 01:00 UTC 雲端更新資料並 commit（資料自動更新的正式源頭——本機 Claude 排程只負責 git pull 同步）
 - `vite.config.ts` base：build 時為 `/beybuilder/`、dev 維持 `/`
 - **phstudy 匯入**：`src/lib/importPh.ts`＋映射表 `src/data/ph_map.json`（data:update 生成，含 hardcoded.json 聯名套組）；朋友用書籤小工具從 phstudy 跳轉 `#phimport=<base64>` 一鍵匯入，或貼 JSON。全程瀏覽器端解析不上傳
+- **GA4 分析**：`src/lib/analytics.ts`（gtag.js，只做頁面瀏覽），`main.tsx` 開頭呼叫 `initAnalytics()`。僅 `import.meta.env.PROD` 才載入——本機 dev 不追蹤。Measurement ID `G-NNJPTBMXKW` 硬編於該檔（公開值）
 
 ## Data pipeline（先懂這個再動資料相關程式）
 
