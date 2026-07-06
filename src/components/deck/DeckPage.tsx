@@ -1,9 +1,20 @@
 import { useMemo, useState } from 'react'
-import { COMBO_SOURCE_LABEL, bladeByName, imgUrl, metaCombos, partsDb, products, siteCombos } from '../../lib/data'
+import {
+  COMBO_SOURCE_LABEL,
+  bitById,
+  bladeByName,
+  imgUrl,
+  metaCombos,
+  partsDb,
+  products,
+  ratchetById,
+  siteCombos,
+} from '../../lib/data'
 import { buildCandidates, pickBestDeck, resolveOwnedParts } from '../../lib/recommend'
 import { renderDeckCard } from '../../lib/shareCard'
 import type { BeyCombo, Inventory } from '../../types'
 import { ImportPhBody } from '../inventory/ImportPh'
+import { HoverThumb } from '../ui/HoverThumb'
 import { TierBadge } from '../ui/TierBadge'
 import { BeyCard } from './BeyCard'
 import './deck.css'
@@ -179,8 +190,8 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
                     {combos.map((c) => (
                       <tr key={`${c.ratchet}|${c.bit}|${c.assist ?? ''}`}>
                         <td>
-                          {c.ratchet}
-                          {c.bit}
+                          <HoverThumb label={c.ratchet} img={ratchetById.get(c.ratchet)?.img} />
+                          <HoverThumb label={c.bit} img={bitById.get(c.bit)?.img} />
                           {c.assist ? `（輔助${c.assist}）` : ''}
                         </td>
                         <td>{COMBO_SOURCE_LABEL[c.source] ?? c.source}</td>

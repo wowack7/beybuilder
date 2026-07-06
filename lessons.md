@@ -38,3 +38,10 @@
 - tags: git, push, https
 - 坑：本機 git 2.31 走 https 推含 298 張圖（~4MB）的 commit，報「遠端意外掛斷了」且後續 `git push` 誤顯示 Everything up-to-date——實際 commit 沒推出去（`git status -sb` 顯示領先 1）。
 - 解：`git config http.postBuffer 157286400` 後重推即成功。推完務必 `git status -sb` 確認不再領先。
+
+## L6 hover 彈出層被 overflow:hidden 裁掉；DOM 存在 ≠ 視覺正確（2026-07-06）
+
+- tags: css, hover, verification, overflow
+- 坑：`.bey-card` 與 `.alt-group` 都有 `overflow: hidden`，`position:absolute` 的 hover 彈出圖會被裁掉、實際看不到。第一版只驗「DOM 有 .hover-thumb 元素＋img 有 src」就宣稱完成——漏了真正 hover 的視覺，被用戶抓包。
+- 解：彈出層改 `position: fixed`＋JS 用 `getBoundingClientRect` 給座標（fixed 不受祖先 overflow:hidden 裁切，前提是祖先無 transform/filter/contain）。
+- 驗證教訓：hover/tooltip/彈窗這類「視覺行為」不能只查 DOM 存在，要**實際觸發 hover（派 mouseover 事件）並截圖**確認沒被裁、位置對。

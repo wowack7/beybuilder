@@ -5,23 +5,18 @@
   outline: none;
 }
 
+/* position:fixed → 座標由 JS 以 getBoundingClientRect 提供，不受祖先 overflow:hidden 裁切 */
 .hover-thumb-pop {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  transform: translateX(-50%) scale(0.9);
-  transform-origin: bottom center;
-  opacity: 0;
-  pointer-events: none;
+  position: fixed;
+  transform: translate(-50%, calc(-100% - 8px));
   padding: var(--space-2);
   background: var(--bg-overlay);
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-pop);
-  transition:
-    opacity var(--duration-fast) var(--ease-out),
-    transform var(--duration-fast) var(--ease-out);
-  z-index: 20;
+  pointer-events: none;
+  z-index: 200;
+  animation: thumb-pop var(--duration-fast) var(--ease-out);
 }
 
 .hover-thumb-pop img {
@@ -31,8 +26,9 @@
   object-fit: contain;
 }
 
-.hover-thumb:hover .hover-thumb-pop,
-.hover-thumb:focus-visible .hover-thumb-pop {
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
+@keyframes thumb-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 2px));
+  }
 }
