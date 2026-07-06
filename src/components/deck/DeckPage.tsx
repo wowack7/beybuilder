@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { COMBO_SOURCE_LABEL, bladeByName, imgUrl, metaCombos, partsDb, products, siteCombos } from '../../lib/data'
 import { buildCandidates, pickBestDeck, resolveOwnedParts } from '../../lib/recommend'
+import { renderDeckCard } from '../../lib/shareCard'
 import type { BeyCombo, Inventory } from '../../types'
 import { ImportPhBody } from '../inventory/ImportPh'
 import { TierBadge } from '../ui/TierBadge'
@@ -20,11 +21,41 @@ const hasAnyParts = (inv: Inventory) =>
   inv.extraBits.length > 0
 
 export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
+  const [shareState, setShareState] = useState<'idle' | 'busy' | 'error'>('idle')
   const candidates = useMemo(() => {
     const owned = resolveOwnedParts(inventory, products, partsDb)
     return buildCandidates(owned, metaCombos, siteCombos)
   }, [inventory])
   const deck = useMemo(() => pickBestDeck(candidates), [candidates])
+
+  const handleShare = async () => {
+    setShareState('busy')
+    try {
+      const blob = await renderDeckCard(deck)
+      const file = new File([blob], `beybuilder-deck-${deck.totalScore.toFixed(0)}.png`, {
+        type: 'image/png',
+      })
+      // 行動裝置優先走原生分享；不支援就下載
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: '我的 Beyblade X 最強戰隊' })
+      } else {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = file.name
+        a.click()
+        URL.revokeObjectURL(url)
+      }
+      setShareState('idle')
+    } catch (error: unknown) {
+      // 用戶取消原生分享不算錯誤
+      if (error instanceof Error && error.name === 'AbortError') {
+        setShareState('idle')
+        return
+      }
+      setShareState('error')
+    }
+  }
 
   // 候補依陀螺分組（排除已進 deck 的組合），組內沿用候選排序（分數遞減）
   const alternateGroups = useMemo(() => {
@@ -88,6 +119,17 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
         <div className="deck-total">
           <span className="label">Deck Score</span>
           <span className="value">{deck.totalScore.toFixed(0)}</span>
+          {deck.beys.length > 0 && (
+            <button
+              type="button"
+              className="btn-share"
+              onClick={handleShare}
+              disabled={shareState === 'busy'}
+            >
+              {shareState === 'busy' ? '產生中…' : '⬇ 分享戰隊圖'}
+            </button>
+          )}
+          {shareState === 'error' && <span className="share-error">圖片產生失敗，再試一次</span>}
         </div>
       </header>
 
