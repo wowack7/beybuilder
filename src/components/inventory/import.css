@@ -61,18 +61,60 @@
   white-space: pre-wrap;
 }
 
-.import-manual {
-  margin-top: var(--space-2);
+/* ── 匯入方式區塊 ─────────────────────────── */
+.import-method {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
 }
 
-.import-manual summary {
+.import-method-primary {
+  border-color: var(--accent-deep);
+  background:
+    radial-gradient(120% 120% at 0% 0%, var(--accent-glow), transparent 60%),
+    var(--bg-raised);
+}
+
+.import-method > h4 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin: 0 0 var(--space-2);
+  font-size: 1rem;
+}
+
+.import-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: 999px;
+  padding: 1px 8px;
+  letter-spacing: 0.04em;
+}
+
+.import-method > summary {
   cursor: pointer;
-  color: var(--text-faint);
-  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.import-manual[open] summary {
+.import-method[open] > summary {
   margin-bottom: var(--space-2);
+  color: var(--text);
+}
+
+.import-file-input {
+  display: none;
+}
+
+.import-method-primary .import-steps li code {
+  background: var(--bg);
+  padding: 0 4px;
+  border-radius: 4px;
 }
 
 .bookmarklet-copy {
