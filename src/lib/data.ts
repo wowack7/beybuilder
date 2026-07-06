@@ -7,10 +7,21 @@
 import combosJson from '../data/combos.json'
 import metaJson from '../data/meta.json'
 import partsJson from '../data/parts.json'
+import phMapJson from '../data/ph_map.json'
 import productsJson from '../data/products.json'
 import siteCombosJson from '../data/site_combos.json'
 import type { MetaCombo, PartsDb, Product, SiteCombo } from '../types'
-import { SOURCES, bakedEnrichment, shouldUseCache, transformAll, type DataBundle } from './transform'
+import {
+  SOURCES,
+  bakedEnrichment,
+  shouldUseCache,
+  transformAll,
+  type DataBundle,
+  type PhMap,
+} from './transform'
+
+/** phstudy 倉庫匯入映射表（永遠用內建版；隨每週資料更新重生） */
+export const phMap = phMapJson as PhMap
 
 const CACHE_KEY = 'beybuilder.datacache.v1'
 

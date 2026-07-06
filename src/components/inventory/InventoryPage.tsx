@@ -3,6 +3,7 @@ import type { ExtraKind } from '../../hooks/useInventory'
 import { SERIES_OPTIONS, partsDb, products, productSeries } from '../../lib/data'
 import { resolveOwnedParts } from '../../lib/recommend'
 import type { Inventory } from '../../types'
+import { ImportPh } from './ImportPh'
 import { ProductCard } from './ProductCard'
 import './inventory.css'
 
@@ -11,6 +12,7 @@ interface InventoryPageProps {
   onToggleProduct: (id: string) => void
   onToggleExtra: (kind: ExtraKind, id: string) => void
   onClearAll: () => void
+  onMerge: (add: Inventory) => void
 }
 
 export function InventoryPage({
@@ -18,6 +20,7 @@ export function InventoryPage({
   onToggleProduct,
   onToggleExtra,
   onClearAll,
+  onMerge,
 }: InventoryPageProps) {
   const [query, setQuery] = useState('')
   const [series, setSeries] = useState<(typeof SERIES_OPTIONS)[number]>('全部')
@@ -117,6 +120,8 @@ export function InventoryPage({
       ) : (
         <p className="no-results">沒有符合條件的產品</p>
       )}
+
+      <ImportPh onMerge={onMerge} />
 
       <details className="extra-parts">
         <summary>額外零件（單獨入手的 Blade / Ratchet / Bit / 輔助刃）</summary>

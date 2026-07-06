@@ -6,7 +6,9 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { SOURCES, buildPhEnrichment, transformAll } from '../src/lib/transform.ts'
+import { SOURCES, buildPhEnrichment, buildPhMap, transformAll } from '../src/lib/transform.ts'
+
+const PH_HARDCODED_URL = 'https://beyblade.phstudy.org/data/hardcoded.json'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT_DIR = join(ROOT, 'src', 'data')
@@ -19,14 +21,20 @@ async function fetchText(url) {
 
 async function main() {
   console.log('downloading sources...')
-  const [tierCsv, comboCsv, partsCsv, phMainText] = await Promise.all([
+  const [tierCsv, comboCsv, partsCsv, phMainText, phHardcodedText] = await Promise.all([
     fetchText(SOURCES.tierCsv),
     fetchText(SOURCES.comboCsv),
     fetchText(SOURCES.partsCsv),
     fetchText(SOURCES.phMain),
+    // 聯名/特例套組（如漫威）在 hardcoded.json；抓不到不致命
+    fetchText(PH_HARDCODED_URL).catch(() => 'null'),
   ])
-  const enrich = buildPhEnrichment(JSON.parse(phMainText).data)
+  const phMain = JSON.parse(phMainText).data
+  const phHardcodedRaw = JSON.parse(phHardcodedText)
+  const phHardcoded = phHardcodedRaw?.data ?? phHardcodedRaw ?? {}
+  const enrich = buildPhEnrichment(phMain)
   const bundle = transformAll({ tierCsv, comboCsv, partsCsv }, enrich)
+  const phMap = buildPhMap([phMain, phHardcoded], bundle.products, bundle.parts)
 
   mkdirSync(OUT_DIR, { recursive: true })
   const write = (file, data) => {
@@ -37,7 +45,13 @@ async function main() {
   write('parts.json', bundle.parts)
   write('combos.json', bundle.combos)
   write('site_combos.json', bundle.siteCombos)
+  write('ph_map.json', phMap)
   write('meta.json', { generatedAt: new Date().toISOString() })
+  console.log(
+    `ph_map: sets=${Object.keys(phMap.sets).length} blades=${Object.keys(phMap.blades).length}` +
+      ` ratchets=${Object.keys(phMap.ratchets).length} bits=${Object.keys(phMap.bits).length}` +
+      ` assists=${Object.keys(phMap.assists).length}`,
+  )
 
   const withStats = bundle.parts.blades.filter((b) => b.stats).length
   const cxSplit = bundle.products.filter((p) => p.lockChip && p.mainBlade).length

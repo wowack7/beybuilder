@@ -12,7 +12,14 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - `npm run build` — `tsc -b` type-check + production build
 - `npm test` — Vitest run once（單一測試檔：`vitest run src/lib/recommend.test.ts`；watch 用 `npm run test:watch`）
 - `npm run lint` — oxlint
-- `npm run data:update` — 重新抓取兩個資料來源並重新生成 `src/data/*.json`（需網路、Node ≥ 23.6：轉換邏輯在 `src/lib/transform.ts`，靠 Node 原生 TS import 與前端共用）。每週一 09:05 有 Claude 排程任務 `beybuilder-weekly-data-update` 自動跑；app header 另有「更新資料」鈕從瀏覽器直抓 Google Sheets（快取於 localStorage，與內建資料比時間戳新者勝）。坑點見 lessons.md
+- `npm run data:update` — 重新抓取兩個資料來源並重新生成 `src/data/*.json`（需網路、Node ≥ 23.6：轉換邏輯在 `src/lib/transform.ts`，靠 Node 原生 TS import 與前端共用）。app header 另有「更新資料」鈕從瀏覽器直抓 Google Sheets（快取於 localStorage，與內建資料比時間戳新者勝）。坑點見 lessons.md
+
+## Deploy（GitHub Pages）
+
+- 正式站：https://wowack7.github.io/beybuilder/ （repo `wowack7/beybuilder`，public）
+- push main → `.github/workflows/deploy.yml` 自動 test+build+部署；`data-update.yml` 每週一 01:00 UTC 雲端更新資料並 commit（資料自動更新的正式源頭——本機 Claude 排程只負責 git pull 同步）
+- `vite.config.ts` base：build 時為 `/beybuilder/`、dev 維持 `/`
+- **phstudy 匯入**：`src/lib/importPh.ts`＋映射表 `src/data/ph_map.json`（data:update 生成，含 hardcoded.json 聯名套組）；朋友用書籤小工具從 phstudy 跳轉 `#phimport=<base64>` 一鍵匯入，或貼 JSON。全程瀏覽器端解析不上傳
 
 ## Data pipeline（先懂這個再動資料相關程式）
 

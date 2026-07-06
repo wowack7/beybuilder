@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DeckPage } from './components/deck/DeckPage'
+import { performPhImport } from './components/inventory/importFlow'
 import { InventoryPage } from './components/inventory/InventoryPage'
 import { TierPage } from './components/tier/TierPage'
 import { useInventory } from './hooks/useInventory'
 import { dataStatus, refreshData } from './lib/data'
+import { decodeImportHash } from './lib/importPh'
 
 function formatDataTime(iso: string): string {
   const d = new Date(iso)
@@ -51,7 +53,21 @@ const TABS: { id: Tab; label: string }[] = [
 
 function App() {
   const [tab, setTab] = useState<Tab>('deck')
-  const { inventory, toggleProduct, toggleExtra, clearAll } = useInventory()
+  const { inventory, toggleProduct, toggleExtra, clearAll, mergeInventory } = useInventory()
+
+  // phstudy 書籤小工具跳轉匯入：#phimport=<base64>
+  useEffect(() => {
+    const raw = decodeImportHash(window.location.hash)
+    if (!raw) return
+    history.replaceState(null, '', window.location.pathname + window.location.search)
+    try {
+      const message = performPhImport(raw, mergeInventory)
+      setTab('inventory')
+      window.alert(message)
+    } catch (error: unknown) {
+      window.alert(`匯入失敗：${error instanceof Error ? error.message : '未知錯誤'}`)
+    }
+  }, [mergeInventory])
 
   return (
     <>
@@ -92,6 +108,7 @@ function App() {
             onToggleProduct={toggleProduct}
             onToggleExtra={toggleExtra}
             onClearAll={clearAll}
+            onMerge={mergeInventory}
           />
         )}
         {tab === 'tier' && <TierPage inventory={inventory} />}

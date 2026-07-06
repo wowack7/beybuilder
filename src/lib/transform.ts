@@ -387,3 +387,74 @@ export function transformAll(raw: RawSheets, enrich?: Enrichment): DataBundle {
 /** 快取 vs 內建：新者勝（未抗辯假設；ISO 8601 字串可直接字典序比較） */
 export const shouldUseCache = (cacheSavedAt: string, bakedGeneratedAt: string): boolean =>
   cacheSavedAt > bakedGeneratedAt
+
+/**
+ * phstudy 倉庫匯入映射表：phstudy 的 partId 尾碼（如 "PRD-914570-05"）→ 本站零件身分。
+ * 供「匯入 phstudy 倉庫」功能在瀏覽器離線解析用（生成於 data:update）。
+ */
+export interface PhMap {
+  /** 套組尾碼 → 本站產品 id（僅收錄型號能對上者） */
+  sets: Record<string, string>
+  /** BL 尾碼 → blade 名稱 */
+  blades: Record<string, string>
+  /** RC 尾碼 → ratchet id（如 "3-60"） */
+  ratchets: Record<string, string>
+  /** BT 尾碼 → bit id */
+  bits: Record<string, string>
+  /** AB 尾碼 → 輔助刃字母 */
+  assists: Record<string, string>
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any -- phstudy 外部資料無 schema 保證 */
+/**
+ * 由 phstudy 資料（main.json ＋ hardcoded.json，皆傳 .data）生成匯入映射表。
+ * 未抗辯假設：套組/零件標題開頭的型號對應本站產品 id；BL 退而以名稱包含比對。
+ */
+export function buildPhMap(phDataList: any[], products: Product[], parts: PartsDb): PhMap {
+  const map: PhMap = { sets: {}, blades: {}, ratchets: {}, bits: {}, assists: {} }
+  const productById = new Map(products.map((p) => [p.id, p]))
+  const bladeNames = parts.blades.map((b) => b.name)
+  const title = (p: any): string => p.catalog_title?.['zh-TW'] ?? p.catalog_title?.['ja-JP'] ?? ''
+  const codeOf = (t: string) => t.match(/^([A-Z]{2,4}-\d+(?:-\d+)?)/)?.[1] ?? ''
+  const suffixOf = (id: string) => id.replace(/^[A-Z]{2}-/, '')
+
+  for (const phData of phDataList) {
+    for (const [id, p] of Object.entries<any>(phData?.BeybladeSeries ?? {})) {
+      const prod = productById.get(codeOf(title(p)))
+      if (prod && !map.sets[suffixOf(id)]) map.sets[suffixOf(id)] = prod.id
+    }
+    for (const [id, p] of Object.entries<any>(phData?.BeybladePartsBlade ?? {})) {
+      const suffix = suffixOf(id)
+      if (map.blades[suffix]) continue
+      const prod = productById.get(codeOf(title(p)))
+      if (prod) {
+        map.blades[suffix] = prod.name
+        continue
+      }
+      // 型號對不上（如聯名系列）→ 以名稱包含比對，取最長匹配
+      const hits = bladeNames.filter((n) => n && title(p).includes(n))
+      if (hits.length) map.blades[suffix] = hits.reduce((a, b) => (b.length > a.length ? b : a))
+    }
+    const tailMap = (cat: string, pattern: RegExp, out: Record<string, string>, valid: Set<string>) => {
+      for (const [id, p] of Object.entries<any>(phData?.[cat] ?? {})) {
+        const m = title(p).match(pattern)
+        if (m && valid.has(m[1]) && !out[suffixOf(id)]) out[suffixOf(id)] = m[1]
+      }
+    }
+    tailMap(
+      'BeybladePartsRatchet',
+      /(\d+-\d+)\s*$/,
+      map.ratchets,
+      new Set(parts.ratchets.map((r) => r.id)),
+    )
+    tailMap('BeybladePartsBit', /\s([A-Z]{1,2})\s*$/, map.bits, new Set(parts.bits.map((b) => b.id)))
+    tailMap(
+      'BeybladePartsAssistBlade',
+      /\s([A-Z])\s*$/,
+      map.assists,
+      new Set(parts.assists.map((a) => a.id)),
+    )
+  }
+  return map
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */

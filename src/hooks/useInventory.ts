@@ -55,5 +55,17 @@ export function useInventory() {
 
   const clearAll = useCallback(() => setInventory(EMPTY), [])
 
-  return { inventory, toggleProduct, toggleExtra, clearAll }
+  /** 匯入合併（聯集，不清除既有庫存） */
+  const mergeInventory = useCallback((add: Inventory) => {
+    const union = (a: string[] = [], b: string[] = []) => [...new Set([...a, ...b])].sort()
+    setInventory((inv) => ({
+      productIds: union(inv.productIds, add.productIds),
+      extraBlades: union(inv.extraBlades, add.extraBlades),
+      extraRatchets: union(inv.extraRatchets, add.extraRatchets),
+      extraBits: union(inv.extraBits, add.extraBits),
+      extraAssists: union(inv.extraAssists, add.extraAssists),
+    }))
+  }, [])
+
+  return { inventory, toggleProduct, toggleExtra, clearAll, mergeInventory }
 }
