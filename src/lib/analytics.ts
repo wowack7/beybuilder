@@ -7,7 +7,7 @@
 
 // GA4 Measurement ID（GA 管理 → 資料串流 → 網站串流；形如 G-XXXXXXXXXX）。
 // 留空 = 不啟用 GA。
-const GA_ID = ''
+const GA_ID = 'G-NNJPTBMXKW'
 
 declare global {
   interface Window {
