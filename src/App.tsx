@@ -14,14 +14,6 @@ function formatDataDate(iso: string): string {
   return Number.isNaN(d.getTime()) ? iso : `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
 }
 
-function DataStatusBar() {
-  return (
-    <div className="data-status">
-      <span className="data-time">資料更新：{formatDataDate(dataStatus.at)}（每週自動同步）</span>
-    </div>
-  )
-}
-
 type Tab = 'deck' | 'inventory' | 'tier'
 
 const TABS: { id: Tab; label: string }[] = [
@@ -58,7 +50,6 @@ function App() {
           </h1>
           <span className="brand-sub">Beyblade X 配裝模擬器</span>
         </div>
-        <DataStatusBar />
         <nav aria-label="主導覽">
           <div className="tabs" role="tablist">
             {TABS.map((t) => (
@@ -116,7 +107,10 @@ function App() {
           </a>
           。本站僅供玩家交流參考，Beyblade X 為 TAKARA TOMY 之商標。
         </p>
-        <p className="footer-privacy">本站使用 Google Analytics 匿名統計流量，以了解使用狀況。</p>
+        <p className="footer-privacy">
+          資料更新：{formatDataDate(dataStatus.at)}（每週自動同步）｜本站使用 Google Analytics
+          匿名統計流量，以了解使用狀況。
+        </p>
       </footer>
     </>
   )

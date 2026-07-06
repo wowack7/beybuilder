@@ -99,15 +99,6 @@ button {
   letter-spacing: 0.08em;
 }
 
-.data-status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  font-size: 0.8rem;
-  color: var(--text-faint);
-  flex-wrap: wrap;
-}
-
 .btn-refresh {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
@@ -432,10 +423,6 @@ main {
     align-items: stretch;
     gap: var(--space-2);
     padding: var(--space-3) 0;
-  }
-
-  .data-status {
-    font-size: 0.72rem;
   }
 
   nav[aria-label='主導覽'] {
