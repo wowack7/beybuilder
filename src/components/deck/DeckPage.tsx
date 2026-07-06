@@ -124,7 +124,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
               onClick={handleShare}
               disabled={shareState === 'busy'}
             >
-              {shareState === 'busy' ? '產生中…' : '⬇ 分享戰隊圖'}
+              {shareState === 'busy' ? '產生中…' : '📤 分享戰隊圖'}
             </button>
           )}
           {shareState === 'error' && <span className="share-error">圖片產生失敗，再試一次</span>}

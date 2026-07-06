@@ -4,41 +4,18 @@ import { performPhImport } from './components/inventory/importFlow'
 import { InventoryPage } from './components/inventory/InventoryPage'
 import { TierPage } from './components/tier/TierPage'
 import { useInventory } from './hooks/useInventory'
-import { dataStatus, refreshData } from './lib/data'
+import { dataStatus } from './lib/data'
 import { decodeImportHash } from './lib/importPh'
 
-function formatDataTime(iso: string): string {
+function formatDataDate(iso: string): string {
   const d = new Date(iso)
-  return Number.isNaN(d.getTime())
-    ? iso
-    : `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  return Number.isNaN(d.getTime()) ? iso : `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
 }
 
 function DataStatusBar() {
-  const [state, setState] = useState<'idle' | 'busy' | 'error'>('idle')
-  const [message, setMessage] = useState('')
-
-  const handleRefresh = async () => {
-    setState('busy')
-    setMessage('')
-    try {
-      await refreshData()
-      location.reload()
-    } catch (error: unknown) {
-      setState('error')
-      setMessage(error instanceof Error ? error.message : '未知錯誤')
-    }
-  }
-
   return (
-    <div className="data-status" role="status">
-      <span className="data-time">
-        資料：{formatDataTime(dataStatus.at)}（{dataStatus.source === 'online' ? '線上' : '內建'}）
-      </span>
-      <button type="button" className="btn-refresh" onClick={handleRefresh} disabled={state === 'busy'}>
-        {state === 'busy' ? '更新中…' : '更新資料'}
-      </button>
-      {state === 'error' && <span className="data-error">線上更新失敗（{message}），仍使用現有資料</span>}
+    <div className="data-status">
+      <span className="data-time">資料更新：{formatDataDate(dataStatus.at)}（每週自動同步）</span>
     </div>
   )
 }

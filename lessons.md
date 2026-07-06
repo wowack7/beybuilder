@@ -27,11 +27,11 @@
 - 坑：改檔後 Vite 持續 serve 舊模組（HMR 與強制 reload 都拿到舊 code），單日已發生 4 次（InventoryPage、輔助刃 UI、App.tsx hash 匯入…）；容易誤判成「改動沒生效」而白改半天。
 - 解：先驗證 `fetch('/src/<改過的檔>')` 內容是否含新字串；不含 → 重啟 dev server（preview_stop/start），不要改 code 重試。
 
-## L4 資料雙軌更新的優先序（2026-07-06）
+## L4 資料更新只走 data:update（2026-07-06 更新：移除瀏覽器端更新）
 
 - tags: data, cache
-- 機制：內建資料（`npm run data:update` 生成，含 phstudy 慢資料）vs 瀏覽器「更新資料」快取（僅 Google Sheets 競技資料，localStorage `beybuilder.datacache.v1`）——載入時比時間戳新者勝（`shouldUseCache`，有測試）。
-- 注意：phstudy 無 CORS，瀏覽器路徑永遠拿不到零件數值/CX 拆名更新——那些只能靠每週排程。若 Google 改 gviz CORS 政策，按鈕會失效但排程不受影響。
+- 原設計曾有瀏覽器「更新資料」鈕＋localStorage 快取（新者勝）；因公開站會變成每個訪客各自觸發外部請求，用戶決策移除該鈕與整套快取機制（refreshData / shouldUseCache / bakedEnrichment / datacache.v1 皆已刪）。
+- 現況：前端一律用內建 `src/data/*.json`；更新只靠 `npm run data:update`（本機）與每週 GitHub Actions。phstudy 無 CORS，本來瀏覽器路徑也拿不到零件數值/CX 拆名，移除後無損失。
 
 ## L5 git push 大包被遠端掛斷（2026-07-06）
 

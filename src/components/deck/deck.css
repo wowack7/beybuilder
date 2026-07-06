@@ -104,11 +104,10 @@
 }
 
 .part-row .part-kind {
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
   color: var(--text-faint);
-  text-transform: uppercase;
-  width: 4.6em;
+  width: 3.8em;
   flex-shrink: 0;
 }
 

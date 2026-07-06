@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { parseCsv, parseSiteCombos, shouldUseCache, transformAll } from './transform'
+import { parseCsv, parseSiteCombos, transformAll } from './transform'
 
 describe('parseCsv', () => {
   test('handles quoted fields with commas and escaped quotes', () => {
@@ -56,13 +56,5 @@ describe('transformAll tier inheritance', () => {
     expect(byName.get('魔導神杖(綠)')).toMatchObject({ tier: 'X', tierInherited: true })
     expect(byName.get('蒼穹龍騎士')).toMatchObject({ tier: '', tierInherited: false })
     expect(byName.get('蒼穹龍騎士(左)')).toMatchObject({ tier: 'S+', tierInherited: false })
-  })
-})
-
-describe('shouldUseCache', () => {
-  test('newer cache wins, older or equal cache is discarded', () => {
-    expect(shouldUseCache('2026-07-06T10:00:00Z', '2026-07-06T09:00:00Z')).toBe(true)
-    expect(shouldUseCache('2026-07-06T08:00:00Z', '2026-07-06T09:00:00Z')).toBe(false)
-    expect(shouldUseCache('2026-07-06T09:00:00Z', '2026-07-06T09:00:00Z')).toBe(false)
   })
 })

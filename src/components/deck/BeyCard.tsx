@@ -50,7 +50,7 @@ export function BeyCard({ bey, slot }: BeyCardProps) {
           </>
         ) : (
           <li className="part-row">
-            <span className="part-kind">Blade</span>
+            <span className="part-kind">戰刃</span>
             <span className="part-name">{bey.blade}</span>
             <TierBadge tier={blade?.tier ?? ''} inherited={blade?.tierInherited} />
           </li>
@@ -62,12 +62,12 @@ export function BeyCard({ bey, slot }: BeyCardProps) {
           </li>
         )}
         <li className="part-row">
-          <span className="part-kind">Ratchet</span>
+          <span className="part-kind">固鎖</span>
           <span className="part-name">{bey.ratchet}</span>
           <TierBadge tier={ratchet?.tier ?? ''} />
         </li>
         <li className="part-row">
-          <span className="part-kind">Bit</span>
+          <span className="part-kind">軸心</span>
           <span className="part-name">{bey.bit}</span>
           <TierBadge tier={bit?.tier ?? ''} />
         </li>

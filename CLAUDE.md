@@ -12,7 +12,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - `npm run build` — `tsc -b` type-check + production build
 - `npm test` — Vitest run once（單一測試檔：`vitest run src/lib/recommend.test.ts`；watch 用 `npm run test:watch`）
 - `npm run lint` — oxlint
-- `npm run data:update` — 重新抓取兩個資料來源並重新生成 `src/data/*.json`（需網路、Node ≥ 23.6：轉換邏輯在 `src/lib/transform.ts`，靠 Node 原生 TS import 與前端共用）。app header 另有「更新資料」鈕從瀏覽器直抓 Google Sheets（快取於 localStorage，與內建資料比時間戳新者勝）。坑點見 lessons.md
+- `npm run data:update` — 重新抓取兩個資料來源並重新生成 `src/data/*.json`（需網路、Node ≥ 23.6：轉換邏輯在 `src/lib/transform.ts`，靠 Node 原生 TS import 與前端共用）。資料更新只走此路徑（本機 + 每週 GitHub Actions），**前端一律用內建資料、不在瀏覽器端抓取**（用戶決策 2026-07-06：公開站避免每個訪客各自觸發外部請求；原「更新資料」鈕與 localStorage 快取機制已移除）。坑點見 lessons.md
 
 ## Deploy（GitHub Pages）
 

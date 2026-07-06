@@ -150,34 +150,6 @@ export function buildPhEnrichment(phData: any): Enrichment {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-/** 由既有內建資料建立補充資料（瀏覽器「立即更新」用：phstudy 慢資料沿用內建） */
-export function bakedEnrichment(products: Product[], parts: PartsDb): Enrichment {
-  const stat = (list: SimplePart[]) => {
-    const m = new Map(list.map((p) => [p.id, p.stats]))
-    return (id: string) => m.get(id)
-  }
-  const cxByProduct = new Map(
-    products
-      .filter((p) => p.lockChip || p.mainBlade)
-      .map((p) => [p.id, { lockChip: p.lockChip, mainBlade: p.mainBlade }]),
-  )
-  const bladeByBase = new Map<string, Blade>()
-  for (const b of parts.blades) {
-    const base = bladeFamilyKey(b.name)
-    if (b.stats && !bladeByBase.has(base)) bladeByBase.set(base, b)
-  }
-  return {
-    ratchetStats: stat(parts.ratchets),
-    bitStats: stat(parts.bits),
-    assistStats: stat(parts.assists ?? []),
-    cxNames: (productId) => cxByProduct.get(productId),
-    bladeExtras: (base) => {
-      const b = bladeByBase.get(base)
-      return b?.stats ? { stats: b.stats, rotation: b.rotation } : undefined
-    },
-  }
-}
-
 /**
  * 解析「建議配置 (Combo)」半結構化文字 → 站方推薦組合（未抗辯假設：解析規則）。
  * #後為註解（逐行剝除）；固鎖/冠軍配置段的每個 / 項可含 ratchet、成對 bit、輔助X；
@@ -383,10 +355,6 @@ export function transformAll(raw: RawSheets, enrich?: Enrichment): DataBundle {
     siteCombos,
   }
 }
-
-/** 快取 vs 內建：新者勝（未抗辯假設；ISO 8601 字串可直接字典序比較） */
-export const shouldUseCache = (cacheSavedAt: string, bakedGeneratedAt: string): boolean =>
-  cacheSavedAt > bakedGeneratedAt
 
 /**
  * phstudy 倉庫匯入映射表：phstudy 的 partId 尾碼（如 "PRD-914570-05"）→ 本站零件身分。
