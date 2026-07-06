@@ -1,5 +1,6 @@
 import { COMBO_SOURCE_LABEL, bitById, bladeByName, imgUrl, ratchetById } from '../../lib/data'
 import type { BeyCombo } from '../../types'
+import { HoverThumb } from '../ui/HoverThumb'
 import { TierBadge } from '../ui/TierBadge'
 
 interface BeyCardProps {
@@ -68,7 +69,9 @@ export function BeyCard({ bey, slot }: BeyCardProps) {
         </li>
         <li className="part-row">
           <span className="part-kind">軸心</span>
-          <span className="part-name">{bey.bit}</span>
+          <span className="part-name">
+            <HoverThumb label={bey.bit} img={bit?.img} />
+          </span>
           <TierBadge tier={bit?.tier ?? ''} />
         </li>
       </ul>

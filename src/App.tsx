@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { DeckPage } from './components/deck/DeckPage'
+import { ImportPhBody } from './components/inventory/ImportPh'
 import { performPhImport } from './components/inventory/importFlow'
 import { InventoryPage } from './components/inventory/InventoryPage'
 import { TierPage } from './components/tier/TierPage'
+import { Modal } from './components/ui/Modal'
 import { useInventory } from './hooks/useInventory'
 import { dataStatus } from './lib/data'
 import { decodeImportHash } from './lib/importPh'
@@ -30,6 +32,7 @@ const TABS: { id: Tab; label: string }[] = [
 
 function App() {
   const [tab, setTab] = useState<Tab>('deck')
+  const [importOpen, setImportOpen] = useState(false)
   const { inventory, toggleProduct, toggleExtra, clearAll, mergeInventory } = useInventory()
 
   // phstudy 書籤小工具跳轉匯入：#phimport=<base64>
@@ -74,8 +77,17 @@ function App() {
               </button>
             ))}
           </div>
+          <button type="button" className="nav-import" onClick={() => setImportOpen(true)}>
+            📥 匯入零件
+          </button>
         </nav>
       </header>
+
+      {importOpen && (
+        <Modal title="從 phstudy 匯入零件" onClose={() => setImportOpen(false)}>
+          <ImportPhBody onMerge={mergeInventory} />
+        </Modal>
+      )}
 
       <main>
         {tab === 'deck' && (
@@ -87,7 +99,6 @@ function App() {
             onToggleProduct={toggleProduct}
             onToggleExtra={toggleExtra}
             onClearAll={clearAll}
-            onMerge={mergeInventory}
           />
         )}
         {tab === 'tier' && <TierPage inventory={inventory} />}
@@ -105,6 +116,7 @@ function App() {
           </a>
           。本站僅供玩家交流參考，Beyblade X 為 TAKARA TOMY 之商標。
         </p>
+        <p className="footer-privacy">本站使用 Google Analytics 匿名統計流量，以了解使用狀況。</p>
       </footer>
     </>
   )

@@ -3,7 +3,7 @@ import type { ExtraKind } from '../../hooks/useInventory'
 import { SERIES_OPTIONS, partsDb, products, productSeries } from '../../lib/data'
 import { resolveOwnedParts } from '../../lib/recommend'
 import type { Inventory } from '../../types'
-import { ImportPh } from './ImportPh'
+import { Modal } from '../ui/Modal'
 import { ProductCard } from './ProductCard'
 import './inventory.css'
 
@@ -12,7 +12,6 @@ interface InventoryPageProps {
   onToggleProduct: (id: string) => void
   onToggleExtra: (kind: ExtraKind, id: string) => void
   onClearAll: () => void
-  onMerge: (add: Inventory) => void
 }
 
 export function InventoryPage({
@@ -20,11 +19,11 @@ export function InventoryPage({
   onToggleProduct,
   onToggleExtra,
   onClearAll,
-  onMerge,
 }: InventoryPageProps) {
   const [query, setQuery] = useState('')
   const [series, setSeries] = useState<(typeof SERIES_OPTIONS)[number]>('全部')
   const [ownedOnly, setOwnedOnly] = useState(false)
+  const [confirmClear, setConfirmClear] = useState(false)
 
   const ownedSet = useMemo(() => new Set(inventory.productIds), [inventory.productIds])
   const owned = useMemo(() => resolveOwnedParts(inventory, products, partsDb), [inventory])
@@ -44,8 +43,9 @@ export function InventoryPage({
     })
   }, [query, series, ownedOnly, ownedSet])
 
-  const handleClear = () => {
-    if (window.confirm('確定要清空整個庫存？此動作無法復原。')) onClearAll()
+  const handleClearConfirmed = () => {
+    onClearAll()
+    setConfirmClear(false)
   }
 
   return (
@@ -106,7 +106,18 @@ export function InventoryPage({
           輔助刃 <strong>{owned.assists.length}</strong>
         </span>
         <span className="spacer" />
-        <button type="button" className="btn btn-ghost-danger" onClick={handleClear}>
+        <button
+          type="button"
+          className="btn btn-ghost-danger"
+          onClick={() => setConfirmClear(true)}
+          disabled={
+            inventory.productIds.length === 0 &&
+            inventory.extraBlades.length === 0 &&
+            inventory.extraRatchets.length === 0 &&
+            inventory.extraBits.length === 0 &&
+            (inventory.extraAssists?.length ?? 0) === 0
+          }
+        >
           清空庫存
         </button>
       </div>
@@ -120,8 +131,6 @@ export function InventoryPage({
       ) : (
         <p className="no-results">沒有符合條件的產品</p>
       )}
-
-      <ImportPh onMerge={onMerge} />
 
       <details className="extra-parts">
         <summary>額外零件（單獨入手的 戰刃／固鎖／軸心／輔助刃）</summary>
@@ -192,6 +201,22 @@ export function InventoryPage({
           </div>
         </div>
       </details>
+
+      {confirmClear && (
+        <Modal title="清空庫存" onClose={() => setConfirmClear(false)}>
+          <p className="confirm-message">
+            確定要清空整個庫存嗎？你登錄的所有產品與零件都會移除，此動作<strong>無法復原</strong>。
+          </p>
+          <div className="confirm-actions">
+            <button type="button" className="btn" onClick={() => setConfirmClear(false)}>
+              取消
+            </button>
+            <button type="button" className="btn btn-danger" onClick={handleClearConfirmed}>
+              確定清空
+            </button>
+          </div>
+        </Modal>
+      )}
     </section>
   )
 }

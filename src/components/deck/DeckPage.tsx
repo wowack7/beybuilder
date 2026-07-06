@@ -169,7 +169,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
                 <table>
                   <thead>
                     <tr>
-                      <th scope="col">組合</th>
+                      <th scope="col">配置</th>
                       <th scope="col">來源</th>
                       <th scope="col">勝場</th>
                       <th scope="col">奪冠率</th>
@@ -179,7 +179,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
                     {combos.map((c) => (
                       <tr key={`${c.ratchet}|${c.bit}|${c.assist ?? ''}`}>
                         <td>
-                          {c.blade} {c.ratchet}
+                          {c.ratchet}
                           {c.bit}
                           {c.assist ? `（輔助${c.assist}）` : ''}
                         </td>

@@ -85,19 +85,3 @@ export function ImportPhBody({ onMerge }: ImportPhBodyProps) {
     </div>
   )
 }
-
-interface ImportPhProps {
-  onMerge: (add: Inventory) => void
-}
-
-/** 零件庫頁的折疊版 */
-export function ImportPh({ onMerge }: ImportPhProps) {
-  return (
-    <details className="extra-parts import-ph">
-      <summary>從 phstudy 零件倉庫一鍵匯入</summary>
-      <div className="extra-body">
-        <ImportPhBody onMerge={onMerge} />
-      </div>
-    </details>
-  )
-}

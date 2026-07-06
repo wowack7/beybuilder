@@ -1,0 +1,38 @@
+.hover-thumb {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted var(--line-strong);
+  outline: none;
+}
+
+.hover-thumb-pop {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) scale(0.9);
+  transform-origin: bottom center;
+  opacity: 0;
+  pointer-events: none;
+  padding: var(--space-2);
+  background: var(--bg-overlay);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-pop);
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+  z-index: 20;
+}
+
+.hover-thumb-pop img {
+  display: block;
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.hover-thumb:hover .hover-thumb-pop,
+.hover-thumb:focus-visible .hover-thumb-pop {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}

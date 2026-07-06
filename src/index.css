@@ -132,10 +132,45 @@ button {
   cursor: wait;
 }
 
+nav[aria-label='主導覽'] {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
 .tabs {
   display: flex;
   gap: var(--space-1);
-  margin-left: auto;
+}
+
+.nav-import {
+  appearance: none;
+  border: 1px solid var(--accent-deep);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--accent) 12%, transparent);
+  color: var(--accent);
+  padding: 0.4em 1em;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-base);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.nav-import:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.nav-import:active {
+  transform: scale(0.96);
 }
 
 .tab {
@@ -323,6 +358,28 @@ main {
   background: none;
 }
 
+.btn-ghost-danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-ghost-danger:disabled:hover {
+  border-color: var(--line);
+  color: var(--text-faint);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: oklch(18% 0.03 25);
+  border-color: var(--danger);
+  font-weight: 700;
+}
+
+.btn-danger:hover {
+  background: color-mix(in oklch, var(--danger) 88%, white);
+  border-color: var(--danger);
+}
+
 .empty-state {
   text-align: center;
   padding: var(--space-section) var(--space-4);
@@ -359,4 +416,9 @@ main {
 
 .site-footer a:hover {
   color: var(--accent);
+}
+
+.footer-privacy {
+  margin-top: var(--space-2);
+  opacity: 0.75;
 }
