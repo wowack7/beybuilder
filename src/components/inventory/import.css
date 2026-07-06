@@ -74,3 +74,29 @@
 .import-manual[open] summary {
   margin-bottom: var(--space-2);
 }
+
+.bookmarklet-copy {
+  border: 1px solid var(--accent-deep);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  padding: 4px 14px;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.bookmarklet-copy:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.import-note {
+  display: block;
+  color: var(--text-faint);
+  font-size: 0.82rem;
+  margin-top: var(--space-1);
+}

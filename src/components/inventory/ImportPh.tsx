@@ -29,28 +29,33 @@ export function ImportPhBody({ onMerge }: ImportPhBodyProps) {
     <div className="import-body">
       <ol className="import-steps">
         <li>
-          把這顆按鈕拖到瀏覽器書籤列：
-          <a className="bookmarklet" href={bookmarklet} onClick={(e) => e.preventDefault()}>
-            ⚡ 帶去 BeyBuilder
-          </a>
           <button
             type="button"
-            className="filter-chip"
+            className="bookmarklet-copy"
             onClick={() =>
               navigator.clipboard
                 .writeText(bookmarklet)
-                .then(() => setMessage('已複製書籤小工具連結，可貼到書籤的網址欄'))
+                .then(() => setMessage('已複製！接著到書籤列右鍵 →「新增網頁…」，網址欄貼上即可'))
+                .catch(() => setMessage('複製失敗，請改用下方「手動貼上」路徑'))
             }
           >
-            複製連結
+            📋 複製小工具連結
           </button>
+          ，然後在書籤列空白處按右鍵 →「新增網頁…」：名稱取「帶去 BeyBuilder」，網址欄貼上剛複製的連結。
+          <span className="import-note">
+            （Firefox 使用者可以直接把
+            <a className="bookmarklet" href={bookmarklet} onClick={(e) => e.preventDefault()}>
+              ⚡ 帶去 BeyBuilder
+            </a>
+            拖到書籤列；Chrome 拖拉會被瀏覽器擋掉，請用複製的方式）
+          </span>
         </li>
         <li>
           開啟{' '}
           <a href="https://beyblade.phstudy.org/inventory.html" target="_blank" rel="noreferrer">
             phstudy 零件倉庫頁
           </a>
-          ，點一下剛才的書籤——會自動跳回本站完成匯入（資料只在你的瀏覽器內轉換，不會上傳）。
+          ，點一下剛才建立的書籤——會自動跳回本站完成匯入（資料只在你的瀏覽器內轉換，不會上傳）。
         </li>
       </ol>
       <details className="import-manual">
