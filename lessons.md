@@ -8,11 +8,12 @@
 - 機制（部署 GitHub Pages 後）：
   - **正式源頭：GitHub Actions** `data-update.yml` 每週一 01:00 UTC（台北 09:00）在雲端跑 `data:update`＋test＋build，資料有變才 commit → 自動觸發重新部署。不依賴本機。
   - **本機 Claude 排程** `beybuilder-weekly-data-update` 已改職責為「git pull 同步 CI 的資料 commit」，避免本機與 CI 雙頭改 `src/data/` 造成分歧。
-- **待驗**：CI cron 首次真實執行（2026-07-13 後）。驗活指令：
+- 已驗：deploy.yml 由真實 push 驗活 ✅；data-update.yml 由 workflow_dispatch 等效觸發驗活 ✅（run 28776064225，success，2026-07-06）——workflow 本體在真實 CI 環境可跑。
+- **待驗**：cron 觸發本身（2026-07-13 後）。驗活指令：
   ```
-  gh run list --workflow=data-update.yml --limit 3   # 應出現 schedule 觸發的 run
+  gh run list --workflow=data-update.yml --limit 3   # 應出現 event=schedule 的 run
   ```
-  （deploy.yml 已由真實 push 驗活 ✅ 2026-07-06；data-update 的 workflow_dispatch 手動觸發可提前驗）。驗過請把本行改成「已驗」。
+  驗過請把本行改成「已驗」。
 
 ## L2 排程/新 shell 的 node 是系統 16 版（2026-07-06）
 
