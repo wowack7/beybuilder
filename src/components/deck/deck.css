@@ -359,3 +359,8 @@
   color: var(--danger);
   font-size: 0.8rem;
 }
+
+.alt-config .sep {
+  color: var(--text-faint);
+  padding: 0 0.15em;
+}

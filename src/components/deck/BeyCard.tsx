@@ -1,4 +1,4 @@
-import { COMBO_SOURCE_LABEL, bitById, bladeByName, imgUrl, ratchetById } from '../../lib/data'
+import { COMBO_SOURCE_LABEL, assistById, bitById, bladeByName, imgUrl, ratchetById } from '../../lib/data'
 import type { BeyCombo } from '../../types'
 import { HoverThumb } from '../ui/HoverThumb'
 import { TierBadge } from '../ui/TierBadge'
@@ -59,7 +59,9 @@ export function BeyCard({ bey, slot }: BeyCardProps) {
         {bey.assist && (
           <li className="part-row">
             <span className="part-kind">輔助刃</span>
-            <span className="part-name">輔助{bey.assist}</span>
+            <span className="part-name">
+              <HoverThumb label={`輔助${bey.assist}`} img={assistById.get(bey.assist)?.img} />
+            </span>
           </li>
         )}
         <li className="part-row">

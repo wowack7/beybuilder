@@ -422,3 +422,72 @@ main {
   margin-top: var(--space-2);
   opacity: 0.75;
 }
+
+/* ── 行動版 ─────────────────────────────── */
+@media (max-width: 640px) {
+  /* 表頭改為非固定＋直式堆疊，避免在小螢幕吃掉過多空間 */
+  .site-header {
+    position: static;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    padding: var(--space-3) 0;
+  }
+
+  .data-status {
+    font-size: 0.72rem;
+  }
+
+  nav[aria-label='主導覽'] {
+    margin-left: 0;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .tabs {
+    gap: 2px;
+  }
+
+  .tab {
+    font-size: var(--text-base);
+    padding: 0.4em 0.7em;
+    letter-spacing: 0.03em;
+  }
+
+  .nav-import {
+    font-size: var(--text-base);
+    padding: 0.4em 0.85em;
+  }
+
+  .page {
+    padding-top: var(--space-4);
+  }
+
+  .page-desc {
+    margin-bottom: var(--space-4);
+  }
+
+  /* 分享按鈕靠左，不擠在螢幕右緣 */
+  .deck-hero {
+    gap: var(--space-3);
+  }
+
+  .deck-actions {
+    width: 100%;
+    text-align: left;
+  }
+
+  .btn-share {
+    margin-left: 0;
+  }
+
+  /* 候補表格在窄螢幕縮排、縮字 */
+  .alternates table {
+    font-size: 0.82rem;
+  }
+
+  .alternates th,
+  .alternates td {
+    padding: var(--space-2) var(--space-2);
+  }
+}

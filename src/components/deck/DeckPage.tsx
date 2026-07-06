@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import {
   COMBO_SOURCE_LABEL,
+  assistById,
   bitById,
   bladeByName,
   imgUrl,
@@ -135,7 +136,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
               onClick={handleShare}
               disabled={shareState === 'busy'}
             >
-              {shareState === 'busy' ? '產生中…' : '📤 分享戰隊圖'}
+              {shareState === 'busy' ? '產生中…' : '分享戰隊圖'}
             </button>
           )}
           {shareState === 'error' && <span className="share-error">圖片產生失敗，再試一次</span>}
@@ -189,10 +190,16 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
                   <tbody>
                     {combos.map((c) => (
                       <tr key={`${c.ratchet}|${c.bit}|${c.assist ?? ''}`}>
-                        <td>
+                        <td className="alt-config">
                           <HoverThumb label={c.ratchet} img={ratchetById.get(c.ratchet)?.img} />
+                          <span className="sep"> / </span>
                           <HoverThumb label={c.bit} img={bitById.get(c.bit)?.img} />
-                          {c.assist ? `（輔助${c.assist}）` : ''}
+                          {c.assist && (
+                            <>
+                              <span className="sep"> / </span>
+                              <HoverThumb label={`輔助${c.assist}`} img={assistById.get(c.assist)?.img} />
+                            </>
+                          )}
                         </td>
                         <td>{COMBO_SOURCE_LABEL[c.source] ?? c.source}</td>
                         <td>{c.meta?.wins ?? '—'}</td>

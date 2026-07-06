@@ -78,7 +78,7 @@ function App() {
             ))}
           </div>
           <button type="button" className="nav-import" onClick={() => setImportOpen(true)}>
-            📥 匯入零件
+            匯入零件
           </button>
         </nav>
       </header>
