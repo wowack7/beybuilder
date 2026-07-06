@@ -130,7 +130,7 @@ export function parsePhInventory(
           const name = pid ? productById.get(pid)?.name : map.blades[suffix]
           if (name && !covered.blades.has(name)) extras.blades.add(name)
         } else if (!cxBladeSuffixes.has(suffix)) {
-          unmatched.push({ partId: p.partId, reason: 'CX 組件不齊（需鎖片＋主刃）' })
+          unmatched.push({ partId: p.partId, reason: 'CX 組件不齊（需紋章＋主刃）' })
         }
         break
       }

@@ -36,10 +36,10 @@ export function BeyCard({ bey, slot }: BeyCardProps) {
 
       <ul className="bey-parts">
         {bey.lockChip && bey.mainBlade ? (
-          // CX 五層：鎖片＋主刃＋輔助刃（整刃階級掛在主刃列）
+          // CX 五層：紋章（鎖片 lockChip）＋主刃＋輔助刃（整刃階級掛在主刃列）
           <>
             <li className="part-row">
-              <span className="part-kind">鎖片</span>
+              <span className="part-kind">紋章</span>
               <span className="part-name">{bey.lockChip}</span>
             </li>
             <li className="part-row">

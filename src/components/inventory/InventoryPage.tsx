@@ -54,7 +54,7 @@ export function InventoryPage({
         我的零件庫
       </h2>
       <p className="page-desc">
-        點選你擁有的產品（自動帶入原裝 Blade / Ratchet / Bit）；單獨入手的零件可在下方「額外零件」補登。資料會存在瀏覽器內。
+        點選你擁有的產品（自動帶入原裝戰刃／固鎖／軸心）；單獨入手的零件可在下方「額外零件」補登。資料會存在瀏覽器內。
       </p>
 
       <div className="inv-toolbar" role="search">
@@ -94,13 +94,13 @@ export function InventoryPage({
           已擁有 <strong>{inventory.productIds.length}</strong> 件產品
         </span>
         <span>
-          Blade <strong>{owned.blades.length}</strong>
+          戰刃 <strong>{owned.blades.length}</strong>
         </span>
         <span>
-          Ratchet <strong>{owned.ratchets.length}</strong>
+          固鎖 <strong>{owned.ratchets.length}</strong>
         </span>
         <span>
-          Bit <strong>{owned.bits.length}</strong>
+          軸心 <strong>{owned.bits.length}</strong>
         </span>
         <span>
           輔助刃 <strong>{owned.assists.length}</strong>
@@ -124,10 +124,10 @@ export function InventoryPage({
       <ImportPh onMerge={onMerge} />
 
       <details className="extra-parts">
-        <summary>額外零件（單獨入手的 Blade / Ratchet / Bit / 輔助刃）</summary>
+        <summary>額外零件（單獨入手的 戰刃／固鎖／軸心／輔助刃）</summary>
         <div className="extra-body">
           <div className="extra-group">
-            <h4>Blade</h4>
+            <h4>戰刃</h4>
             <div className="chip-row">
               {partsDb.blades.map((b) => (
                 <button
@@ -143,7 +143,7 @@ export function InventoryPage({
             </div>
           </div>
           <div className="extra-group">
-            <h4>Ratchet</h4>
+            <h4>固鎖</h4>
             <div className="chip-row">
               {partsDb.ratchets.map((r) => (
                 <button
@@ -159,7 +159,7 @@ export function InventoryPage({
             </div>
           </div>
           <div className="extra-group">
-            <h4>Bit</h4>
+            <h4>軸心</h4>
             <div className="chip-row">
               {partsDb.bits.map((b) => (
                 <button

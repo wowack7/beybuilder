@@ -95,7 +95,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
               B
             </span>
             <h3>從零開始勾選</h3>
-            <p>到零件庫點選你擁有的陀螺產品，原裝 Blade／Ratchet／Bit 會自動帶入；散裝零件也能補登。</p>
+            <p>到零件庫點選你擁有的陀螺產品，原裝戰刃／固鎖／軸心會自動帶入；散裝零件也能補登。</p>
             <button type="button" className="btn btn-primary" onClick={onGoInventory}>
               前往登錄庫存
             </button>
@@ -113,7 +113,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
             最強戰隊
           </h2>
           <p className="page-desc">
-            依你的庫存，在「同一 deck 內 Blade / Ratchet / Bit 不得重複」的 3on3 規則下算出的最佳三顆。
+            依你的庫存，在「同一 deck 內 戰刃／固鎖／軸心 不得重複」的 3on3 規則下算出的最佳三顆。
           </p>
         </div>
         <div className="deck-actions">
