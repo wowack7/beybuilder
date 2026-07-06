@@ -32,3 +32,9 @@
 - tags: data, cache
 - 機制：內建資料（`npm run data:update` 生成，含 phstudy 慢資料）vs 瀏覽器「更新資料」快取（僅 Google Sheets 競技資料，localStorage `beybuilder.datacache.v1`）——載入時比時間戳新者勝（`shouldUseCache`，有測試）。
 - 注意：phstudy 無 CORS，瀏覽器路徑永遠拿不到零件數值/CX 拆名更新——那些只能靠每週排程。若 Google 改 gviz CORS 政策，按鈕會失效但排程不受影響。
+
+## L5 git push 大包被遠端掛斷（2026-07-06）
+
+- tags: git, push, https
+- 坑：本機 git 2.31 走 https 推含 298 張圖（~4MB）的 commit，報「遠端意外掛斷了」且後續 `git push` 誤顯示 Everything up-to-date——實際 commit 沒推出去（`git status -sb` 顯示領先 1）。
+- 解：`git config http.postBuffer 157286400` 後重推即成功。推完務必 `git status -sb` 確認不再領先。
