@@ -64,7 +64,9 @@ export function BeyCard({ bey, slot }: BeyCardProps) {
         )}
         <li className="part-row">
           <span className="part-kind">固鎖</span>
-          <span className="part-name">{bey.ratchet}</span>
+          <span className="part-name">
+            <HoverThumb label={bey.ratchet} img={ratchet?.img} />
+          </span>
           <TierBadge tier={ratchet?.tier ?? ''} />
         </li>
         <li className="part-row">
