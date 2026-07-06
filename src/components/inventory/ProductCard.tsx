@@ -1,3 +1,4 @@
+import { imgUrl } from '../../lib/data'
 import type { Product } from '../../types'
 import { TierBadge } from '../ui/TierBadge'
 import { TypeTag } from '../ui/TypeTag'
@@ -20,7 +21,7 @@ export function ProductCard({ product, owned, onToggle }: ProductCardProps) {
         {owned ? '✓' : '+'}
       </span>
       {product.img ? (
-        <img className="product-img" src={product.img} alt="" width="180" height="180" loading="lazy" />
+        <img className="product-img" src={imgUrl(product.img)} alt="" width="180" height="180" loading="lazy" decoding="async" />
       ) : (
         <span className="product-img-empty" aria-hidden="true">
           X

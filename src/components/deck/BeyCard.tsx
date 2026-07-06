@@ -1,4 +1,4 @@
-import { COMBO_SOURCE_LABEL, bitById, bladeByName, ratchetById } from '../../lib/data'
+import { COMBO_SOURCE_LABEL, bitById, bladeByName, imgUrl, ratchetById } from '../../lib/data'
 import type { BeyCombo } from '../../types'
 import { TierBadge } from '../ui/TierBadge'
 
@@ -19,7 +19,7 @@ export function BeyCard({ bey, slot }: BeyCardProps) {
       </span>
       <div className="bey-head">
         {blade?.img ? (
-          <img className="bey-img" src={blade.img} alt="" width="84" height="84" loading="lazy" />
+          <img className="bey-img" src={imgUrl(blade.img)} alt="" width="84" height="84" loading="lazy" decoding="async" />
         ) : (
           <span className="bey-img-placeholder" aria-hidden="true">
             X

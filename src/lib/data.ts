@@ -5,6 +5,7 @@
  * 結果快取於 localStorage——與內建資料比時間戳，新者勝。
  */
 import combosJson from '../data/combos.json'
+import imgMapJson from '../data/img_map.json'
 import metaJson from '../data/meta.json'
 import partsJson from '../data/parts.json'
 import phMapJson from '../data/ph_map.json'
@@ -22,6 +23,16 @@ import {
 
 /** phstudy 倉庫匯入映射表（永遠用內建版；隨每週資料更新重生） */
 export const phMap = phMapJson as PhMap
+
+/**
+ * 圖片路徑解析：自架的壓縮版（public/img，同源快）優先，
+ * 沒對應到（新品尚未跑 data:update）退回原圖床。
+ */
+export function imgUrl(src: string): string {
+  if (!src) return src
+  const local = (imgMapJson as Record<string, string>)[src]
+  return local ? import.meta.env.BASE_URL + local : src
+}
 
 const CACHE_KEY = 'beybuilder.datacache.v1'
 

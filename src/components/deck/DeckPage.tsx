@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { COMBO_SOURCE_LABEL, bladeByName, metaCombos, partsDb, products, siteCombos } from '../../lib/data'
+import { COMBO_SOURCE_LABEL, bladeByName, imgUrl, metaCombos, partsDb, products, siteCombos } from '../../lib/data'
 import { buildCandidates, pickBestDeck, resolveOwnedParts } from '../../lib/recommend'
 import type { BeyCombo, Inventory } from '../../types'
 import { TierBadge } from '../ui/TierBadge'
@@ -98,7 +98,7 @@ export function DeckPage({ inventory, onGoInventory }: DeckPageProps) {
               <details className="alt-group" key={blade} open={i === 0}>
                 <summary>
                   {info?.img ? (
-                    <img src={info.img} alt="" width="40" height="40" loading="lazy" />
+                    <img src={imgUrl(info.img)} alt="" width="40" height="40" loading="lazy" decoding="async" />
                   ) : (
                     <span className="alt-img-empty" aria-hidden="true">
                       X
