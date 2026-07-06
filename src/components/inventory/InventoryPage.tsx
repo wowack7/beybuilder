@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { ExtraKind } from '../../hooks/useInventory'
-import { SERIES_OPTIONS, partsDb, products, productSeries } from '../../lib/data'
+import { SERIES_OPTIONS, partsDb, productById, products, productSeries } from '../../lib/data'
 import { resolveOwnedParts } from '../../lib/recommend'
 import type { Inventory } from '../../types'
 import { Modal } from '../ui/Modal'
@@ -24,6 +24,7 @@ export function InventoryPage({
   const [series, setSeries] = useState<(typeof SERIES_OPTIONS)[number]>('全部')
   const [ownedOnly, setOwnedOnly] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
+  const [removeId, setRemoveId] = useState<string | null>(null)
 
   const ownedSet = useMemo(() => new Set(inventory.productIds), [inventory.productIds])
   const owned = useMemo(() => resolveOwnedParts(inventory, products, partsDb), [inventory])
@@ -46,6 +47,17 @@ export function InventoryPage({
   const handleClearConfirmed = () => {
     onClearAll()
     setConfirmClear(false)
+  }
+
+  // 新增直接生效；移除（再點一次已擁有的產品）先確認，避免誤觸刪除
+  const handleProductClick = (id: string) => {
+    if (ownedSet.has(id)) setRemoveId(id)
+    else onToggleProduct(id)
+  }
+
+  const handleRemoveConfirmed = () => {
+    if (removeId) onToggleProduct(removeId)
+    setRemoveId(null)
   }
 
   return (
@@ -125,7 +137,7 @@ export function InventoryPage({
       {filtered.length > 0 ? (
         <div className="product-grid">
           {filtered.map((p) => (
-            <ProductCard key={p.id} product={p} owned={ownedSet.has(p.id)} onToggle={onToggleProduct} />
+            <ProductCard key={p.id} product={p} owned={ownedSet.has(p.id)} onToggle={handleProductClick} />
           ))}
         </div>
       ) : (
@@ -213,6 +225,22 @@ export function InventoryPage({
             </button>
             <button type="button" className="btn btn-danger" onClick={handleClearConfirmed}>
               確定清空
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {removeId && (
+        <Modal title="移除產品" onClose={() => setRemoveId(null)}>
+          <p className="confirm-message">
+            要把「{productById.get(removeId)?.name ?? removeId}」從庫存移除嗎？
+          </p>
+          <div className="confirm-actions">
+            <button type="button" className="btn" onClick={() => setRemoveId(null)}>
+              取消
+            </button>
+            <button type="button" className="btn btn-danger" onClick={handleRemoveConfirmed}>
+              移除
             </button>
           </div>
         </Modal>

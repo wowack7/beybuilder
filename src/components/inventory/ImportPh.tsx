@@ -6,10 +6,12 @@ import './import.css'
 
 interface ImportPhBodyProps {
   onMerge: (add: Inventory) => void
+  /** 匯入成功後呼叫（例如關閉彈窗）；失敗時不呼叫 */
+  onDone?: () => void
 }
 
 /** phstudy 匯入引導本體（首頁 onboarding 與匯入彈窗共用） */
-export function ImportPhBody({ onMerge }: ImportPhBodyProps) {
+export function ImportPhBody({ onMerge, onDone }: ImportPhBodyProps) {
   const [text, setText] = useState('')
   const [message, setMessage] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
@@ -18,11 +20,17 @@ export function ImportPhBody({ onMerge }: ImportPhBodyProps) {
   const bookmarklet = buildBookmarklet(siteUrl)
 
   const runImport = (raw: string) => {
+    let result: string
     try {
-      setMessage(performPhImport(raw, onMerge))
+      result = performPhImport(raw, onMerge)
     } catch (error: unknown) {
+      // 失敗留在原地、顯示訊息讓用戶修正
       setMessage(`匯入失敗：${error instanceof Error ? error.message : '未知錯誤'}`)
+      return
     }
+    // 成功 → 跳提示框並關閉對話框
+    window.alert(result)
+    onDone?.()
   }
 
   const handleFile = (e: ChangeEvent<HTMLInputElement>) => {

@@ -76,7 +76,7 @@ function App() {
 
       {importOpen && (
         <Modal title="從 phstudy 匯入零件" onClose={() => setImportOpen(false)}>
-          <ImportPhBody onMerge={mergeInventory} />
+          <ImportPhBody onMerge={mergeInventory} onDone={() => setImportOpen(false)} />
         </Modal>
       )}
 
