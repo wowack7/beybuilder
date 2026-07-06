@@ -304,3 +304,54 @@
   color: var(--text-faint);
   max-width: 72ch;
 }
+
+/* ── Onboarding（空庫存導覽） ─────────────── */
+.onboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  gap: var(--space-4);
+  align-items: start;
+  margin-top: var(--space-6);
+}
+
+.onboard-card {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-card);
+}
+
+.onboard-primary {
+  border-color: var(--accent-deep);
+  background:
+    radial-gradient(120% 90% at 0% 0%, var(--accent-glow), transparent 55%),
+    var(--bg-raised);
+}
+
+.onboard-step {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 2rem;
+  color: var(--text-faint);
+  opacity: 0.5;
+}
+
+.onboard-primary .onboard-step {
+  color: var(--accent);
+}
+
+.onboard-card h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-lg);
+  padding-right: 2.6rem; /* 讓出右上角步驟字母的位置 */
+}
+
+.onboard-card > p {
+  color: var(--text-dim);
+  margin: 0 0 var(--space-4);
+}

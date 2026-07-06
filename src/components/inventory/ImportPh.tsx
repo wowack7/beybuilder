@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { buildBookmarklet } from '../../lib/importPh'
 import type { Inventory } from '../../types'
 import { performPhImport } from './importFlow'
+import './import.css'
 
-interface ImportPhProps {
+interface ImportPhBodyProps {
   onMerge: (add: Inventory) => void
 }
 
-export function ImportPh({ onMerge }: ImportPhProps) {
+/** phstudy 匯入引導本體（首頁 onboarding 與零件庫頁共用） */
+export function ImportPhBody({ onMerge }: ImportPhBodyProps) {
   const [text, setText] = useState('')
   const [message, setMessage] = useState('')
 
@@ -24,33 +26,37 @@ export function ImportPh({ onMerge }: ImportPhProps) {
   }
 
   return (
-    <details className="extra-parts import-ph">
-      <summary>從 phstudy 零件倉庫一鍵匯入</summary>
-      <div className="extra-body">
-        <ol className="import-steps">
-          <li>
-            把這顆按鈕拖到瀏覽器書籤列：
-            <a className="bookmarklet" href={bookmarklet} onClick={(e) => e.preventDefault()}>
-              ⚡ 帶去 BeyBuilder
-            </a>
-            <button
-              type="button"
-              className="filter-chip"
-              onClick={() => navigator.clipboard.writeText(bookmarklet).then(() => setMessage('已複製書籤小工具連結，可貼到書籤網址欄'))}
-            >
-              複製連結
-            </button>
-          </li>
-          <li>
-            開啟{' '}
-            <a href="https://beyblade.phstudy.org/inventory.html" target="_blank" rel="noreferrer">
-              phstudy 零件倉庫頁
-            </a>
-            ，點一下剛才的書籤——會自動跳回本站完成匯入（資料只在你的瀏覽器內轉換，不會上傳）。
-          </li>
-        </ol>
+    <div className="import-body">
+      <ol className="import-steps">
+        <li>
+          把這顆按鈕拖到瀏覽器書籤列：
+          <a className="bookmarklet" href={bookmarklet} onClick={(e) => e.preventDefault()}>
+            ⚡ 帶去 BeyBuilder
+          </a>
+          <button
+            type="button"
+            className="filter-chip"
+            onClick={() =>
+              navigator.clipboard
+                .writeText(bookmarklet)
+                .then(() => setMessage('已複製書籤小工具連結，可貼到書籤的網址欄'))
+            }
+          >
+            複製連結
+          </button>
+        </li>
+        <li>
+          開啟{' '}
+          <a href="https://beyblade.phstudy.org/inventory.html" target="_blank" rel="noreferrer">
+            phstudy 零件倉庫頁
+          </a>
+          ，點一下剛才的書籤——會自動跳回本站完成匯入（資料只在你的瀏覽器內轉換，不會上傳）。
+        </li>
+      </ol>
+      <details className="import-manual">
+        <summary>沒辦法用書籤？手動貼上</summary>
         <p className="import-alt">
-          或手動匯入：在 phstudy 頁按 F12 開 Console，執行
+          在 phstudy 頁按 F12 開 Console，執行
           <code>copy(localStorage.getItem('beybladePartInventory:default'))</code>
           後貼到下方。
         </p>
@@ -65,11 +71,27 @@ export function ImportPh({ onMerge }: ImportPhProps) {
         <button type="button" className="btn-refresh" disabled={!text.trim()} onClick={handleImport}>
           解析並匯入
         </button>
-        {message && (
-          <p className="import-result" role="status">
-            {message}
-          </p>
-        )}
+      </details>
+      {message && (
+        <p className="import-result" role="status">
+          {message}
+        </p>
+      )}
+    </div>
+  )
+}
+
+interface ImportPhProps {
+  onMerge: (add: Inventory) => void
+}
+
+/** 零件庫頁的折疊版 */
+export function ImportPh({ onMerge }: ImportPhProps) {
+  return (
+    <details className="extra-parts import-ph">
+      <summary>從 phstudy 零件倉庫一鍵匯入</summary>
+      <div className="extra-body">
+        <ImportPhBody onMerge={onMerge} />
       </div>
     </details>
   )

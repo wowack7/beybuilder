@@ -62,7 +62,7 @@ function App() {
     history.replaceState(null, '', window.location.pathname + window.location.search)
     try {
       const message = performPhImport(raw, mergeInventory)
-      setTab('inventory')
+      setTab('deck') // 匯入完直接看成果
       window.alert(message)
     } catch (error: unknown) {
       window.alert(`匯入失敗：${error instanceof Error ? error.message : '未知錯誤'}`)
@@ -101,7 +101,9 @@ function App() {
       </header>
 
       <main>
-        {tab === 'deck' && <DeckPage inventory={inventory} onGoInventory={() => setTab('inventory')} />}
+        {tab === 'deck' && (
+          <DeckPage inventory={inventory} onGoInventory={() => setTab('inventory')} onMerge={mergeInventory} />
+        )}
         {tab === 'inventory' && (
           <InventoryPage
             inventory={inventory}

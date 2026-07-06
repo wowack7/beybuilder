@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { COMBO_SOURCE_LABEL, bladeByName, imgUrl, metaCombos, partsDb, products, siteCombos } from '../../lib/data'
 import { buildCandidates, pickBestDeck, resolveOwnedParts } from '../../lib/recommend'
 import type { BeyCombo, Inventory } from '../../types'
+import { ImportPhBody } from '../inventory/ImportPh'
 import { TierBadge } from '../ui/TierBadge'
 import { BeyCard } from './BeyCard'
 import './deck.css'
@@ -9,6 +10,7 @@ import './deck.css'
 interface DeckPageProps {
   inventory: Inventory
   onGoInventory: () => void
+  onMerge: (add: Inventory) => void
 }
 
 const hasAnyParts = (inv: Inventory) =>
@@ -17,7 +19,7 @@ const hasAnyParts = (inv: Inventory) =>
   inv.extraRatchets.length > 0 ||
   inv.extraBits.length > 0
 
-export function DeckPage({ inventory, onGoInventory }: DeckPageProps) {
+export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
   const candidates = useMemo(() => {
     const owned = resolveOwnedParts(inventory, products, partsDb)
     return buildCandidates(owned, metaCombos, siteCombos)
@@ -43,14 +45,30 @@ export function DeckPage({ inventory, onGoInventory }: DeckPageProps) {
     return (
       <section className="page" aria-labelledby="deck-title">
         <h2 className="page-title" id="deck-title">
-          最強戰隊
+          歡迎來到 BeyBuilder X
         </h2>
-        <div className="empty-state">
-          <h3>先登錄你的零件庫</h3>
-          <p>勾選你擁有的陀螺產品後，這裡會自動算出手上零件能組出的最強 3on3 出戰組合。</p>
-          <button type="button" className="btn btn-primary" onClick={onGoInventory}>
-            前往登錄庫存
-          </button>
+        <p className="page-desc">
+          登錄你擁有的零件，這裡會依官方 3on3 規則自動算出最強出戰組合。兩種方式開始：
+        </p>
+        <div className="onboard-grid">
+          <article className="onboard-card onboard-primary">
+            <span className="onboard-step" aria-hidden="true">
+              A
+            </span>
+            <h3>已經在 phstudy 記錄過零件？</h3>
+            <p>兩步驟把你的「零件倉庫」整批搬過來，馬上看到你的最強戰隊。</p>
+            <ImportPhBody onMerge={onMerge} />
+          </article>
+          <article className="onboard-card">
+            <span className="onboard-step" aria-hidden="true">
+              B
+            </span>
+            <h3>從零開始勾選</h3>
+            <p>到零件庫點選你擁有的陀螺產品，原裝 Blade／Ratchet／Bit 會自動帶入；散裝零件也能補登。</p>
+            <button type="button" className="btn btn-primary" onClick={onGoInventory}>
+              前往登錄庫存
+            </button>
+          </article>
         </div>
       </section>
     )

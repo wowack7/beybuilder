@@ -1,0 +1,76 @@
+/* ── phstudy 匯入 ─────────────────────────── */
+.import-steps {
+  margin: 0 0 var(--space-3);
+  padding-left: 1.4em;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.import-steps li {
+  line-height: 1.9;
+}
+
+.bookmarklet {
+  display: inline-block;
+  margin: 0 var(--space-2);
+  padding: 2px 12px;
+  border: 1px dashed var(--accent-deep);
+  border-radius: 999px;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: grab;
+}
+
+.import-alt {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  margin: 0 0 var(--space-2);
+}
+
+.import-alt code {
+  display: block;
+  margin-top: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  overflow-x: auto;
+  user-select: all;
+}
+
+.import-textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.8rem;
+  padding: var(--space-2);
+  margin-bottom: var(--space-2);
+  resize: vertical;
+}
+
+.import-textarea:focus-visible {
+  outline: 2px solid var(--accent-deep);
+}
+
+.import-result {
+  margin: var(--space-2) 0 0;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
+
+.import-manual {
+  margin-top: var(--space-2);
+}
+
+.import-manual summary {
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 0.85rem;
+}
+
+.import-manual[open] summary {
+  margin-bottom: var(--space-2);
+}
