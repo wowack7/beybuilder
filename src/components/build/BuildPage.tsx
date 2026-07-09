@@ -23,15 +23,21 @@ interface Option {
 const byTierDesc = <T extends { tier: string }>(a: T, b: T) => tierValue(b.tier) - tierValue(a.tier)
 
 export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
-  const { slots, setSlotPart, clearSlot, reset } = useCustomDeck()
+  const { slots, setSlotPart, clearSlot } = useCustomDeck()
   const [shareState, setShareState] = useState<'idle' | 'busy' | 'error'>('idle')
   const owned = useMemo(() => resolveOwnedParts(inventory, products, partsDb), [inventory])
 
-  // CX 戰刃（有紋章＋主刃拆名者）需要輔助刃
-  const cxBlades = useMemo(
-    () => new Set(products.filter((p) => p.lockChip && p.mainBlade).map((p) => p.name)),
+  // CX 戰刃（有紋章＋主刃拆名者）需要輔助刃，並顯示紋章/主刃五層結構
+  const cxNamesByBlade = useMemo(
+    () =>
+      new Map(
+        products
+          .filter((p) => p.lockChip && p.mainBlade)
+          .map((p) => [p.name, { lockChip: p.lockChip as string, mainBlade: p.mainBlade as string }]),
+      ),
     [],
   )
+  const cxBlades = useMemo(() => new Set(cxNamesByBlade.keys()), [cxNamesByBlade])
 
   const bladeOpts: Option[] = useMemo(
     () => [...owned.blades].sort(byTierDesc).map((b) => ({ value: b.name, label: b.name, tier: b.tier })),
@@ -146,12 +152,9 @@ export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
             onClick={handleShare}
             disabled={shareState === 'busy' || completeCount === 0}
           >
-            {shareState === 'busy' ? '產生中…' : '分享圖'}
+            {shareState === 'busy' ? '產生中…' : '分享戰隊圖'}
           </button>
           {shareState === 'error' && <span className="share-error">圖片產生失敗</span>}
-          <button type="button" className="btn btn-ghost-danger" onClick={reset}>
-            全部清空
-          </button>
         </div>
       </header>
 
@@ -162,6 +165,7 @@ export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
             slot={slot}
             index={i}
             isCx={cxBlades.has(slot.blade)}
+            cxNames={cxNamesByBlade.get(slot.blade)}
             bladeOpts={bladeOpts}
             ratchetOpts={ratchetOpts}
             bitOpts={bitOpts}
@@ -187,6 +191,7 @@ interface SlotCardProps {
   slot: CustomSlot
   index: number
   isCx: boolean
+  cxNames?: { lockChip: string; mainBlade: string }
   bladeOpts: Option[]
   ratchetOpts: Option[]
   bitOpts: Option[]
@@ -203,6 +208,7 @@ function SlotCard({
   slot,
   index,
   isCx,
+  cxNames,
   bladeOpts,
   ratchetOpts,
   bitOpts,
@@ -272,6 +278,18 @@ function SlotCard({
           disabledKey={(o) => (o.value === slot.blade ? false : usedBladeFamilies.has(bladeFamilyKey(o.value)))}
           onChange={(v) => onSet(index, 'blade', v)}
         />
+        {isCx && cxNames && (
+          <>
+            <div className="part-readonly">
+              <span className="part-select-label">紋章</span>
+              <span className="part-readonly-value">{cxNames.lockChip}</span>
+            </div>
+            <div className="part-readonly">
+              <span className="part-select-label">主刃</span>
+              <span className="part-readonly-value">{cxNames.mainBlade}</span>
+            </div>
+          </>
+        )}
         {isCx && (
           <PartSelect
             label="輔助刃"

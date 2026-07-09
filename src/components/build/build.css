@@ -136,6 +136,23 @@
   gap: var(--space-3);
 }
 
+/* CX 紋章/主刃：由所選戰刃決定，唯讀顯示 */
+.part-readonly {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.part-readonly-value {
+  flex: 1;
+  min-width: 0;
+  padding: 0.45em 0.7em;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
 .part-select-label {
   font-size: 0.78rem;
   letter-spacing: 0.14em;
