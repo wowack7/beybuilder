@@ -199,32 +199,41 @@
   margin-top: auto;
 }
 
-.extra-parts {
-  margin-top: var(--space-8);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--bg-raised);
+/* 庫存子分頁（套組 / 額外零件） */
+.inv-tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-4);
+  border-bottom: 1px solid var(--line);
 }
 
-.extra-parts summary {
-  cursor: pointer;
-  padding: var(--space-3) var(--space-4);
-  font-weight: 600;
+.inv-tab {
+  appearance: none;
+  border: none;
+  background: none;
   color: var(--text-dim);
-  list-style: none;
+  font: inherit;
+  font-weight: 600;
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
 }
 
-.extra-parts summary::before {
-  content: '▸ ';
+.inv-tab:hover {
+  color: var(--text);
+}
+
+.inv-tab[aria-selected='true'] {
   color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 
-.extra-parts[open] summary::before {
-  content: '▾ ';
-}
-
-.extra-parts .extra-body {
-  padding: 0 var(--space-4) var(--space-4);
+.extra-body {
+  margin-top: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);

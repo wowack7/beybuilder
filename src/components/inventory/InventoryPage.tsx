@@ -44,6 +44,7 @@ export function InventoryPage({
   onToggleExtra,
   onClearAll,
 }: InventoryPageProps) {
+  const [view, setView] = useState<'sets' | 'extras'>('sets')
   const [query, setQuery] = useState('')
   const [series, setSeries] = useState<(typeof SERIES_OPTIONS)[number]>('全部')
   const [ownedOnly, setOwnedOnly] = useState(false)
@@ -109,40 +110,8 @@ export function InventoryPage({
         我的零件庫
       </h2>
       <p className="page-desc">
-        點選你擁有的產品（自動帶入原裝戰刃／固鎖／軸心）；單獨入手的零件可在下方「額外零件」補登。資料會存在瀏覽器內。
+        點選你擁有的產品（自動帶入原裝戰刃／固鎖／軸心）；單獨入手的零件在「額外零件」分頁補登。資料會存在瀏覽器內。
       </p>
-
-      <div className="inv-toolbar" role="search">
-        <input
-          type="search"
-          className="inv-search"
-          placeholder="搜尋型號、名稱、零件…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label="搜尋產品"
-        />
-        <div className="chip-row" role="group" aria-label="系列篩選">
-          {SERIES_OPTIONS.map((s) => (
-            <button
-              key={s}
-              type="button"
-              className="filter-chip"
-              aria-pressed={series === s}
-              onClick={() => setSeries(s)}
-            >
-              {s}
-            </button>
-          ))}
-          <button
-            type="button"
-            className="filter-chip"
-            aria-pressed={ownedOnly}
-            onClick={() => setOwnedOnly((v) => !v)}
-          >
-            只看已擁有
-          </button>
-        </div>
-      </div>
 
       <div className="inv-summary">
         <span>
@@ -177,18 +146,79 @@ export function InventoryPage({
         </button>
       </div>
 
-      {filtered.length > 0 ? (
-        <div className="product-grid">
-          {filtered.map((p) => (
-            <ProductCard key={p.id} product={p} owned={ownedSet.has(p.id)} onToggle={handleProductClick} />
-          ))}
-        </div>
-      ) : (
-        <p className="no-results">沒有符合條件的產品</p>
+      <div className="inv-tabs" role="tablist" aria-label="庫存檢視">
+        <button
+          type="button"
+          role="tab"
+          className="inv-tab"
+          aria-selected={view === 'sets'}
+          onClick={() => setView('sets')}
+        >
+          套組（產品）
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className="inv-tab"
+          aria-selected={view === 'extras'}
+          onClick={() => setView('extras')}
+        >
+          額外零件
+        </button>
+      </div>
+
+      {view === 'sets' && (
+        <>
+          <div className="inv-toolbar" role="search">
+            <input
+              type="search"
+              className="inv-search"
+              placeholder="搜尋型號、名稱、零件…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="搜尋產品"
+            />
+            <div className="chip-row" role="group" aria-label="系列篩選">
+              {SERIES_OPTIONS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className="filter-chip"
+                  aria-pressed={series === s}
+                  onClick={() => setSeries(s)}
+                >
+                  {s}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="filter-chip"
+                aria-pressed={ownedOnly}
+                onClick={() => setOwnedOnly((v) => !v)}
+              >
+                只看已擁有
+              </button>
+            </div>
+          </div>
+
+          {filtered.length > 0 ? (
+            <div className="product-grid">
+              {filtered.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  owned={ownedSet.has(p.id)}
+                  onToggle={handleProductClick}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="no-results">沒有符合條件的產品</p>
+          )}
+        </>
       )}
 
-      <details className="extra-parts">
-        <summary>額外零件（單獨入手的 戰刃／固鎖／軸心／輔助刃）</summary>
+      {view === 'extras' && (
         <div className="extra-body">
           <div className="extra-group">
             <h4>戰刃</h4>
@@ -247,7 +277,7 @@ export function InventoryPage({
             </div>
           </div>
         </div>
-      </details>
+      )}
 
       {confirmClear && (
         <Modal title="清空庫存" onClose={() => setConfirmClear(false)}>
