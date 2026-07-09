@@ -60,4 +60,5 @@ export const TYPE_LABEL: Record<string, string> = {
 export const COMBO_SOURCE_LABEL: Record<string, string> = {
   meta: '實戰組合',
   site: '站方推薦',
+  custom: '自組組合',
 }

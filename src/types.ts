@@ -65,7 +65,7 @@ export interface MetaCombo {
   recent90: number
 }
 
-export type ComboSource = 'meta' | 'site'
+export type ComboSource = 'meta' | 'site' | 'custom'
 
 /** stan-yao 站「建議配置」欄解析出的站方推薦組合 */
 export interface SiteCombo {

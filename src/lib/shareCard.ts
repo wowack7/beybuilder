@@ -131,26 +131,31 @@ function drawBeyCard(
   const blade = bladeByName.get(bey.blade)
 
   // 來源與戰績（不放本站自訂分數——實戰勝負另關乎技術，僅列真實統計）
-  const isMeta = bey.source === 'meta'
-  const tagText = isMeta ? '實戰組合' : '站方推薦'
-  const tagColor = isMeta ? C.accent : C.gold
+  const TAG: Record<string, { text: string; color: string }> = {
+    meta: { text: '實戰組合', color: C.accent },
+    site: { text: '站方推薦', color: C.gold },
+    custom: { text: '自組組合', color: C.dim },
+  }
+  const tag = TAG[bey.source] ?? TAG.custom
   ctx.font = `600 20px ${BODY}`
-  const tagW = ctx.measureText(tagText).width + 32
+  const tagW = ctx.measureText(tag.text).width + 32
   const tagX = x + (w - tagW) / 2
   const tagY = y + 262
-  ctx.strokeStyle = tagColor
+  ctx.strokeStyle = tag.color
   ctx.lineWidth = 1.5
   ctx.beginPath()
   ctx.roundRect(tagX, tagY, tagW, 38, 19)
   ctx.stroke()
-  ctx.fillStyle = tagColor
-  ctx.fillText(tagText, x + w / 2, tagY + 27)
+  ctx.fillStyle = tag.color
+  ctx.fillText(tag.text, x + w / 2, tagY + 27)
 
   ctx.fillStyle = C.dim
   ctx.font = `500 18px ${BODY}`
   const record = bey.meta
     ? `勝場 ${bey.meta.wins}｜奪冠率 ${(bey.meta.champRate * 100).toFixed(0)}%`
-    : '站方建議配置'
+    : bey.source === 'site'
+      ? '站方建議配置'
+      : '自訂配置'
   ctx.fillText(record, x + w / 2, y + h - 28)
 
   // blade 階級徽章（圖右上）
@@ -166,7 +171,12 @@ function drawBeyCard(
   }
 }
 
-export async function renderDeckCard(deck: DeckResult): Promise<Blob> {
+export interface DeckCardOptions {
+  /** 標頭副標（預設「我的最強戰隊｜Beyblade X 3on3」） */
+  subtitle?: string
+}
+
+export async function renderDeckCard(deck: DeckResult, opts: DeckCardOptions = {}): Promise<Blob> {
   await document.fonts.ready
   await Promise.all([
     document.fonts.load(`900 60px ${DISPLAY}`),
@@ -207,7 +217,7 @@ export async function renderDeckCard(deck: DeckResult): Promise<Blob> {
   ctx.fillText('BUILDER X', 48 + beyW, 84)
   ctx.fillStyle = C.dim
   ctx.font = `500 20px ${BODY}`
-  ctx.fillText('我的最強戰隊｜Beyblade X 3on3', 50, 118)
+  ctx.fillText(opts.subtitle ?? '我的最強戰隊｜Beyblade X 3on3', 50, 118)
 
   // 右上：3 ON 3 標記（不放本站自訂分數）
   ctx.textAlign = 'right'
@@ -246,4 +256,30 @@ export async function renderDeckCard(deck: DeckResult): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('圖片輸出失敗'))), 'image/png')
   })
+}
+
+/**
+ * 分享或下載 PNG：觸控裝置（手機/平板）走原生分享，電腦一律下載。
+ *（Windows Chrome/Edge 桌機也支援檔案分享，故不能只靠 canShare 判斷。）
+ * 用戶取消原生分享會擲 AbortError，由呼叫端處理。
+ */
+export async function shareOrDownloadPng(blob: Blob, filename: string, shareTitle: string): Promise<void> {
+  const file = new File([blob], filename, { type: 'image/png' })
+  const isTouch = window.matchMedia('(pointer: coarse)').matches
+  if (isTouch && navigator.canShare?.({ files: [file] })) {
+    await navigator.share({ files: [file], title: shareTitle })
+    return
+  }
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+/** YYYYMMDD 檔名戳記 */
+export function dateStamp(): string {
+  const d = new Date()
+  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
 }

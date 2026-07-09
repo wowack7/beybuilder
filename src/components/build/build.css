@@ -20,6 +20,11 @@
   white-space: nowrap;
 }
 
+/* 分享按鈕在此為 flex 項目，取消 deck.css 的 block/auto 邊距 */
+.build-actions .btn-share {
+  margin: 0;
+}
+
 .build-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr));

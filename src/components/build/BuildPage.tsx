@@ -1,10 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useCustomDeck, type CustomSlot, type SlotField } from '../../hooks/useCustomDeck'
 import { bitById, bladeByName, imgUrl, metaCombos, partsDb, products, ratchetById } from '../../lib/data'
 import { bladeFamilyKey } from '../../lib/family'
 import { resolveOwnedParts } from '../../lib/recommend'
 import { tierValue } from '../../lib/score'
-import type { Inventory } from '../../types'
+import { dateStamp, renderDeckCard, shareOrDownloadPng } from '../../lib/shareCard'
+import type { BeyCombo, DeckResult, Inventory } from '../../types'
 import { TierBadge } from '../ui/TierBadge'
 import './build.css'
 
@@ -23,6 +24,7 @@ const byTierDesc = <T extends { tier: string }>(a: T, b: T) => tierValue(b.tier)
 
 export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
   const { slots, setSlotPart, clearSlot, reset } = useCustomDeck()
+  const [shareState, setShareState] = useState<'idle' | 'busy' | 'error'>('idle')
   const owned = useMemo(() => resolveOwnedParts(inventory, products, partsDb), [inventory])
 
   // CX 戰刃（有紋章＋主刃拆名者）需要輔助刃
@@ -61,10 +63,52 @@ export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
     return set
   }
 
-  const completeCount = slots.filter((s) => {
-    const cx = cxBlades.has(s.blade)
-    return s.blade && s.ratchet && s.bit && (!cx || s.assist)
-  }).length
+  // 已配完的顆——組成分享卡的 beys（命中實戰組合標 meta＋真實數據，否則標自組）
+  const shareBeys: BeyCombo[] = useMemo(() => {
+    return slots
+      .filter((s) => {
+        const cx = cxBlades.has(s.blade)
+        return s.blade && s.ratchet && s.bit && (!cx || s.assist)
+      })
+      .map((s) => {
+        const cx = cxBlades.has(s.blade)
+        const matched = !cx
+          ? metaCombos.find(
+              (c) =>
+                bladeFamilyKey(c.blade) === bladeFamilyKey(s.blade) &&
+                c.ratchet === s.ratchet &&
+                c.bit === s.bit,
+            )
+          : undefined
+        return {
+          blade: s.blade,
+          ratchet: s.ratchet,
+          bit: s.bit,
+          ...(s.assist ? { assist: s.assist } : {}),
+          score: 0,
+          source: matched ? 'meta' : 'custom',
+          ...(matched ? { meta: matched } : {}),
+        } satisfies BeyCombo
+      })
+  }, [slots, cxBlades])
+
+  const completeCount = shareBeys.length
+
+  const handleShare = async () => {
+    setShareState('busy')
+    try {
+      const deck: DeckResult = { beys: shareBeys, totalScore: 0, incomplete: shareBeys.length < 3, alternates: [] }
+      const blob = await renderDeckCard(deck, { subtitle: '我的自組隊伍｜Beyblade X 3on3' })
+      await shareOrDownloadPng(blob, `beybuilder-build-${dateStamp()}.png`, '我的 Beyblade X 自組隊伍')
+      setShareState('idle')
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        setShareState('idle')
+        return
+      }
+      setShareState('error')
+    }
+  }
 
   if (!hasParts) {
     return (
@@ -96,6 +140,15 @@ export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
         </div>
         <div className="build-actions">
           <span className="build-count">已配 {completeCount}/3 顆</span>
+          <button
+            type="button"
+            className="btn-share"
+            onClick={handleShare}
+            disabled={shareState === 'busy' || completeCount === 0}
+          >
+            {shareState === 'busy' ? '產生中…' : '分享圖'}
+          </button>
+          {shareState === 'error' && <span className="share-error">圖片產生失敗</span>}
           <button type="button" className="btn btn-ghost-danger" onClick={reset}>
             全部清空
           </button>

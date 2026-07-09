@@ -12,7 +12,7 @@ import {
   siteCombos,
 } from '../../lib/data'
 import { buildCandidates, pickBestDeck, resolveOwnedParts } from '../../lib/recommend'
-import { renderDeckCard } from '../../lib/shareCard'
+import { dateStamp, renderDeckCard, shareOrDownloadPng } from '../../lib/shareCard'
 import type { BeyCombo, Inventory } from '../../types'
 import { ImportPhBody } from '../inventory/ImportPh'
 import { HoverThumb } from '../ui/HoverThumb'
@@ -44,22 +44,7 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
     setShareState('busy')
     try {
       const blob = await renderDeckCard(deck)
-      const today = new Date()
-      const stamp = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`
-      const file = new File([blob], `beybuilder-deck-${stamp}.png`, { type: 'image/png' })
-      // 觸控裝置（手機/平板）才走原生分享；電腦一律下載
-      //（Windows Chrome/Edge 桌機也支援檔案分享，故不能只靠 canShare 判斷）
-      const isTouch = window.matchMedia('(pointer: coarse)').matches
-      if (isTouch && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: '我的 Beyblade X 最強戰隊' })
-      } else {
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = file.name
-        a.click()
-        URL.revokeObjectURL(url)
-      }
+      await shareOrDownloadPng(blob, `beybuilder-deck-${dateStamp()}.png`, '我的 Beyblade X 最強戰隊')
       setShareState('idle')
     } catch (error: unknown) {
       // 用戶取消原生分享不算錯誤
