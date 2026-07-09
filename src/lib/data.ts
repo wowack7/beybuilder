@@ -41,6 +41,23 @@ export const ratchetById = new Map(partsDb.ratchets.map((r) => [r.id, r]))
 export const bitById = new Map(partsDb.bits.map((b) => [b.id, b]))
 export const assistById = new Map((partsDb.assists ?? []).map((a) => [a.id, a]))
 
+/**
+ * CX 紋章/主刃 → 代表整刃圖：自訂混搭（紋章＋主刃湊不出具名整刃）無圖時，
+ * 退而顯示各自的來源整刃圖（本站無單零件圖，只有整刃圖）。
+ */
+export const cxPartImg = (() => {
+  const byLockChip = new Map<string, string>()
+  const byMainBlade = new Map<string, string>()
+  for (const p of products) {
+    if (!p.lockChip || !p.mainBlade) continue
+    const img = bladeByName.get(p.name)?.img || p.img
+    if (!img) continue
+    if (!byLockChip.has(p.lockChip)) byLockChip.set(p.lockChip, img)
+    if (!byMainBlade.has(p.mainBlade)) byMainBlade.set(p.mainBlade, img)
+  }
+  return { byLockChip, byMainBlade }
+})()
+
 /** 產品系列（BX / UX / CX / 其他），供庫存頁篩選 */
 export function productSeries(id: string): string {
   const m = id.match(/^(BX|UX|CX)/i)

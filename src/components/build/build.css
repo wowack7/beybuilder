@@ -89,6 +89,24 @@
   flex-shrink: 0;
 }
 
+/* 自訂混搭：紋章/主刃來源整刃圖並排 */
+.slot-img-mix {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.slot-img-mix img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 8px oklch(0% 0 0 / 0.4));
+}
+
+.slot-img-mix img:nth-child(2) {
+  margin-left: -8px;
+}
+
 .slot-title {
   font-family: var(--font-display);
   font-weight: 700;

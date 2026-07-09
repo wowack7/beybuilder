@@ -3,7 +3,7 @@
  * 純前端渲染；陀螺圖用自架同源檔案，canvas 不會被跨域污染。
  */
 import type { BeyCombo, DeckResult } from '../types'
-import { bladeByName, imgUrl } from './data'
+import { bladeByName, cxPartImg, imgUrl } from './data'
 
 const W = 1200
 const H = 675
@@ -63,10 +63,16 @@ function fitText(
   return size
 }
 
+/** 單張整刃圖，或自訂混搭時的紋章/主刃來源整刃圖組 */
+interface BeyImage {
+  main?: HTMLImageElement | null
+  pair?: (HTMLImageElement | null)[]
+}
+
 function drawBeyCard(
   ctx: CanvasRenderingContext2D,
   bey: BeyCombo,
-  img: HTMLImageElement | null,
+  imgInfo: BeyImage,
   x: number,
   y: number,
   w: number,
@@ -101,9 +107,20 @@ function drawBeyCard(
 
   // 陀螺圖
   const imgSize = 128
-  const imgX = x + (w - imgSize) / 2
-  if (img) {
-    ctx.drawImage(img, imgX, y + 22, imgSize, imgSize)
+  const pair = imgInfo.pair?.filter(Boolean) as HTMLImageElement[] | undefined
+  if (imgInfo.main) {
+    ctx.drawImage(imgInfo.main, x + (w - imgSize) / 2, y + 22, imgSize, imgSize)
+  } else if (pair && pair.length > 0) {
+    // 自訂混搭：紋章/主刃來源整刃圖並排
+    const ps = 92
+    const gap = 4
+    const totalW = pair.length * ps + (pair.length - 1) * gap
+    let px = x + (w - totalW) / 2
+    const py = y + 22 + (imgSize - ps) / 2
+    for (const im of pair) {
+      ctx.drawImage(im, px, py, ps, ps)
+      px += ps + gap
+    }
   } else {
     ctx.strokeStyle = C.line
     ctx.setLineDash([6, 6])
@@ -184,10 +201,18 @@ export async function renderDeckCard(deck: DeckResult, opts: DeckCardOptions = {
   ])
 
   const beys = deck.beys
-  const images = await Promise.all(
-    beys.map((b) => {
-      const src = bladeByName.get(b.blade)?.img
-      return src ? loadImage(imgUrl(src)) : Promise.resolve(null)
+  const images: BeyImage[] = await Promise.all(
+    beys.map(async (b): Promise<BeyImage> => {
+      const bladeSrc = bladeByName.get(b.blade)?.img
+      if (bladeSrc) return { main: await loadImage(imgUrl(bladeSrc)) }
+      // 自訂混搭：退而載入紋章/主刃的來源整刃圖
+      if (b.lockChip && b.mainBlade) {
+        const srcs = [cxPartImg.byLockChip.get(b.lockChip), cxPartImg.byMainBlade.get(b.mainBlade)].filter(
+          Boolean,
+        ) as string[]
+        if (srcs.length) return { pair: await Promise.all(srcs.map((s) => loadImage(imgUrl(s)))) }
+      }
+      return { main: null }
     }),
   )
 

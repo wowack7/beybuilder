@@ -1,6 +1,15 @@
 import { useMemo, useState } from 'react'
 import { useCustomDeck, type CustomSlot, type SlotField } from '../../hooks/useCustomDeck'
-import { bitById, bladeByName, imgUrl, metaCombos, partsDb, products, ratchetById } from '../../lib/data'
+import {
+  bitById,
+  bladeByName,
+  cxPartImg,
+  imgUrl,
+  metaCombos,
+  partsDb,
+  products,
+  ratchetById,
+} from '../../lib/data'
 import { bladeFamilyKey } from '../../lib/family'
 import { resolveOwnedParts } from '../../lib/recommend'
 import { tierValue } from '../../lib/score'
@@ -297,6 +306,11 @@ function SlotCard({
   const name = displayName(slot)
   const complete = isComplete(slot)
 
+  // 自訂混搭（無具名整刃圖）時，退而顯示紋章/主刃的來源整刃圖
+  const lockImg = slot.lockChip ? cxPartImg.byLockChip.get(slot.lockChip) : undefined
+  const mainImg = slot.mainBlade ? cxPartImg.byMainBlade.get(slot.mainBlade) : undefined
+  const mixImgs = !blade?.img && cx ? [lockImg, mainImg].filter(Boolean) : []
+
   const matched =
     complete && !cx
       ? metaCombos.find(
@@ -316,6 +330,12 @@ function SlotCard({
         <div className="slot-preview">
           {blade?.img ? (
             <img className="slot-img" src={imgUrl(blade.img)} alt="" width="72" height="72" loading="lazy" />
+          ) : mixImgs.length > 0 ? (
+            <span className="slot-img-mix">
+              {mixImgs.map((src, k) => (
+                <img key={k} src={imgUrl(src as string)} alt="" width="44" height="44" loading="lazy" />
+              ))}
+            </span>
           ) : (
             <span className="slot-img-empty" aria-hidden="true">
               ?
