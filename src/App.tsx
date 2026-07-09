@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { BuildPage } from './components/build/BuildPage'
 import { DeckPage } from './components/deck/DeckPage'
 import { ImportPhBody } from './components/inventory/ImportPh'
 import { performPhImport } from './components/inventory/importFlow'
@@ -14,10 +15,11 @@ function formatDataDate(iso: string): string {
   return Number.isNaN(d.getTime()) ? iso : `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
 }
 
-type Tab = 'deck' | 'inventory' | 'tier'
+type Tab = 'deck' | 'build' | 'inventory' | 'tier'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'deck', label: '最強戰隊' },
+  { id: 'build', label: '自組隊伍' },
   { id: 'inventory', label: '零件庫' },
   { id: 'tier', label: '天梯' },
 ]
@@ -83,6 +85,9 @@ function App() {
       <main>
         {tab === 'deck' && (
           <DeckPage inventory={inventory} onGoInventory={() => setTab('inventory')} onMerge={mergeInventory} />
+        )}
+        {tab === 'build' && (
+          <BuildPage inventory={inventory} onGoInventory={() => setTab('inventory')} />
         )}
         {tab === 'inventory' && (
           <InventoryPage
