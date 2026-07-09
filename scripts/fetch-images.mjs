@@ -26,6 +26,13 @@ function collectUrls() {
   for (const p of products) if (p.img?.startsWith('http')) urls.add(p.img)
   for (const list of [parts.blades, parts.ratchets, parts.bits, parts.assists ?? []])
     for (const p of list) if (p.img?.startsWith('http')) urls.add(p.img)
+  // CX 紋章/主刃零件圖（phstudy，無 CORS → 必須自架供 canvas 分享卡使用）
+  const cxImgPath = join(ROOT, 'src/data/cx_part_img.json')
+  if (existsSync(cxImgPath)) {
+    const cx = JSON.parse(readFileSync(cxImgPath, 'utf8'))
+    for (const field of [cx.lockChip, cx.mainBlade])
+      for (const url of Object.values(field ?? {})) if (url?.startsWith('http')) urls.add(url)
+  }
   return [...urls]
 }
 

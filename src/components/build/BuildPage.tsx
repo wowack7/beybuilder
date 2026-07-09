@@ -306,7 +306,7 @@ function SlotCard({
   const name = displayName(slot)
   const complete = isComplete(slot)
 
-  // 自訂混搭（無具名整刃圖）時，退而顯示紋章/主刃的來源整刃圖
+  // 自訂混搭（湊不出具名整刃）時，顯示紋章/主刃各自的真零件圖
   const lockImg = slot.lockChip ? cxPartImg.byLockChip.get(slot.lockChip) : undefined
   const mainImg = slot.mainBlade ? cxPartImg.byMainBlade.get(slot.mainBlade) : undefined
   const mixImgs = !blade?.img && cx ? [lockImg, mainImg].filter(Boolean) : []

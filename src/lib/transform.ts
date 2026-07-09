@@ -148,6 +148,37 @@ export function buildPhEnrichment(phData: any): Enrichment {
     },
   }
 }
+
+const PH_IMG_BASE = 'https://beyblade.phstudy.org/images/app'
+
+/** phstudy 紋章(LockChip)/主刃(MainBlade) 名稱 → 零件圖 URL（自訂混搭顯示真零件圖用） */
+export function buildCxPartImages(phData: any): {
+  lockChip: Record<string, string>
+  mainBlade: Record<string, string>
+} {
+  const phList = (v: any): any[] => (Array.isArray(v) ? v : Object.values(v ?? {}))
+  const title = (p: any): string => p.catalog_title?.['zh-TW'] ?? ''
+  const cleanName = (t: string) =>
+    t
+      .replace(/^[A-Z]{2,4}-\d+(?:-\d+)?\s*/, '')
+      .replace(/\s*金屬塗層.*$/, '')
+      .split(/\s+/)
+      .filter((w) => w && !/^>+$/.test(w) && !/版$|籤王/.test(w))
+      .join(' ')
+      .trim()
+  const collect = (cat: string, folder: string) => {
+    const out: Record<string, string> = {}
+    for (const p of phList(phData[cat])) {
+      const name = cleanName(title(p))
+      if (name && p.id && !out[name]) out[name] = `${PH_IMG_BASE}/${folder}/${p.id}.png`
+    }
+    return out
+  }
+  return {
+    lockChip: collect('BeybladePartsLockChip', 'LockChip'),
+    mainBlade: collect('BeybladePartsMainBlade', 'MainBlade'),
+  }
+}
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**

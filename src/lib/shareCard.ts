@@ -205,7 +205,7 @@ export async function renderDeckCard(deck: DeckResult, opts: DeckCardOptions = {
     beys.map(async (b): Promise<BeyImage> => {
       const bladeSrc = bladeByName.get(b.blade)?.img
       if (bladeSrc) return { main: await loadImage(imgUrl(bladeSrc)) }
-      // 自訂混搭：退而載入紋章/主刃的來源整刃圖
+      // 自訂混搭：載入紋章/主刃各自的真零件圖（僅自架者，避免 canvas 跨源污染）
       if (b.lockChip && b.mainBlade) {
         const srcs = [cxPartImg.byLockChip.get(b.lockChip), cxPartImg.byMainBlade.get(b.mainBlade)].filter(
           Boolean,

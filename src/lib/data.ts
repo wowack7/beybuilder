@@ -5,6 +5,7 @@
  * 不在瀏覽器端抓取（避免每個訪客各自觸發外部請求）。
  */
 import combosJson from '../data/combos.json'
+import cxPartImgJson from '../data/cx_part_img.json'
 import imgMapJson from '../data/img_map.json'
 import metaJson from '../data/meta.json'
 import partsJson from '../data/parts.json'
@@ -42,20 +43,26 @@ export const bitById = new Map(partsDb.bits.map((b) => [b.id, b]))
 export const assistById = new Map((partsDb.assists ?? []).map((a) => [a.id, a]))
 
 /**
- * CX 紋章/主刃 → 代表整刃圖：自訂混搭（紋章＋主刃湊不出具名整刃）無圖時，
- * 退而顯示各自的來源整刃圖（本站無單零件圖，只有整刃圖）。
+ * CX 紋章/主刃 → 真零件圖（phstudy 抽取，自架於 public/img）。
+ * 自訂混搭（紋章＋主刃湊不出具名整刃）時顯示各自的真零件圖。
+ * 僅收錄已自架者：值一律為同源本地路徑，分享卡 canvas 不會被跨源圖污染；
+ * 未自架者略過（該零件退回無圖佔位）。
  */
 export const cxPartImg = (() => {
-  const byLockChip = new Map<string, string>()
-  const byMainBlade = new Map<string, string>()
-  for (const p of products) {
-    if (!p.lockChip || !p.mainBlade) continue
-    const img = bladeByName.get(p.name)?.img || p.img
-    if (!img) continue
-    if (!byLockChip.has(p.lockChip)) byLockChip.set(p.lockChip, img)
-    if (!byMainBlade.has(p.mainBlade)) byMainBlade.set(p.mainBlade, img)
+  const raw = cxPartImgJson as {
+    lockChip: Record<string, string>
+    mainBlade: Record<string, string>
   }
-  return { byLockChip, byMainBlade }
+  const imgMap = imgMapJson as Record<string, string>
+  const localOnly = (field: Record<string, string>) => {
+    const m = new Map<string, string>()
+    for (const [name, url] of Object.entries(field)) {
+      const local = imgMap[url]
+      if (local) m.set(name, import.meta.env.BASE_URL + local)
+    }
+    return m
+  }
+  return { byLockChip: localOnly(raw.lockChip), byMainBlade: localOnly(raw.mainBlade) }
 })()
 
 /** 產品系列（BX / UX / CX / 其他），供庫存頁篩選 */

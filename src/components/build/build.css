@@ -89,7 +89,7 @@
   flex-shrink: 0;
 }
 
-/* 自訂混搭：紋章/主刃來源整刃圖並排 */
+/* 自訂混搭：紋章/主刃真零件圖並排 */
 .slot-img-mix {
   display: flex;
   align-items: center;
