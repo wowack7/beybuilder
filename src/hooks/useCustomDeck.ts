@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 
-/** 自組隊伍的一個槽位；空字串代表尚未選 */
+/**
+ * 自組隊伍的一個槽位；空字串代表尚未選。
+ * CX 五層可拆混：lockChip（紋章）與 mainBlade（主刃）獨立選；blade 為兩者對得到的
+ * 具名整刃（對不到就留空，屬自訂混搭）。非 CX 只用 blade。
+ */
 export interface CustomSlot {
   blade: string
+  lockChip: string
+  mainBlade: string
   ratchet: string
   bit: string
   assist: string
@@ -11,8 +17,17 @@ export interface CustomSlot {
 export type SlotField = keyof CustomSlot
 
 const STORAGE_KEY = 'beybuilder.customdeck.v1'
-const emptySlot = (): CustomSlot => ({ blade: '', ratchet: '', bit: '', assist: '' })
+const emptySlot = (): CustomSlot => ({
+  blade: '',
+  lockChip: '',
+  mainBlade: '',
+  ratchet: '',
+  bit: '',
+  assist: '',
+})
 const emptyDeck = (): CustomSlot[] => [emptySlot(), emptySlot(), emptySlot()]
+
+const str = (v: unknown): string => (typeof v === 'string' ? v : '')
 
 function load(): CustomSlot[] {
   try {
@@ -20,12 +35,17 @@ function load(): CustomSlot[] {
     if (!raw) return emptyDeck()
     const parsed = JSON.parse(raw) as unknown
     if (!Array.isArray(parsed) || parsed.length !== 3) return emptyDeck()
-    return parsed.map((s) => ({
-      blade: typeof (s as CustomSlot)?.blade === 'string' ? (s as CustomSlot).blade : '',
-      ratchet: typeof (s as CustomSlot)?.ratchet === 'string' ? (s as CustomSlot).ratchet : '',
-      bit: typeof (s as CustomSlot)?.bit === 'string' ? (s as CustomSlot).bit : '',
-      assist: typeof (s as CustomSlot)?.assist === 'string' ? (s as CustomSlot).assist : '',
-    }))
+    return parsed.map((s) => {
+      const o = s as Partial<CustomSlot>
+      return {
+        blade: str(o?.blade),
+        lockChip: str(o?.lockChip),
+        mainBlade: str(o?.mainBlade),
+        ratchet: str(o?.ratchet),
+        bit: str(o?.bit),
+        assist: str(o?.assist),
+      }
+    })
   } catch {
     return emptyDeck()
   }
@@ -42,22 +62,14 @@ export function useCustomDeck() {
     }
   }, [slots])
 
-  /** 更新某槽位的某零件；選了新戰刃時清掉舊輔助刃（避免殘留不相容的 CX 輔助刃） */
-  const setSlotPart = useCallback((index: number, field: SlotField, value: string) => {
-    setSlots((prev) =>
-      prev.map((s, i) => {
-        if (i !== index) return s
-        if (field === 'blade' && value !== s.blade) return { ...s, blade: value, assist: '' }
-        return { ...s, [field]: value }
-      }),
-    )
+  /** 合併更新某槽位的多個欄位（CX 衍生邏輯在 BuildPage 算好後一次套用） */
+  const patchSlot = useCallback((index: number, partial: Partial<CustomSlot>) => {
+    setSlots((prev) => prev.map((s, i) => (i === index ? { ...s, ...partial } : s)))
   }, [])
 
   const clearSlot = useCallback((index: number) => {
     setSlots((prev) => prev.map((s, i) => (i === index ? emptySlot() : s)))
   }, [])
 
-  const reset = useCallback(() => setSlots(emptyDeck()), [])
-
-  return { slots, setSlotPart, clearSlot, reset }
+  return { slots, patchSlot, clearSlot }
 }

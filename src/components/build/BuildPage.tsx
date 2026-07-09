@@ -20,14 +20,34 @@ interface Option {
   tier: string
 }
 
+interface UsedSets {
+  bladeFamilies: Set<string>
+  lockChips: Set<string>
+  mainBlades: Set<string>
+  ratchets: Set<string>
+  bits: Set<string>
+  assists: Set<string>
+}
+
 const byTierDesc = <T extends { tier: string }>(a: T, b: T) => tierValue(b.tier) - tierValue(a.tier)
 
+/** 有選紋章或主刃即視為 CX 槽（五層可拆混） */
+const isCxSlot = (s: CustomSlot) => !!(s.lockChip || s.mainBlade)
+
+/** 具名整刃優先，否則以紋章＋主刃當顯示名 */
+const displayName = (s: CustomSlot) => s.blade || `${s.lockChip}${s.mainBlade}`
+
+const isComplete = (s: CustomSlot) =>
+  isCxSlot(s)
+    ? !!(s.lockChip && s.mainBlade && s.assist && s.ratchet && s.bit)
+    : !!(s.blade && s.ratchet && s.bit)
+
 export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
-  const { slots, setSlotPart, clearSlot } = useCustomDeck()
+  const { slots, patchSlot, clearSlot } = useCustomDeck()
   const [shareState, setShareState] = useState<'idle' | 'busy' | 'error'>('idle')
   const owned = useMemo(() => resolveOwnedParts(inventory, products, partsDb), [inventory])
 
-  // CX 戰刃（有紋章＋主刃拆名者）需要輔助刃，並顯示紋章/主刃五層結構
+  // blade → { 紋章, 主刃 }；(紋章|主刃) → 具名整刃
   const cxNamesByBlade = useMemo(
     () =>
       new Map(
@@ -37,7 +57,18 @@ export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
       ),
     [],
   )
-  const cxBlades = useMemo(() => new Set(cxNamesByBlade.keys()), [cxNamesByBlade])
+  const bladeByCxParts = useMemo(() => {
+    // (紋章|主刃) → 具名整刃；同組合有多個變體時優先取基底名（無顏色/特別版後綴）
+    const map = new Map<string, string>()
+    for (const p of products) {
+      if (!p.lockChip || !p.mainBlade) continue
+      const key = `${p.lockChip}|${p.mainBlade}`
+      const existing = map.get(key)
+      const isBase = bladeFamilyKey(p.name) === p.name
+      if (!existing || (isBase && bladeFamilyKey(existing) !== existing)) map.set(key, p.name)
+    }
+    return map
+  }, [])
 
   const bladeOpts: Option[] = useMemo(
     () => [...owned.blades].sort(byTierDesc).map((b) => ({ value: b.name, label: b.name, tier: b.tier })),
@@ -55,48 +86,93 @@ export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
     () => owned.assists.map((a) => ({ value: a.id, label: `輔助${a.id}`, tier: a.tier })),
     [owned],
   )
+  // 擁有的 CX 戰刃可拆出的紋章 / 主刃（去重）
+  const lockChipOpts: Option[] = useMemo(() => {
+    const set = new Set<string>()
+    owned.blades.forEach((b) => {
+      const cx = cxNamesByBlade.get(b.name)
+      if (cx) set.add(cx.lockChip)
+    })
+    return [...set].sort().map((v) => ({ value: v, label: v, tier: '' }))
+  }, [owned, cxNamesByBlade])
+  const mainBladeOpts: Option[] = useMemo(() => {
+    const set = new Set<string>()
+    owned.blades.forEach((b) => {
+      const cx = cxNamesByBlade.get(b.name)
+      if (cx) set.add(cx.mainBlade)
+    })
+    return [...set].sort().map((v) => ({ value: v, label: v, tier: '' }))
+  }, [owned, cxNamesByBlade])
 
   const hasParts = bladeOpts.length > 0 && ratchetOpts.length > 0 && bitOpts.length > 0
 
-  // 其他槽位已用的零件（戰刃以家族鍵判定）
-  const usedElsewhere = (index: number, field: SlotField, familyKey = false) => {
-    const set = new Set<string>()
-    slots.forEach((s, i) => {
-      if (i === index) return
-      const v = s[field]
-      if (v) set.add(familyKey ? bladeFamilyKey(v) : v)
-    })
-    return set
+  // 選戰刃：CX 帶入紋章/主刃並清輔助刃；改紋章/主刃：重算對得到的具名整刃
+  const handleSet = (index: number, field: SlotField, value: string) => {
+    if (field === 'blade') {
+      const cx = cxNamesByBlade.get(value)
+      patchSlot(
+        index,
+        cx
+          ? { blade: value, lockChip: cx.lockChip, mainBlade: cx.mainBlade, assist: '' }
+          : { blade: value, lockChip: '', mainBlade: '', assist: '' },
+      )
+    } else if (field === 'lockChip' || field === 'mainBlade') {
+      const s = slots[index]
+      const lockChip = field === 'lockChip' ? value : s.lockChip
+      const mainBlade = field === 'mainBlade' ? value : s.mainBlade
+      patchSlot(index, { [field]: value, blade: bladeByCxParts.get(`${lockChip}|${mainBlade}`) ?? '' })
+    } else {
+      patchSlot(index, { [field]: value })
+    }
   }
 
-  // 已配完的顆——組成分享卡的 beys（命中實戰組合標 meta＋真實數據，否則標自組）
+  // 其他槽位已用的實體零件（CX 以紋章/主刃/輔助刃計，非 CX 以戰刃家族計）
+  const usedByOthers = (index: number): UsedSets => {
+    const u: UsedSets = {
+      bladeFamilies: new Set(),
+      lockChips: new Set(),
+      mainBlades: new Set(),
+      ratchets: new Set(),
+      bits: new Set(),
+      assists: new Set(),
+    }
+    slots.forEach((s, i) => {
+      if (i === index) return
+      if (isCxSlot(s)) {
+        if (s.lockChip) u.lockChips.add(s.lockChip)
+        if (s.mainBlade) u.mainBlades.add(s.mainBlade)
+        if (s.assist) u.assists.add(s.assist)
+      } else if (s.blade) {
+        u.bladeFamilies.add(bladeFamilyKey(s.blade))
+      }
+      if (s.ratchet) u.ratchets.add(s.ratchet)
+      if (s.bit) u.bits.add(s.bit)
+    })
+    return u
+  }
+
   const shareBeys: BeyCombo[] = useMemo(() => {
-    return slots
-      .filter((s) => {
-        const cx = cxBlades.has(s.blade)
-        return s.blade && s.ratchet && s.bit && (!cx || s.assist)
-      })
-      .map((s) => {
-        const cx = cxBlades.has(s.blade)
-        const matched = !cx
-          ? metaCombos.find(
-              (c) =>
-                bladeFamilyKey(c.blade) === bladeFamilyKey(s.blade) &&
-                c.ratchet === s.ratchet &&
-                c.bit === s.bit,
-            )
-          : undefined
-        return {
-          blade: s.blade,
-          ratchet: s.ratchet,
-          bit: s.bit,
-          ...(s.assist ? { assist: s.assist } : {}),
-          score: 0,
-          source: matched ? 'meta' : 'custom',
-          ...(matched ? { meta: matched } : {}),
-        } satisfies BeyCombo
-      })
-  }, [slots, cxBlades])
+    return slots.filter(isComplete).map((s) => {
+      const cx = isCxSlot(s)
+      const name = displayName(s)
+      const matched = !cx
+        ? metaCombos.find(
+            (c) =>
+              bladeFamilyKey(c.blade) === bladeFamilyKey(name) && c.ratchet === s.ratchet && c.bit === s.bit,
+          )
+        : undefined
+      return {
+        blade: name,
+        ratchet: s.ratchet,
+        bit: s.bit,
+        ...(s.assist ? { assist: s.assist } : {}),
+        ...(cx ? { lockChip: s.lockChip, mainBlade: s.mainBlade } : {}),
+        score: 0,
+        source: matched ? 'meta' : 'custom',
+        ...(matched ? { meta: matched } : {}),
+      } satisfies BeyCombo
+    })
+  }, [slots])
 
   const completeCount = shareBeys.length
 
@@ -141,7 +217,7 @@ export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
             自組隊伍
           </h2>
           <p className="page-desc">
-            從你的庫存自由配三顆，同一隊伍內戰刃／固鎖／軸心／輔助刃不得重複（重塗變體算同一顆）。
+            從你的庫存自由配三顆，同一隊伍內零件不得重複（重塗變體算同一顆；CX 的紋章、主刃、輔助刃可拆開混搭）。
           </p>
         </div>
         <div className="build-actions">
@@ -164,17 +240,15 @@ export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
             key={i}
             slot={slot}
             index={i}
-            isCx={cxBlades.has(slot.blade)}
-            cxNames={cxNamesByBlade.get(slot.blade)}
+            cxNamesByBlade={cxNamesByBlade}
             bladeOpts={bladeOpts}
+            lockChipOpts={lockChipOpts}
+            mainBladeOpts={mainBladeOpts}
             ratchetOpts={ratchetOpts}
             bitOpts={bitOpts}
             assistOpts={assistOpts}
-            usedBladeFamilies={usedElsewhere(i, 'blade', true)}
-            usedRatchets={usedElsewhere(i, 'ratchet')}
-            usedBits={usedElsewhere(i, 'bit')}
-            usedAssists={usedElsewhere(i, 'assist')}
-            onSet={setSlotPart}
+            used={usedByOthers(i)}
+            onSet={handleSet}
             onClear={clearSlot}
           />
         ))}
@@ -190,16 +264,14 @@ export function BuildPage({ inventory, onGoInventory }: BuildPageProps) {
 interface SlotCardProps {
   slot: CustomSlot
   index: number
-  isCx: boolean
-  cxNames?: { lockChip: string; mainBlade: string }
+  cxNamesByBlade: Map<string, { lockChip: string; mainBlade: string }>
   bladeOpts: Option[]
+  lockChipOpts: Option[]
+  mainBladeOpts: Option[]
   ratchetOpts: Option[]
   bitOpts: Option[]
   assistOpts: Option[]
-  usedBladeFamilies: Set<string>
-  usedRatchets: Set<string>
-  usedBits: Set<string>
-  usedAssists: Set<string>
+  used: UsedSets
   onSet: (index: number, field: SlotField, value: string) => void
   onClear: (index: number) => void
 }
@@ -207,26 +279,26 @@ interface SlotCardProps {
 function SlotCard({
   slot,
   index,
-  isCx,
-  cxNames,
+  cxNamesByBlade,
   bladeOpts,
+  lockChipOpts,
+  mainBladeOpts,
   ratchetOpts,
   bitOpts,
   assistOpts,
-  usedBladeFamilies,
-  usedRatchets,
-  usedBits,
-  usedAssists,
+  used,
   onSet,
   onClear,
 }: SlotCardProps) {
+  const cx = isCxSlot(slot)
   const blade = bladeByName.get(slot.blade)
   const ratchet = ratchetById.get(slot.ratchet)
   const bit = bitById.get(slot.bit)
+  const name = displayName(slot)
+  const complete = isComplete(slot)
 
-  const complete = slot.blade && slot.ratchet && slot.bit && (!isCx || slot.assist)
   const matched =
-    complete && !isCx
+    complete && !cx
       ? metaCombos.find(
           (c) =>
             bladeFamilyKey(c.blade) === bladeFamilyKey(slot.blade) &&
@@ -235,10 +307,10 @@ function SlotCard({
         )
       : undefined
 
-  const filled = [slot.blade, slot.ratchet, slot.bit, isCx ? slot.assist : 'x'].filter(Boolean).length
+  const filled = !!(slot.blade || slot.lockChip || slot.mainBlade || slot.ratchet || slot.bit || slot.assist)
 
   return (
-    <article className="slot-card" data-complete={!!complete}>
+    <article className="slot-card" data-complete={complete}>
       <header className="slot-head">
         <span className="slot-no">{String(index + 1).padStart(2, '0')}</span>
         <div className="slot-preview">
@@ -250,18 +322,18 @@ function SlotCard({
             </span>
           )}
           <span className="slot-title">
-            {slot.blade || '（尚未選戰刃）'}
+            {name || '（尚未選戰刃）'}
             {slot.ratchet || slot.bit ? (
               <span className="slot-combo">
                 {' '}
                 {slot.ratchet}
                 {slot.bit}
-                {isCx && slot.assist ? `（輔助${slot.assist}）` : ''}
+                {cx && slot.assist ? `（輔助${slot.assist}）` : ''}
               </span>
             ) : null}
           </span>
         </div>
-        {filled > 0 && (
+        {filled && (
           <button type="button" className="slot-clear" onClick={() => onClear(index)} aria-label="清空此顆">
             ✕
           </button>
@@ -275,36 +347,46 @@ function SlotCard({
           badge={blade?.tier}
           badgeInherited={blade?.tierInherited}
           options={bladeOpts}
-          disabledKey={(o) => (o.value === slot.blade ? false : usedBladeFamilies.has(bladeFamilyKey(o.value)))}
+          disabledKey={(o) => {
+            if (o.value === slot.blade) return false
+            const info = cxNamesByBlade.get(o.value)
+            return info
+              ? used.lockChips.has(info.lockChip) || used.mainBlades.has(info.mainBlade)
+              : used.bladeFamilies.has(bladeFamilyKey(o.value))
+          }}
           onChange={(v) => onSet(index, 'blade', v)}
         />
-        {isCx && cxNames && (
+        {cx && (
           <>
-            <div className="part-readonly">
-              <span className="part-select-label">紋章</span>
-              <span className="part-readonly-value">{cxNames.lockChip}</span>
-            </div>
-            <div className="part-readonly">
-              <span className="part-select-label">主刃</span>
-              <span className="part-readonly-value">{cxNames.mainBlade}</span>
-            </div>
+            <PartSelect
+              label="紋章"
+              value={slot.lockChip}
+              options={lockChipOpts}
+              disabledKey={(o) => o.value !== slot.lockChip && used.lockChips.has(o.value)}
+              onChange={(v) => onSet(index, 'lockChip', v)}
+            />
+            <PartSelect
+              label="主刃"
+              value={slot.mainBlade}
+              options={mainBladeOpts}
+              disabledKey={(o) => o.value !== slot.mainBlade && used.mainBlades.has(o.value)}
+              onChange={(v) => onSet(index, 'mainBlade', v)}
+            />
+            <PartSelect
+              label="輔助刃"
+              value={slot.assist}
+              options={assistOpts}
+              disabledKey={(o) => o.value !== slot.assist && used.assists.has(o.value)}
+              onChange={(v) => onSet(index, 'assist', v)}
+            />
           </>
-        )}
-        {isCx && (
-          <PartSelect
-            label="輔助刃"
-            value={slot.assist}
-            options={assistOpts}
-            disabledKey={(o) => o.value !== slot.assist && usedAssists.has(o.value)}
-            onChange={(v) => onSet(index, 'assist', v)}
-          />
         )}
         <PartSelect
           label="固鎖"
           value={slot.ratchet}
           badge={ratchet?.tier}
           options={ratchetOpts}
-          disabledKey={(o) => o.value !== slot.ratchet && usedRatchets.has(o.value)}
+          disabledKey={(o) => o.value !== slot.ratchet && used.ratchets.has(o.value)}
           onChange={(v) => onSet(index, 'ratchet', v)}
         />
         <PartSelect
@@ -312,7 +394,7 @@ function SlotCard({
           value={slot.bit}
           badge={bit?.tier}
           options={bitOpts}
-          disabledKey={(o) => o.value !== slot.bit && usedBits.has(o.value)}
+          disabledKey={(o) => o.value !== slot.bit && used.bits.has(o.value)}
           onChange={(v) => onSet(index, 'bit', v)}
         />
       </div>

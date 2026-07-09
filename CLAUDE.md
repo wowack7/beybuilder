@@ -44,7 +44,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - `src/lib/score.ts` — 所有評分權重常數集中於此，檔頭標明「未抗辯假設」：權重是自訂近似值，調整只改這檔。**分數僅供引擎內部排序，UI 與分享圖一律不顯示數字**（用戶決策 2026-07-06：實戰關乎技術、來源站非官方，只展示勝場/奪冠率/階級等真實資料）
 - `src/lib/data.ts` — 唯一 import `src/data/*.json` 的模組，提供型別化資料與 Map 索引
 - `src/hooks/useInventory.ts` — 庫存狀態＋localStorage 持久化（key: `beybuilder.inventory.v1`）
-- `src/components/{deck,build,inventory,tier}/` — 四個分頁，各自帶同目錄 css；共用小元件在 `components/ui/`。deck＝天梯自動算最強三顆；**build＝自組隊伍**（`BuildPage`：從庫存手動下拉配三顆，遵守 deck 不重複規則，家族鍵去重、CX 才顯示輔助刃、命中實戰組合顯示真實數據；自組狀態存 `beybuilder.customdeck.v1`，`useCustomDeck` hook；自組允許自由重組零件，與引擎的「只用已知組合」互補）
+- `src/components/{deck,build,inventory,tier}/` — 四個分頁，各自帶同目錄 css；共用小元件在 `components/ui/`。deck＝天梯自動算最強三顆；**build＝自組隊伍**（`BuildPage`：從庫存手動下拉配三顆，命中實戰組合顯示真實數據；自組狀態存 `beybuilder.customdeck.v1`（含 lockChip/mainBlade），`useCustomDeck` hook 提供 `patchSlot`。**CX 五層可拆混**：紋章/主刃/輔助刃各自獨立下拉，(紋章|主刃) 對得到具名整刃就用該名（優先基底、非特別版）、否則為自訂混搭；去重以「實體零件」計——CX 看紋章/主刃/輔助刃/固鎖/軸心、非 CX 看戰刃家族鍵。自組允許自由重組，與引擎的「只用已知組合」互補）
 - 設計 tokens 在 `src/styles/tokens.css`（深色競技場風、螢光綠 accent），元件一律用 CSS 變數不硬編色碼
 
 ## Constraints
