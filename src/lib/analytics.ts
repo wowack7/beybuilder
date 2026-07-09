@@ -12,6 +12,7 @@ const GA_ID = 'G-NNJPTBMXKW'
 declare global {
   interface Window {
     dataLayer?: unknown[]
+    gtag?: (...args: unknown[]) => void
   }
 }
 
@@ -25,9 +26,13 @@ export function initAnalytics(): void {
   document.head.appendChild(script)
 
   window.dataLayer = window.dataLayer ?? []
-  const gtag = (...args: unknown[]) => {
-    window.dataLayer!.push(args)
+  // 必須 push「arguments 物件」（照官方 snippet），不能 push 陣列——
+  // gtag.js 只把 arguments 物件當指令處理，push 陣列會被忽略，
+  // 導致 config 從未生效、GA 完全不送資料（2026-07-07 修正的實際 bug）。
+  window.gtag = function gtag() {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer!.push(arguments)
   }
-  gtag('js', new Date())
-  gtag('config', GA_ID)
+  window.gtag('js', new Date())
+  window.gtag('config', GA_ID)
 }

@@ -45,3 +45,10 @@
 - 坑：`.bey-card` 與 `.alt-group` 都有 `overflow: hidden`，`position:absolute` 的 hover 彈出圖會被裁掉、實際看不到。第一版只驗「DOM 有 .hover-thumb 元素＋img 有 src」就宣稱完成——漏了真正 hover 的視覺，被用戶抓包。
 - 解：彈出層改 `position: fixed`＋JS 用 `getBoundingClientRect` 給座標（fixed 不受祖先 overflow:hidden 裁切，前提是祖先無 transform/filter/contain）。
 - 驗證教訓：hover/tooltip/彈窗這類「視覺行為」不能只查 DOM 存在，要**實際觸發 hover（派 mouseover 事件）並截圖**確認沒被裁、位置對。
+
+## L7 GA4 gtag：dataLayer 要 push arguments 物件、不能 push 陣列（2026-07-07）
+
+- tags: ga, analytics, gtag, verification
+- 坑：analytics.ts 當初寫 `const gtag=(...a)=>dataLayer.push(a)`——push 的是**陣列**。gtag.js 只把 **arguments 物件**當指令處理，陣列被忽略 → `config` 從未生效 → GA 完全不送資料、不設 `_ga` cookie。表面上 gtag.js 有載入（200）、`google_tag_data` 也在，很容易誤判成「裝好了」。
+- 解：照官方 snippet `window.gtag=function gtag(){window.dataLayer.push(arguments)}`（用具名 function＋`arguments`，非箭頭函式）。
+- 驗證教訓：GA「裝好」的證據不是 gtag.js 載入，而是 **`_ga` cookie 被設定**（純前端寫入、擋廣告也擋不掉）或 GA 即時報表有數。本次就是靠 `/(^|;)\s*_ga/.test(document.cookie)` 在正式站確認。標準報表另有 24–48h 延遲，只有「即時」是即時的。
