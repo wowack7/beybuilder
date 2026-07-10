@@ -51,4 +51,18 @@
 - tags: ga, analytics, gtag, verification
 - 坑：analytics.ts 當初寫 `const gtag=(...a)=>dataLayer.push(a)`——push 的是**陣列**。gtag.js 只把 **arguments 物件**當指令處理，陣列被忽略 → `config` 從未生效 → GA 完全不送資料、不設 `_ga` cookie。表面上 gtag.js 有載入（200）、`google_tag_data` 也在，很容易誤判成「裝好了」。
 - 解：照官方 snippet `window.gtag=function gtag(){window.dataLayer.push(arguments)}`（用具名 function＋`arguments`，非箭頭函式）。
+
+## L8 Vite 不改寫 `<meta content>` 與 `<a href>` 的 base（2026-07-10）
+
+- tags: vite, base, seo, github-pages
+- 坑：`base: '/beybuilder/'` 只作用在 `<link href>`／`<script src>`／`<img src>` 這類已知屬性。`<meta property="og:image" content="/og.png">` 與 `<a href="/tier/">` **不會**被補上 base，部署後解析到網域根 → og 縮圖 404、內鏈 404。
+- 解：SEO 相關的絕對位址（canonical、og:*、twitter:*、JSON-LD、骨架內鏈）一律寫完整 URL，來源集中在 `src/lib/site.ts`，並用 `site.test.ts` 讀 `index.html` 比對，漏改就紅燈。
+- 附帶坑：`vite preview` 的 `command` 也是 `'serve'`，只判 `command === 'build'` 會讓 preview 用 base `/` 起站——`/beybuilder/` 走 SPA fallback 回 200 的 HTML、但 assets 404，看起來「頁面開得起來卻整個壞掉」。要判 `isPreview`。
+
+## L9 驗收要對「乾淨重建」跑，否則 stale dist 會假裝通過（2026-07-10）
+
+- tags: verification, build, tsc, dist
+- 坑：`npm run build` 是 `tsc -b && vite build && ...`；新增的測試檔 import `node:fs` 但 `tsconfig.app.json` 的 `types` 沒有 `node`，`tsc -b` 直接失敗 → 後面兩步沒跑。但 `dist/` 還留著上一次的產物，curl 驗收全部「通過」（讀到的是舊檔），只有 og.png 大小與已刪除的 robots.txt 露出破綻。
+- 解：驗收前 `rm -rf dist node_modules/.tmp` 再 build，並檢查 build 的 exit code，不能只看最後幾行 log。
+- 解2：`tsconfig.app.json` 加 `"types": ["vite/client", "node"]`（`@types/node` 本來就是 devDep）。
 - 驗證教訓：GA「裝好」的證據不是 gtag.js 載入，而是 **`_ga` cookie 被設定**（純前端寫入、擋廣告也擋不掉）或 GA 即時報表有數。本次就是靠 `/(^|;)\s*_ga/.test(document.cookie)` 在正式站確認。標準報表另有 24–48h 延遲，只有「即時」是即時的。

@@ -1,14 +1,83 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant-TW">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#080b13" />
+
+    <title>戰鬥陀螺 Beyblade X 配裝模擬器｜天梯階級・最強 3on3 組合 - BeyBuilder X</title>
     <meta
       name="description"
-      content="Beyblade X 配裝模擬器：登錄你擁有的零件，自動算出最強 3on3 出戰組合，並附天梯階級與實戰組合排行。"
+      content="登錄你擁有的 Beyblade X 零件，依官方 3on3 規則自動算出最強出戰組合。收錄戰刃／固鎖／軸心天梯階級、實戰組合勝場排行，支援 phstudy 倉庫一鍵匯入。"
     />
-    <title>BeyBuilder X｜Beyblade X 配裝模擬器</title>
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <!--
+      canonical 與 og:image 必須寫絕對 URL：Vite 只改寫 <link href> / <script src> 這類屬性，
+      不會替 <meta content="/og.png"> 補上 base（/beybuilder/），寫相對路徑爬蟲與社群平台會解析錯。
+    -->
+    <link rel="canonical" href="https://wowack7.github.io/beybuilder/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="BeyBuilder X" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:url" content="https://wowack7.github.io/beybuilder/" />
+    <meta property="og:title" content="戰鬥陀螺 Beyblade X 配裝模擬器｜BeyBuilder X" />
+    <meta
+      property="og:description"
+      content="登錄你擁有的 Beyblade X 零件，依官方 3on3 規則自動算出最強出戰組合，並附天梯階級與實戰組合排行。"
+    />
+    <meta property="og:image" content="https://wowack7.github.io/beybuilder/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="BeyBuilder X — 戰鬥陀螺 Beyblade X 配裝模擬器" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="戰鬥陀螺 Beyblade X 配裝模擬器｜BeyBuilder X" />
+    <meta
+      name="twitter:description"
+      content="登錄你擁有的 Beyblade X 零件，依官方 3on3 規則自動算出最強出戰組合，並附天梯階級與實戰組合排行。"
+    />
+    <meta name="twitter:image" content="https://wowack7.github.io/beybuilder/og.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://wowack7.github.io/beybuilder/#website",
+            "url": "https://wowack7.github.io/beybuilder/",
+            "name": "BeyBuilder X",
+            "inLanguage": "zh-Hant-TW",
+            "description": "戰鬥陀螺 Beyblade X 配裝模擬器"
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://wowack7.github.io/beybuilder/#app",
+            "isPartOf": { "@id": "https://wowack7.github.io/beybuilder/#website" },
+            "url": "https://wowack7.github.io/beybuilder/",
+            "name": "BeyBuilder X",
+            "applicationCategory": "GameApplication",
+            "operatingSystem": "Web",
+            "inLanguage": "zh-Hant-TW",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TWD" },
+            "screenshot": "https://wowack7.github.io/beybuilder/og.png",
+            "description": "登錄你擁有的 Beyblade X 零件，依官方 3on3 規則自動算出最強出戰組合，並提供天梯階級與實戰組合排行。",
+            "featureList": [
+              "依官方 3on3 規則計算最強出戰組合",
+              "戰刃／固鎖／軸心天梯階級查詢",
+              "實戰組合勝場與奪冠率排行",
+              "自組隊伍與戰隊圖分享",
+              "phstudy 零件倉庫一鍵匯入"
+            ]
+          }
+        ]
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,7 +86,37 @@
     />
   </head>
   <body>
-    <div id="root"></div>
+    <!--
+      #root 內的靜態骨架：爬蟲不執行 JS，只讀得到這裡的文字。
+      footer 的天梯頁連結寫在 React JSX 裡，原始 HTML 看不到，/tier/ 會變成孤兒頁——
+      這段提供一條原始 HTML 就存在的內鏈，順帶當作 JS 載入前的畫面（原本整片空白）。
+      React createRoot() 掛載時會清空 #root，使用者不會看到殘留。
+      連結用絕對 URL：Vite 不改寫 <a href>，寫相對路徑在 /beybuilder/ 子路徑下會解析錯。
+    -->
+    <div id="root">
+      <div
+        style="
+          max-width: 52rem;
+          margin: 0 auto;
+          padding: 3rem 1.25rem;
+          font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
+          color: #e7ecf0;
+        "
+      >
+        <h1 style="font-size: 2rem; line-height: 1.25; margin: 0 0 0.75rem">
+          BEY<span style="color: #ff8900">BUILDER X</span>
+        </h1>
+        <p style="color: #9ea5ae; margin: 0 0 1rem">
+          戰鬥陀螺 Beyblade X 配裝模擬器——登錄你擁有的零件，依官方 3on3 規則自動算出最強出戰組合。
+        </p>
+        <p style="margin: 0 0 1.5rem">
+          <a href="https://wowack7.github.io/beybuilder/tier/" style="color: #ff8900"
+            >Beyblade X 天梯階級總表</a
+          >：查看全部戰刃／固鎖／軸心的階級評等與熱門實戰組合。
+        </p>
+        <p style="color: #6f757d; font-size: 0.9rem">載入中…（本站需要 JavaScript）</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

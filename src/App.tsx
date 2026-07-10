@@ -101,6 +101,13 @@ function App() {
       </main>
 
       <footer className="site-footer">
+        {/* 靜態天梯總表（build 時由 scripts/gen-seo.mjs 產出）。這條內鏈是爬蟲抵達該頁的唯一路徑，
+            移除等同讓它變成孤兒頁、長尾關鍵字失效。 */}
+        <p>
+          不用登錄零件也能查：
+          <a href={`${import.meta.env.BASE_URL}tier/`}>Beyblade X 天梯階級總表</a>
+          （全部戰刃／固鎖／軸心階級與熱門實戰組合）
+        </p>
         <p>
           天梯階級與實戰統計資料來自{' '}
           <a href="https://stan-yao.github.io/beyblade_x_tier/" target="_blank" rel="noreferrer">

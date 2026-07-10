@@ -62,7 +62,8 @@ export function toObjects(rows: string[][]): Row[] {
   })
 }
 
-const TIER_ORDER = ['X', 'S+', 'S', 'A+', 'A', 'B+', 'B', 'C+', 'C', 'D+', 'D', 'E+', 'E']
+/** 天梯階級由高到低（X 最高）。scripts/gen-seo.mjs 也 import 此常數，勿另建副本。 */
+export const TIER_ORDER = ['X', 'S+', 'S', 'A+', 'A', 'B+', 'B', 'C+', 'C', 'D+', 'D', 'E+', 'E']
 const tierRank = (t: string) => {
   const i = TIER_ORDER.indexOf(t)
   return i === -1 ? TIER_ORDER.length : i

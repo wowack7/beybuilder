@@ -9,7 +9,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 ## Commands
 
 - `npm run dev` — Vite dev server (port 5173)
-- `npm run build` — `tsc -b` type-check + production build
+- `npm run build` — `tsc -b` type-check + production build + `scripts/gen-seo.mjs`（產靜態天梯頁與 sitemap，見 SEO 段）
 - `npm test` — Vitest run once（單一測試檔：`vitest run src/lib/recommend.test.ts`；watch 用 `npm run test:watch`）
 - `npm run lint` — oxlint
 - `npm run data:update` — 重新抓取兩個資料來源並重新生成 `src/data/*.json`（需網路、Node ≥ 23.6：轉換邏輯在 `src/lib/transform.ts`，靠 Node 原生 TS import 與前端共用）。資料更新只走此路徑（本機 + 每週 GitHub Actions），**前端一律用內建資料、不在瀏覽器端抓取**（用戶決策 2026-07-06：公開站避免每個訪客各自觸發外部請求；原「更新資料」鈕與 localStorage 快取機制已移除）。坑點見 lessons.md
@@ -18,9 +18,22 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 
 - 正式站：https://wowack7.github.io/beybuilder/ （repo `wowack7/beybuilder`，public）
 - push main → `.github/workflows/deploy.yml` 自動 test+build+部署；`data-update.yml` 每週一 01:00 UTC 雲端更新資料並 commit（資料自動更新的正式源頭——本機 Claude 排程只負責 git pull 同步）
-- `vite.config.ts` base：build 時為 `/beybuilder/`、dev 維持 `/`
+- `vite.config.ts` base：build 與 `vite preview` 時為 `/beybuilder/`、dev 維持 `/`（preview 也要判 `isPreview`，否則 `/beybuilder/*` 被 SPA fallback 吃掉、assets 404，無法忠實模擬正式站）
 - **phstudy 匯入**：`src/lib/importPh.ts`＋映射表 `src/data/ph_map.json`（data:update 生成，含 hardcoded.json 聯名套組）。三種方式（`ImportPhBody`，全程瀏覽器端解析不上傳）：①**檔案匯入**（主要、手機也適用）——phstudy「下載」匯出 `{parts:[...]}` JSON 檔，本站選檔即解析；②書籤小工具跳轉 `#phimport=<base64>`（電腦一鍵）；③手動貼 JSON。三者最後都進 `parsePhInventory`（吃 partId，忽略其他欄位）
 - **GA4 分析**：`src/lib/analytics.ts`（gtag.js，只做頁面瀏覽），`main.tsx` 開頭呼叫 `initAnalytics()`。僅 `import.meta.env.PROD` 才載入——本機 dev 不追蹤。Measurement ID `G-NNJPTBMXKW` 硬編於該檔（公開值）
+
+## SEO
+
+本站是 client-rendered SPA，爬蟲抓首頁只看得到歡迎頁文案（庫存空的），沒有任何零件名稱。因此：
+
+- **`src/lib/site.ts`** — 站台位址單一來源（`SITE_URL`/`BASE_PATH`/`TIER_PATH`/`OG_IMAGE_URL`）。`index.html` 與 `vite.config.ts` 無法 import 它、只能寫死字面量，**`src/lib/site.test.ts` 會實際讀這兩個檔比對**，換網域漏改一處就紅燈（canonical/og:image/sitemap 指錯不會有 runtime 錯誤，只會靜默掉出搜尋結果）
+- **`src/lib/palette.ts`** — tokens 的程式端鏡像（oklch 三元組＋`oklchToHex`）。og 縮圖與靜態天梯頁吃不到 CSS 變數，色碼一律由此**算出**而非手打；`palette.test.ts` 比對它與 `tokens.css`
+- **`scripts/gen-seo.mjs`** — 串在 `npm run build` 之後，產 `dist/tier/index.html`（全部戰刃/固鎖/軸心/輔助刃階級＋Top 60 實戰組合，長尾關鍵字的唯一來源）與 `dist/sitemap.xml`。純函式有 `scripts/gen-seo.test.mjs` 覆蓋（階級排序、不外洩 score、HTML escape、缺 assists 不炸 build）
+- **`scripts/gen-og.mjs`** — 一次性產 `public/og.png`（1200×630 分享縮圖），改視覺才重跑；產物已 commit
+- **`index.html` 的 `#root` 靜態骨架** — 爬蟲唯一能讀到的 `/tier/` 內鏈（footer 那條在 React JSX 裡，原始 HTML 沒有），順帶當 JS 載入前的畫面。React `createRoot()` 掛載時會清空，實測 CLS = 0。連結用**絕對** URL：Vite 不改寫 `<a href>`，相對路徑在子路徑下會解析錯
+- 同理 `<meta content="...">` 也不被 Vite 改寫 base，canonical/og:image 一律寫絕對 URL
+- **沒有 robots.txt**：專案站的 `/beybuilder/robots.txt` 爬蟲不讀（只讀網域根 `wowack7.github.io/robots.txt`，非本 repo 所有，實測 404＝允許全抓）。sitemap 靠 Search Console 手動提交
+- **未完成**：Search Console 尚未驗證／未提交 sitemap（需帳號擁有者操作）。在那之前 `/tier/` 只能靠首頁內鏈被爬到
 
 ## Data pipeline（先懂這個再動資料相關程式）
 
@@ -31,7 +44,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 
 要點：
 
-- 階級尺度為 `X > S+ > S > A+ > … > E`（X 最高）；順序定義在 `scripts/fetch-data.mjs` 與 `src/lib/score.ts` 兩處的 `TIER_ORDER`/`TIER_VALUE`，改動需同步
+- 階級尺度為 `X > S+ > S > A+ > … > E`（X 最高）。順序的**唯一來源**是 `src/lib/transform.ts` 的 `TIER_ORDER`（`scripts/fetch-data.mjs`、`scripts/gen-seo.mjs` 都 import 它，勿再複製）；`src/lib/score.ts` 的 `TIER_VALUE` 是同一尺度的分數映射，改動需與 `TIER_ORDER` 同步
 - 產品（`Product`）＝一件商品：blade 名稱＋原裝 ratchet＋原裝 bit；blade 以「名稱」為身分聚合，變體（顏色/特別版）無階級時從同家族基底名繼承（`tierInherited: true`）
 - **blade 家族鍵**（重塗/特別版視為同零件；(左)/(右)、(…型) 保留為不同零件）定義在 `src/lib/family.ts`，`scripts/fetch-data.mjs` 的 `baseName()` 是同規則的複本——改其中一邊必須同步另一邊。實戰組合匹配、deck 衝突判定、天梯「可組」判定都走家族鍵
 - **CX 是五層結構**（紋章〔顯示名，內部欄位 lockChip〕＋主刃＋輔助刃＋固鎖＋軸心）：stan-yao 以「整刃」評級與記錄實戰組合，故 blade 仍是評分單位；輔助刃是正式零件（`parts.json.assists`，單字母 id），站方組合可指定輔助刃（沒擁有就不可組），實戰組合帶入產品原裝輔助刃。鎖片/主刃名稱由 phstudy 反查（`products.json.lockChip/mainBlade`，僅顯示與重複判定用）。deck 衝突判定含輔助刃/鎖片/主刃同名（未抗辯假設：官方「同零件不重複」的延伸解讀）。**紋章/主刃真零件圖**：phstudy `images/app/{LockChip,MainBlade}/<id>.png`（無 CORS→`fetch-images.mjs` 自架），名稱→URL 由 `transform.ts` 的 `buildCxPartImages` 產出 `cx_part_img.json`，前端 `data.ts` 的 `cxPartImg` 僅收錄已自架者（值為同源本地路徑，分享卡 canvas 不污染）；自訂混搭（湊不出具名整刃）時 build slot 與分享卡並排顯示這兩張真零件圖

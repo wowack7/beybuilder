@@ -4,7 +4,8 @@
     "target": "es2023",
     "lib": ["ES2023", "DOM"],
     "module": "esnext",
-    "types": ["vite/client"],
+    /* node：site.test.ts / palette.test.ts 需讀 index.html、tokens.css 比對常數是否同步 */
+    "types": ["vite/client", "node"],
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
     "strict": true,
