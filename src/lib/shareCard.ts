@@ -4,6 +4,10 @@
  */
 import type { BeyCombo, DeckResult } from '../types'
 import { bladeByName, cxPartImg, imgUrl } from './data'
+import { SITE_URL } from './site'
+
+/** 分享卡右下角網域字樣，由 SITE_URL 去掉協定與結尾斜線（單一來源，換域自動跟著變） */
+const SITE_LABEL = SITE_URL.replace(/^https?:\/\//, '').replace(/\/$/, '')
 
 const W = 1200
 const H = 675
@@ -276,7 +280,7 @@ export async function renderDeckCard(deck: DeckResult, opts: DeckCardOptions = {
   ctx.textAlign = 'right'
   ctx.fillStyle = C.dim
   ctx.font = `600 18px ${DISPLAY}`
-  ctx.fillText('wowack7.github.io/beybuilder', W - 48, H - 32)
+  ctx.fillText(SITE_LABEL, W - 48, H - 32)
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('圖片輸出失敗'))), 'image/png')

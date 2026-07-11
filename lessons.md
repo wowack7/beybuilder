@@ -58,6 +58,7 @@
 - 坑：`base: '/beybuilder/'` 只作用在 `<link href>`／`<script src>`／`<img src>` 這類已知屬性。`<meta property="og:image" content="/og.png">` 與 `<a href="/tier/">` **不會**被補上 base，部署後解析到網域根 → og 縮圖 404、內鏈 404。
 - 解：SEO 相關的絕對位址（canonical、og:*、twitter:*、JSON-LD、骨架內鏈）一律寫完整 URL，來源集中在 `src/lib/site.ts`，並用 `site.test.ts` 讀 `index.html` 比對，漏改就紅燈。
 - 附帶坑：`vite preview` 的 `command` 也是 `'serve'`，只判 `command === 'build'` 會讓 preview 用 base `/` 起站——`/beybuilder/` 走 SPA fallback 回 200 的 HTML、但 assets 404，看起來「頁面開得起來卻整個壞掉」。要判 `isPreview`。
+- 更新（2026-07-11 換子網域 `beybuilder.5-seven.dog`）：base 改回 `/`，isPreview 分支已移除、此附帶坑不再適用；但「絕對 URL」與「Vite 不改寫 `<meta content>`」兩條仍成立。換域一律改 `src/lib/site.ts` 的 `SITE_URL`，`site.test.ts` 守 index.html/vite.config.ts 同步。
 
 ## L9 驗收要對「乾淨重建」跑，否則 stale dist 會假裝通過（2026-07-10）
 

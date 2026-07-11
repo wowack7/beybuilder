@@ -60,7 +60,10 @@ describe('index.html 與 site.ts 一致', () => {
 })
 
 describe('vite.config.ts 與 site.ts 一致', () => {
-  test('build base 等於 BASE_PATH', () => {
-    expect(viteConfig).toContain(`'${BASE_PATH}'`)
+  test('base 設定值等於 BASE_PATH', () => {
+    // 解析實際的 `base: '...'` 那行來比對，而非 toContain（BASE_PATH 為 '/' 時
+    // toContain 會被註解裡的 '/' 誤中而變成永遠通過的空洞守門）。
+    const m = viteConfig.match(/base:\s*'([^']*)'/)
+    expect(m?.[1]).toBe(BASE_PATH)
   })
 })

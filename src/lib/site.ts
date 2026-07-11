@@ -11,10 +11,10 @@
  */
 
 /** 正式站根位址，結尾必須有斜線 */
-export const SITE_URL = 'https://wowack7.github.io/beybuilder/'
+export const SITE_URL = 'https://beybuilder.5-seven.dog/'
 
-/** GitHub Pages 專案站的子路徑（= vite.config.ts 的 build base） */
-export const BASE_PATH = '/beybuilder/'
+/** 部署路徑（= vite.config.ts 的 base）。站台在子網域根，故為 '/' */
+export const BASE_PATH = '/'
 
 /** 靜態天梯總表（由 scripts/gen-seo.mjs 於 build 後產出） */
 export const TIER_PATH = 'tier/'

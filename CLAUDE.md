@@ -16,9 +16,9 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 
 ## Deploy（GitHub Pages）
 
-- 正式站：https://wowack7.github.io/beybuilder/ （repo `wowack7/beybuilder`，public）
+- 正式站：https://beybuilder.5-seven.dog/ （自訂子網域，DNS 為 GoDaddy 的 CNAME `beybuilder` → `wowack7.github.io`；`public/CNAME` 告訴 GitHub 掛此域，舊 `wowack7.github.io/beybuilder/` 由 GitHub 自動 301 過來）。repo `wowack7/beybuilder`，public
 - push main → `.github/workflows/deploy.yml` 自動 test+build+部署；`data-update.yml` 每週一 01:00 UTC 雲端更新資料並 commit（資料自動更新的正式源頭——本機 Claude 排程只負責 git pull 同步）
-- `vite.config.ts` base：build 與 `vite preview` 時為 `/beybuilder/`、dev 維持 `/`（preview 也要判 `isPreview`，否則 `/beybuilder/*` 被 SPA fallback 吃掉、assets 404，無法忠實模擬正式站）
+- `vite.config.ts` base 一律 `/`（站台在子網域根）。網址／base 單一來源在 `src/lib/site.ts`（`SITE_URL`/`BASE_PATH`），`site.test.ts` 讀 `index.html`、`vite.config.ts` 比對，換域漏改就紅燈
 - **phstudy 匯入**：`src/lib/importPh.ts`＋映射表 `src/data/ph_map.json`（data:update 生成，含 hardcoded.json 聯名套組）。三種方式（`ImportPhBody`，全程瀏覽器端解析不上傳）：①**檔案匯入**（主要、手機也適用）——phstudy「下載」匯出 `{parts:[...]}` JSON 檔，本站選檔即解析；②書籤小工具跳轉 `#phimport=<base64>`（電腦一鍵）；③手動貼 JSON。三者最後都進 `parsePhInventory`（吃 partId，忽略其他欄位）
 - **GA4 分析**：`src/lib/analytics.ts`（gtag.js，只做頁面瀏覽），`main.tsx` 開頭呼叫 `initAnalytics()`。僅 `import.meta.env.PROD` 才載入——本機 dev 不追蹤。Measurement ID `G-NNJPTBMXKW` 硬編於該檔（公開值）
 
@@ -32,7 +32,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **`scripts/gen-og.mjs`** — 一次性產 `public/og.png`（1200×630 分享縮圖），改視覺才重跑；產物已 commit
 - **`index.html` 的 `#root` 靜態骨架** — 爬蟲唯一能讀到的 `/tier/` 內鏈（footer 那條在 React JSX 裡，原始 HTML 沒有），順帶當 JS 載入前的畫面。React `createRoot()` 掛載時會清空，實測 CLS = 0。連結用**絕對** URL：Vite 不改寫 `<a href>`，相對路徑在子路徑下會解析錯
 - 同理 `<meta content="...">` 也不被 Vite 改寫 base，canonical/og:image 一律寫絕對 URL
-- **沒有 robots.txt**：專案站的 `/beybuilder/robots.txt` 爬蟲不讀（只讀網域根 `wowack7.github.io/robots.txt`，非本 repo 所有，實測 404＝允許全抓）。sitemap 靠 Search Console 手動提交
+- **robots.txt**：站台現在在子網域根 `beybuilder.5-seven.dog/`，爬蟲會讀 `beybuilder.5-seven.dog/robots.txt`——目前沒放（404＝允許全抓，可接受）；若日後要放 sitemap 指引就丟 `public/robots.txt`。sitemap 仍靠 Search Console 手動提交
 - **未完成**：Search Console 尚未驗證／未提交 sitemap（需帳號擁有者操作）。在那之前 `/tier/` 只能靠首頁內鏈被爬到
 
 ## Data pipeline（先懂這個再動資料相關程式）
