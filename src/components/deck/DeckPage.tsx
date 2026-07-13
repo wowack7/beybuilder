@@ -201,9 +201,11 @@ export function DeckPage({ inventory, onGoInventory, onMerge }: DeckPageProps) {
         </section>
       )}
 
-      <p className="score-note">
-        組合僅取自實戰組合（天梯站賽事統計）與站方推薦（建議配置），不自由重組零件；排序依實戰與階級的自訂權重，不顯示分數。實際勝負仍看技術，資料轉錄自第三方站點，僅供參考。
-      </p>
+      <ul className="score-note">
+        <li>組合僅取自實戰組合（天梯站賽事統計）與站方推薦（建議配置），不自由重組零件。</li>
+        <li>排序依實戰與階級的自訂權重，不顯示分數。</li>
+        <li>實際勝負仍看技術，資料轉錄自第三方站點，僅供參考。</li>
+      </ul>
     </section>
   )
 }

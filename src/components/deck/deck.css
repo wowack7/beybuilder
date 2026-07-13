@@ -267,10 +267,16 @@
 }
 
 .score-note {
-  margin-top: var(--space-6);
+  margin: var(--space-6) 0 0;
+  padding-left: 1.3em;
   font-size: 0.8rem;
   color: var(--text-faint);
   max-width: 72ch;
+  list-style: disc;
+}
+
+.score-note li {
+  margin-top: 0.3em;
 }
 
 /* ── Onboarding（空庫存導覽） ─────────────── */
