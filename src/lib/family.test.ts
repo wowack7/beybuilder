@@ -31,6 +31,14 @@ describe('bladeFamilyKey', () => {
     expect(bladeFamilyKey('飛龍刀刃(連擊型)')).toBe('飛龍刀刃(連擊型)')
   })
 
+  test('strips edition markers even when written in parentheses (世足 = cosmetic World Cup edition)', () => {
+    expect(bladeFamilyKey('武士星劍(世足)')).toBe('武士星劍')
+    // 賽事版與基底同家族，才能共用基底的實戰組合
+    expect(bladeFamilyKey('武士星劍(世足)')).toBe(bladeFamilyKey('武士星劍'))
+    // 括號版本詞不可誤傷功能標記
+    expect(bladeFamilyKey('蒼穹龍騎士(左)')).toBe('蒼穹龍騎士(左)')
+  })
+
   test('leaves plain names untouched', () => {
     expect(bladeFamilyKey('魔導神杖')).toBe('魔導神杖')
     expect(bladeFamilyKey('A賞飛龍')).toBe('A賞飛龍')

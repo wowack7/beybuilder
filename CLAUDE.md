@@ -46,7 +46,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 
 - 階級尺度為 `X > S+ > S > A+ > … > E`（X 最高）。順序的**唯一來源**是 `src/lib/transform.ts` 的 `TIER_ORDER`（`scripts/fetch-data.mjs`、`scripts/gen-seo.mjs` 都 import 它，勿再複製）；`src/lib/score.ts` 的 `TIER_VALUE` 是同一尺度的分數映射，改動需與 `TIER_ORDER` 同步
 - 產品（`Product`）＝一件商品：blade 名稱＋原裝 ratchet＋原裝 bit；blade 以「名稱」為身分聚合，變體（顏色/特別版）無階級時從同家族基底名繼承（`tierInherited: true`）
-- **blade 家族鍵**（重塗/特別版視為同零件；(左)/(右)、(…型) 保留為不同零件）定義在 `src/lib/family.ts`，`scripts/fetch-data.mjs` 的 `baseName()` 是同規則的複本——改其中一邊必須同步另一邊。實戰組合匹配、deck 衝突判定、天梯「可組」判定都走家族鍵
+- **blade 家族鍵**（重塗/版本/賽事版如(世足)視為同零件；(左)/(右)、(…型) 保留為不同零件）唯一定義在 `src/lib/family.ts`，前端與資料管線（`transform.ts` 直接 import，非複本）共用。實戰組合匹配、deck 衝突判定、天梯「可組」判定都走家族鍵。顏色詞在 `COLOR_WORDS`、版本/賽事詞在 `EDITION_WORDS`（兩者在空白尾段或括號內都會被剝除；功能標記不在表中故保留），新變體漏配就到不了基底組合，`family.test.ts` 覆蓋
 - **CX 是五層結構**（紋章〔顯示名，內部欄位 lockChip〕＋主刃＋輔助刃＋固鎖＋軸心）：stan-yao 以「整刃」評級與記錄實戰組合，故 blade 仍是評分單位；輔助刃是正式零件（`parts.json.assists`，單字母 id），站方組合可指定輔助刃（沒擁有就不可組），實戰組合帶入產品原裝輔助刃。鎖片/主刃名稱由 phstudy 反查（`products.json.lockChip/mainBlade`，僅顯示與重複判定用）。deck 衝突判定含輔助刃/鎖片/主刃同名（未抗辯假設：官方「同零件不重複」的延伸解讀）。**紋章/主刃真零件圖**：phstudy `images/app/{LockChip,MainBlade}/<id>.png`（無 CORS→`fetch-images.mjs` 自架），名稱→URL 由 `transform.ts` 的 `buildCxPartImages` 產出 `cx_part_img.json`，前端 `data.ts` 的 `cxPartImg` 僅收錄已自架者（值為同源本地路徑，分享卡 canvas 不污染）；自訂混搭（湊不出具名整刃）時 build slot 與分享卡並排顯示這兩張真零件圖
 - CSV 欄名是中文帶英文括號（如 `型號 (ID)`），來源表頭有一欄拼寫缺右括號（`原裝輔助戰刃 (Assist Blade`），程式兩種都接
 

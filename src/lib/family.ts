@@ -24,17 +24,22 @@ const COLOR_WORDS = new Set([
   '闇黑',
 ])
 
-/** 版本/獎賞尾詞（以空白分隔的最後一段完全等於其一才剝除） */
-const EDITION_WORDS = new Set(['特別版', '透明版', '異色版', '水籃版', '火紅版', '籤王'])
+/**
+ * 版本/獎賞/賽事詞：純外觀變體，同模具，功能等價於基底。
+ * 可出現在空白分隔尾段（英仙幽冥 特別版）或括號內（武士星劍(世足)）。
+ * ⚠️ 未抗辯假設：世足＝世界盃紀念版，視為同模外觀變體（與顏色同級）。
+ */
+const EDITION_WORDS = new Set(['特別版', '透明版', '異色版', '水籃版', '火紅版', '籤王', '世足'])
 
 export function bladeFamilyKey(name: string): string {
   let key = name.trim()
   let changed = true
   while (changed) {
     changed = false
-    // 剝除結尾的顏色括號：魔導神杖(綠) → 魔導神杖
+    // 剝除結尾的顏色/版本括號：魔導神杖(綠) → 魔導神杖、武士星劍(世足) → 武士星劍
+    //（功能標記如 (左)/(…型) 不在兩表中，保留）
     const paren = key.match(/^(.*?)[（(]([^()（）]+)[)）]$/)
-    if (paren && COLOR_WORDS.has(paren[2])) {
+    if (paren && (COLOR_WORDS.has(paren[2]) || EDITION_WORDS.has(paren[2]))) {
       key = paren[1].trim()
       changed = true
       continue
