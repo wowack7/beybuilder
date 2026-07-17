@@ -57,6 +57,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - `src/lib/score.ts` — 所有評分權重常數集中於此，檔頭標明「未抗辯假設」：權重是自訂近似值，調整只改這檔。**分數僅供引擎內部排序，UI 與分享圖一律不顯示數字**（用戶決策 2026-07-06：實戰關乎技術、來源站非官方，只展示勝場/奪冠率/階級等真實資料）
 - `src/lib/data.ts` — 唯一 import `src/data/*.json` 的模組，提供型別化資料與 Map 索引
 - `src/hooks/useInventory.ts` — 庫存狀態＋localStorage 持久化（key: `beybuilder.inventory.v1`）
+- **計分分頁（`src/components/score/`）** — 比賽裁判工具，橫向全屏（`App.tsx` 於 `tab==='score'` 提前 return、隱藏站頭/footer）。純規則在 `src/lib/scoring.ts`（官方 Beyblade X：Spin=1/Burst=2/Over=2/Xtreme=3、先到 4 分勝、勝後鎖定；`FINISH_POINTS` 為分值單一來源，UI 按鈕與加分都吃它）＋ `scoring.test.ts`；`useMatch`（localStorage `beybuilder.match.v1`，載入時 `sanitizeLog` 擋壞資料）、`useCountdown`（3-2-1-Go 發射倒數）、`sound.ts`（Web Audio 提示音，無外部檔）。直向顯示「請打橫」提示
 - `src/components/{deck,build,inventory,tier}/` — 四個分頁，各自帶同目錄 css；共用小元件在 `components/ui/`。deck＝天梯自動算最強三顆；**build＝自組隊伍**（`BuildPage`：從庫存手動下拉配三顆，命中實戰組合顯示真實數據；自組狀態存 `beybuilder.customdeck.v1`（含 lockChip/mainBlade），`useCustomDeck` hook 提供 `patchSlot`。**CX 五層可拆混**：紋章/主刃/輔助刃各自獨立下拉，(紋章|主刃) 對得到具名整刃就用該名（優先基底、非特別版）、否則為自訂混搭；去重以「實體零件」計——CX 看紋章/主刃/輔助刃/固鎖/軸心、非 CX 看戰刃家族鍵。自組允許自由重組，與引擎的「只用已知組合」互補）
 - 設計 tokens 在 `src/styles/tokens.css`（深色競技場風、螢光綠 accent），元件一律用 CSS 變數不硬編色碼
 

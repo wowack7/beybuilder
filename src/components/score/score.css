@@ -1,0 +1,440 @@
+/* 計分頁：全屏裁判計分板。橫向左右分屏、直向上下堆疊並提示打橫。 */
+.score-root {
+  --team-a: oklch(64% 0.17 245);
+  --team-a-glow: oklch(64% 0.17 245 / 0.22);
+  --team-b: oklch(60% 0.2 25);
+  --team-b-glow: oklch(60% 0.2 25 / 0.22);
+
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.score-exit {
+  position: absolute;
+  top: max(0.5rem, env(safe-area-inset-top));
+  left: max(0.5rem, env(safe-area-inset-left));
+  z-index: 4;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--bg-overlay);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.score-exit:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.score-arena {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+
+/* ── 兩側計分面板 ─────────────── */
+.side-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.4rem, 2vh, 1rem);
+  padding: clamp(0.5rem, 2vh, 1.25rem) clamp(0.5rem, 2vw, 1.5rem);
+  position: relative;
+  transition: background var(--duration-normal) var(--ease-out);
+}
+.side-panel[data-side='a'] {
+  background: radial-gradient(120% 90% at 50% 0%, var(--team-a-glow), transparent 60%);
+}
+.side-panel[data-side='b'] {
+  background: radial-gradient(120% 90% at 50% 0%, var(--team-b-glow), transparent 60%);
+}
+.side-panel[data-won='true'] {
+  background: radial-gradient(120% 100% at 50% 50%, var(--team-a-glow), transparent 70%);
+}
+
+.side-name {
+  max-width: 100%;
+  padding: 0.15em 0.7em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--bg-overlay);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(0.9rem, 3.4vh, 1.3rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.side-panel[data-side='a'] .side-name {
+  border-color: var(--team-a);
+}
+.side-panel[data-side='b'] .side-name {
+  border-color: var(--team-b);
+}
+
+.side-score {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(3.5rem, 22vh, 9rem);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 30px currentColor;
+}
+.side-panel[data-side='a'] .side-score {
+  color: var(--team-a);
+}
+.side-panel[data-side='b'] .side-score {
+  color: var(--team-b);
+}
+
+.finish-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(0.35rem, 1.5vh, 0.7rem);
+  width: min(100%, 22rem);
+}
+
+.finish-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  padding: clamp(0.5rem, 2.2vh, 0.9rem) 0.5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md, 0.6rem);
+  background: linear-gradient(160deg, var(--bg-overlay), var(--bg-raised));
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(0.95rem, 3vh, 1.2rem);
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+.finish-btn:active {
+  transform: scale(0.94);
+}
+.finish-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.finish-btn[data-pts='2'] {
+  border-color: color-mix(in oklch, var(--accent), var(--line-strong));
+}
+.finish-btn[data-pts='3'] {
+  border-color: var(--accent);
+  background: linear-gradient(160deg, var(--accent-ink), var(--bg-raised));
+}
+.finish-pts {
+  font-size: 0.85em;
+  color: var(--accent);
+}
+.finish-btn[data-pts='3'] .finish-pts {
+  color: var(--accent);
+}
+
+/* ── 中央控制欄 ─────────────── */
+.score-center {
+  flex: 0 0 clamp(7rem, 24vw, 12rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.4rem, 1.5vh, 0.8rem);
+  padding: clamp(0.6rem, 2vh, 1.2rem) 0.4rem;
+  border-inline: 1px solid var(--line);
+  background: var(--bg-raised);
+  min-width: 0;
+}
+
+.launch-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em;
+  width: 100%;
+  padding: clamp(0.5rem, 2.4vh, 1rem) 0.4rem;
+  border: none;
+  border-radius: var(--radius-md, 0.6rem);
+  background: linear-gradient(150deg, var(--accent), var(--accent-deep));
+  color: var(--accent-ink);
+  font-family: var(--font-display);
+  cursor: pointer;
+  box-shadow: 0 6px 20px var(--accent-glow);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.launch-btn:active {
+  transform: scale(0.96);
+}
+.launch-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.launch-title {
+  font-weight: 900;
+  font-size: clamp(1rem, 3.4vh, 1.5rem);
+}
+.launch-sub {
+  font-size: 0.72rem;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.center-actions {
+  display: flex;
+  gap: 0.4rem;
+  width: 100%;
+}
+.ctl-btn {
+  flex: 1;
+  padding: 0.4em 0.3em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm, 0.4rem);
+  background: var(--bg-overlay);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ctl-btn:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+.ctl-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.ctl-btn.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+.battle-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+}
+.battle-log li {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm, 0.4rem);
+  background: var(--bg-overlay);
+  border-left: 3px solid var(--line-strong);
+}
+.battle-log li[data-side='a'] {
+  border-left-color: var(--team-a);
+}
+.battle-log li[data-side='b'] {
+  border-left-color: var(--team-b);
+}
+.log-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-dim);
+}
+.log-pts {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--accent);
+}
+.log-empty {
+  color: var(--text-faint);
+  text-align: center;
+  background: transparent !important;
+  border-left: none !important;
+}
+
+/* ── 發射倒數覆蓋層 ─────────────── */
+.countdown-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  background: oklch(8% 0.02 265 / 0.72);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+.countdown-num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(6rem, 40vh, 16rem);
+  line-height: 1;
+  color: var(--text);
+  text-shadow: 0 0 40px var(--accent-glow);
+  animation: count-pop 0.9s var(--ease-out) both;
+}
+.countdown-num[data-go='true'] {
+  color: var(--accent);
+  font-size: clamp(5rem, 34vh, 14rem);
+  text-shadow: 0 0 60px var(--accent);
+}
+@keyframes count-pop {
+  0% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── 勝利覆蓋層 ─────────────── */
+.winner-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  background: oklch(8% 0.02 265 / 0.8);
+  backdrop-filter: blur(3px);
+  animation: fade-in var(--duration-normal) var(--ease-out) both;
+}
+.winner-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: clamp(1rem, 4vh, 2rem) clamp(1.5rem, 6vw, 3rem);
+  border-radius: var(--radius-lg, 1rem);
+  background: var(--bg-raised);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 20px 60px oklch(0% 0 0 / 0.5);
+  text-align: center;
+}
+.winner-card[data-side='a'] {
+  border-color: var(--team-a);
+}
+.winner-card[data-side='b'] {
+  border-color: var(--team-b);
+}
+.winner-trophy {
+  font-size: clamp(2.5rem, 12vh, 4rem);
+}
+.winner-name {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.4rem, 6vh, 2.4rem);
+}
+.winner-score {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.1rem, 4vh, 1.6rem);
+  color: var(--text-dim);
+}
+.winner-score span {
+  color: var(--text-faint);
+  margin: 0 0.3em;
+}
+.winner-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+.winner-actions .ctl-btn {
+  flex: 0 0 auto;
+  padding: 0.5em 1.2em;
+  font-size: 0.95rem;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── 打橫提示（直向時顯示）─────────────── */
+.rotate-hint {
+  display: none;
+}
+@media (orientation: portrait) {
+  .score-arena {
+    flex-direction: column;
+  }
+  .score-center {
+    flex-basis: auto;
+    border-inline: none;
+    border-block: 1px solid var(--line);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .score-center .battle-log {
+    flex-direction: row;
+    flex: 1 1 100%;
+    overflow-x: auto;
+  }
+  .rotate-hint {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    background: oklch(8% 0.02 265 / 0.92);
+    color: var(--text-dim);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+  }
+  .rotate-icon {
+    font-size: 3rem;
+    color: var(--accent);
+    animation: rotate-nudge 1.6s ease-in-out infinite;
+  }
+}
+@keyframes rotate-nudge {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(90deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .countdown-num,
+  .rotate-icon {
+    animation: none;
+  }
+}

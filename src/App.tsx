@@ -4,6 +4,7 @@ import { DeckPage } from './components/deck/DeckPage'
 import { ImportPhBody } from './components/inventory/ImportPh'
 import { performPhImport } from './components/inventory/importFlow'
 import { InventoryPage } from './components/inventory/InventoryPage'
+import { ScorePage } from './components/score/ScorePage'
 import { TierPage } from './components/tier/TierPage'
 import { Modal } from './components/ui/Modal'
 import { useInventory } from './hooks/useInventory'
@@ -15,13 +16,14 @@ function formatDataDate(iso: string): string {
   return Number.isNaN(d.getTime()) ? iso : `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
 }
 
-type Tab = 'deck' | 'build' | 'inventory' | 'tier'
+type Tab = 'deck' | 'build' | 'inventory' | 'tier' | 'score'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'deck', label: '最強戰隊' },
   { id: 'build', label: '自組隊伍' },
   { id: 'inventory', label: '零件庫' },
   { id: 'tier', label: '天梯' },
+  { id: 'score', label: '計分' },
 ]
 
 function App() {
@@ -42,6 +44,11 @@ function App() {
       window.alert(`匯入失敗：${error instanceof Error ? error.message : '未知錯誤'}`)
     }
   }, [mergeInventory])
+
+  // 計分頁為橫向全屏裁判工具：隱藏站頭/footer，佔滿視窗
+  if (tab === 'score') {
+    return <ScorePage onExit={() => setTab('deck')} />
+  }
 
   return (
     <>
