@@ -22,7 +22,8 @@ export const FINISH_POINTS: Record<Finish, number> = {
 /** 先到此分數者勝 */
 export const WIN_POINTS = 4
 
-export const DEFAULT_NAMES: Record<Side, string> = { a: '藍方', b: '紅方' }
+// 同色模式（不做紅藍隊色）→ 預設名也中性化，依橫向左右分屏取名
+export const DEFAULT_NAMES: Record<Side, string> = { a: '左方', b: '右方' }
 
 export interface LogEntry {
   side: Side

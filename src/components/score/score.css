@@ -1,9 +1,11 @@
 /* 計分頁：全屏裁判計分板。橫向左右分屏、直向上下堆疊並提示打橫。 */
 .score-root {
-  --team-a: oklch(64% 0.17 245);
-  --team-a-glow: oklch(64% 0.17 245 / 0.22);
-  --team-b: oklch(60% 0.2 25);
-  --team-b-glow: oklch(60% 0.2 25 / 0.22);
+  /* 同色模式（用戶決策 2026-07-17，參考 beyscore x）：兩側同用主站橘 accent、不做紅藍隊色。
+     保留 --team-a/--team-b 變數層是為了讓 side-name/score/log/winner 等處一次跟著換。 */
+  --team-a: var(--accent);
+  --team-a-glow: var(--accent-glow);
+  --team-b: var(--accent);
+  --team-b-glow: var(--accent-glow);
 
   position: fixed;
   inset: 0;
@@ -364,13 +366,22 @@
 }
 .winner-actions {
   display: flex;
-  gap: 0.6rem;
+  align-items: center;
+  gap: 0.8rem;
   margin-top: 0.5rem;
 }
-.winner-actions .ctl-btn {
+/* 重置（再戰一場）明顯大於離開，避免點錯（用戶要求） */
+.winner-actions .ctl-btn.primary {
   flex: 0 0 auto;
-  padding: 0.5em 1.2em;
-  font-size: 0.95rem;
+  padding: 0.75em 2em;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.winner-actions .ctl-btn:not(.primary) {
+  flex: 0 0 auto;
+  padding: 0.4em 0.9em;
+  font-size: 0.8rem;
+  opacity: 0.85;
 }
 @keyframes fade-in {
   from {

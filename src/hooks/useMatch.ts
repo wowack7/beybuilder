@@ -33,6 +33,14 @@ function sanitizeLog(raw: unknown): LogEntry[] {
   return out
 }
 
+/** 舊版預設名（紅藍隊色時期）→ 現行預設名；使用者自取的名字不受影響 */
+const LEGACY_DEFAULT: Record<string, Side> = { 藍方: 'a', 紅方: 'b' }
+
+function migrateName(name: string | undefined, side: Side): string {
+  if (!name) return DEFAULT_NAMES[side]
+  return LEGACY_DEFAULT[name] === side ? DEFAULT_NAMES[side] : name
+}
+
 function load(): MatchState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -40,7 +48,7 @@ function load(): MatchState {
     const parsed = JSON.parse(raw) as Partial<MatchState>
     if (!parsed || !parsed.names) return freshMatch()
     return {
-      names: { a: parsed.names.a ?? DEFAULT_NAMES.a, b: parsed.names.b ?? DEFAULT_NAMES.b },
+      names: { a: migrateName(parsed.names.a, 'a'), b: migrateName(parsed.names.b, 'b') },
       log: sanitizeLog(parsed.log),
     }
   } catch {
