@@ -37,6 +37,25 @@
   border-color: var(--line-strong);
 }
 
+/* 語音開關：鏡像 ✕ 於右上角 */
+.score-voice {
+  position: absolute;
+  top: max(0.5rem, env(safe-area-inset-top));
+  right: max(0.5rem, env(safe-area-inset-right));
+  z-index: 4;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--bg-overlay);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.score-voice[aria-pressed='false'] {
+  opacity: 0.6;
+}
+
 .score-arena {
   display: flex;
   flex-direction: row;

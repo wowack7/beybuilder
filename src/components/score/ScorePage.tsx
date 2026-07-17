@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useCountdown } from '../../hooks/useCountdown'
 import { useMatch } from '../../hooks/useMatch'
 import { FINISH_POINTS, type Finish, type Side, scoreOf, winner } from '../../lib/scoring'
+import { speechSupported } from '../../lib/sound'
 import { CountdownOverlay } from './CountdownOverlay'
 import './score.css'
 
@@ -87,9 +88,30 @@ interface ScorePageProps {
   onExit: () => void
 }
 
+const VOICE_KEY = 'beybuilder.voice.v1'
+
 export function ScorePage({ onExit }: ScorePageProps) {
   const { match, award, undo, reset, rename } = useMatch()
-  const countdown = useCountdown()
+  const canSpeak = speechSupported()
+  const [voiceOn, setVoiceOn] = useState(() => {
+    try {
+      return localStorage.getItem(VOICE_KEY) !== 'off'
+    } catch {
+      return true
+    }
+  })
+  const toggleVoice = () => {
+    setVoiceOn((v) => {
+      const next = !v
+      try {
+        localStorage.setItem(VOICE_KEY, next ? 'on' : 'off')
+      } catch {
+        // 無法寫入僅失去記憶，開關仍作用
+      }
+      return next
+    })
+  }
+  const countdown = useCountdown(canSpeak && voiceOn)
   useWakeLock()
 
   const win = winner(match)
@@ -106,6 +128,18 @@ export function ScorePage({ onExit }: ScorePageProps) {
       <button type="button" className="score-exit" onClick={onExit} aria-label="離開計分">
         ✕
       </button>
+
+      {canSpeak && (
+        <button
+          type="button"
+          className="score-voice"
+          onClick={toggleVoice}
+          aria-label={voiceOn ? '關閉裁判語音' : '開啟裁判語音'}
+          aria-pressed={voiceOn}
+        >
+          {voiceOn ? '🔊' : '🔇'}
+        </button>
+      )}
 
       <div className="score-arena">
         <SidePanel

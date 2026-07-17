@@ -1,8 +1,10 @@
 /**
- * 發射倒數 3→2→1→GO（每拍配提示音）。由使用者點擊觸發，符合 AudioContext 手勢限制。
+ * 發射倒數 3→2→1→GO（每拍配裁判語音或提示音）。
+ * 由使用者點擊觸發，符合 AudioContext / speechSynthesis 的手勢限制。
+ * voiceEnabled 且裝置支援時唸「3、2、1、Go Shoot!」；否則（或唸失敗）退回嗶聲。
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { beepGo, beepTick } from '../lib/sound'
+import { beepGo, beepTick, speak } from '../lib/sound'
 
 export type CountStep = 3 | 2 | 1 | 'GO' | null
 
@@ -15,19 +17,31 @@ export interface UseCountdown {
   start: () => void
 }
 
-export function useCountdown(): UseCountdown {
+export function useCountdown(voiceEnabled = false): UseCountdown {
   const [step, setStep] = useState<CountStep>(null)
   const timers = useRef<number[]>([])
+  // start() 排的 timer 讀這裡的最新值，開關中途切換也即時生效
+  const voiceRef = useRef(voiceEnabled)
+  voiceRef.current = voiceEnabled
 
   const clear = useCallback(() => {
     for (const id of timers.current) clearTimeout(id)
     timers.current = []
   }, [])
 
+  const announce = useCallback((v: CountStep) => {
+    if (v === null) return
+    if (v === 'GO') {
+      if (!(voiceRef.current && speak('Go Shoot!', 'en-US'))) beepGo()
+    } else {
+      if (!(voiceRef.current && speak(String(v)))) beepTick()
+    }
+  }, [])
+
   const start = useCallback(() => {
     clear()
     setStep(3)
-    beepTick()
+    announce(3)
     const seq: { at: number; v: CountStep }[] = [
       { at: STEP_MS, v: 2 },
       { at: STEP_MS * 2, v: 1 },
@@ -37,11 +51,10 @@ export function useCountdown(): UseCountdown {
     timers.current = seq.map(({ at, v }) =>
       window.setTimeout(() => {
         setStep(v)
-        if (v === 'GO') beepGo()
-        else if (v !== null) beepTick()
+        announce(v)
       }, at),
     )
-  }, [clear])
+  }, [clear, announce])
 
   useEffect(() => clear, [clear])
 

@@ -45,3 +45,27 @@ export function beep(freq: number, durationMs = 140, gain = 0.15): void {
 /** 倒數的每一拍：3/2/1 用低音短響，Go 用高音長響 */
 export const beepTick = (): void => beep(520, 140)
 export const beepGo = (): void => beep(880, 380, 0.2)
+
+/** 裝置是否支援語音合成（不支援就別顯示語音開關） */
+export const speechSupported = (): boolean =>
+  typeof window !== 'undefined' && 'speechSynthesis' in window
+
+/**
+ * 裁判語音（Web Speech API，無外部音檔）。回傳是否成功送出——
+ * 失敗時呼叫端退回嗶聲。每次先 cancel 前一句，倒數節奏優先於唸完整句。
+ * 文字用數字「3/2/1」而非「三/二/一」：中文語音唸「三」、英文語音唸 three，兩者都對。
+ */
+export function speak(text: string, lang = 'zh-TW'): boolean {
+  try {
+    if (!speechSupported()) return false
+    const synth = window.speechSynthesis
+    synth.cancel()
+    const u = new SpeechSynthesisUtterance(text)
+    u.lang = lang
+    u.rate = 1.15
+    synth.speak(u)
+    return true
+  } catch {
+    return false
+  }
+}
