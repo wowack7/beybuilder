@@ -53,16 +53,17 @@ export const speechSupported = (): boolean =>
 /**
  * 裁判語音（Web Speech API，無外部音檔）。回傳是否成功送出——
  * 失敗時呼叫端退回嗶聲。每次先 cancel 前一句，倒數節奏優先於唸完整句。
- * 文字用數字「3/2/1」而非「三/二/一」：中文語音唸「三」、英文語音唸 three，兩者都對。
+ * 官方無開放音源（查證 2026-07-19：TAKARA TOMY 無効果音素材配布），
+ * 官方 App/動畫音檔屬版權物不可自架，故以 TTS 唸官方英文唸法代替。
  */
-export function speak(text: string, lang = 'zh-TW'): boolean {
+export function speak(text: string, lang = 'en-US', rate = 1.15): boolean {
   try {
     if (!speechSupported()) return false
     const synth = window.speechSynthesis
     synth.cancel()
     const u = new SpeechSynthesisUtterance(text)
     u.lang = lang
-    u.rate = 1.15
+    u.rate = rate
     synth.speak(u)
     return true
   } catch {

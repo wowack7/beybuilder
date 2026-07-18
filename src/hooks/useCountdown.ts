@@ -29,12 +29,14 @@ export function useCountdown(voiceEnabled = false): UseCountdown {
     timers.current = []
   }, [])
 
+  // 官方唸法「Three, Two, One, Go~ Shoot!」；GO 用較慢 rate 拉長尾音
   const announce = useCallback((v: CountStep) => {
     if (v === null) return
     if (v === 'GO') {
-      if (!(voiceRef.current && speak('Go Shoot!', 'en-US'))) beepGo()
+      if (!(voiceRef.current && speak('Go, shoot!', 'en-US', 0.8))) beepGo()
     } else {
-      if (!(voiceRef.current && speak(String(v)))) beepTick()
+      const word = { 3: 'Three', 2: 'Two', 1: 'One' }[v]
+      if (!(voiceRef.current && speak(word))) beepTick()
     }
   }, [])
 
