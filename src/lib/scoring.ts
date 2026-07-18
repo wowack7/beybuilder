@@ -2,7 +2,7 @@
  * Beyblade X 比賽計分（裁判用）純邏輯。
  *
  * 規則來源：官方 Beyblade X Regulation（先到 4 分者勝）。分值：
- *   Spin Finish（對手停轉）= 1；Burst（爆裂）= 2；Over（擊出/進 over zone）= 2；Xtreme（進 Xtreme zone）= 3。
+ *   Spin Finish（對手轉停）= 1；Burst（爆裂）= 2；Over（擊出/進 over zone）= 2；Xtreme（進 Xtreme zone）= 3。
  * 未抗辯假設：達 4 分即鎖定該方獲勝、不再加分（撤銷可解鎖），為常規賽制的合理呈現。
  *
  * 純函式、immutable：所有操作回傳新 state，UI 狀態與持久化由 useMatch 負責。

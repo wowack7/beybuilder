@@ -8,7 +8,7 @@ import './score.css'
 
 // 分值單一來源為 scoring.ts 的 FINISH_POINTS，這裡只定義顯示名稱，避免按鈕「+N」與實際加分不一致
 const FINISHES: { id: Finish; label: string }[] = [
-  { id: 'spin', label: '停轉' },
+  { id: 'spin', label: '轉停' },
   { id: 'over', label: '擊出' },
   { id: 'burst', label: '爆裂' },
   { id: 'xtreme', label: '極限' },
