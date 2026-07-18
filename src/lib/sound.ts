@@ -56,11 +56,12 @@ export const speechSupported = (): boolean =>
  * 官方無開放音源（查證 2026-07-19：TAKARA TOMY 無効果音素材配布），
  * 官方 App/動畫音檔屬版權物不可自架，故以 TTS 唸官方英文唸法代替。
  */
-export function speak(text: string, lang = 'en-US', rate = 1.15): boolean {
+export function speak(text: string, lang = 'en-US', rate = 1.15, queue = false): boolean {
   try {
     if (!speechSupported()) return false
     const synth = window.speechSynthesis
-    synth.cancel()
+    // queue=true 接在前一句後面播（例：拖長的「Go~」接「Shoot!」），不打斷
+    if (!queue) synth.cancel()
     const u = new SpeechSynthesisUtterance(text)
     u.lang = lang
     u.rate = rate
