@@ -58,12 +58,59 @@ export const speechSupported = (): boolean =>
  * 刻意可變——正式站不載入 VoiceLab，這裡的初始值就是正式值）。
  */
 export const VOICE_TUNING = {
-  /** 指定語音名稱；null = 自動挑（見 pickVoice） */
+  /**
+   * 語音來源：howhow＝HowFun《How哥素材》切分音檔（官方釋出供非商業二創，
+   * 切分自 EarlySpringCommitee/HowHow-parser，需標註出處）；tts＝合成語音。
+   */
+  source: 'howhow' as 'howhow' | 'tts',
+  /** HowHow 模式：Go/Shoot 用哪個聲調的音檔（public/howhow/*.mp3） */
+  goClip: 'gou4',
+  shootClip: 'xiu1',
+  /** HowHow 模式：Go 音檔播放速度（<1 拉長） */
+  goClipRate: 0.85,
+  /** TTS 模式：指定語音名稱；null = 自動挑（見 pickVoice） */
   voiceName: null as string | null,
   numberRate: 1.15,
   goRate: 0.35,
   shootRate: 1.1,
   pitch: 1,
+}
+
+// ── HowHow 音檔播放 ──────────────────────────────
+const clipCache = new Map<string, HTMLAudioElement>()
+const clipFailed = new Set<string>()
+
+function getClip(name: string): HTMLAudioElement | null {
+  if (clipFailed.has(name)) return null
+  let a = clipCache.get(name)
+  if (!a) {
+    try {
+      a = new Audio(`${import.meta.env.BASE_URL}howhow/${name}.mp3`)
+      a.preload = 'auto'
+      a.addEventListener('error', () => clipFailed.add(name))
+      clipCache.set(name, a)
+    } catch {
+      clipFailed.add(name)
+      return null
+    }
+  }
+  return a
+}
+
+/** 播一個 HowHow 音檔；onEnded 可串下一段。回傳是否成功起播 */
+function playClip(name: string, rate = 1, onEnded?: () => void): boolean {
+  const a = getClip(name)
+  if (!a) return false
+  try {
+    a.pause()
+    a.currentTime = 0
+    a.playbackRate = rate
+    if (onEnded) a.addEventListener('ended', onEnded, { once: true })
+    void a.play().catch(() => clipFailed.add(name))
+    return true
+  } catch {
+    return false
+  }
 }
 
 // getVoices() 在部分瀏覽器是非同步載入：先掛 listener 讓清單就緒後能重挑
@@ -136,8 +183,23 @@ export function speak(text: string, opts: SpeakOptions = {}): boolean {
   }
 }
 
-/** 唸整段倒數口令中的一拍；由 useCountdown 與 VoiceLab 共用，參數單一來源是 VOICE_TUNING */
+/** HowHow 倒數音檔：三＝san1、二＝er4、一＝yi1；Go/Shoot 由 VOICE_TUNING 選聲調 */
+const HOWHOW_NUMBER: Record<3 | 2 | 1, string> = { 3: 'san1', 2: 'er4', 1: 'yi1' }
+
+/**
+ * 唸整段倒數口令中的一拍；由 useCountdown 與 VoiceLab 共用，參數單一來源是 VOICE_TUNING。
+ * 來源鏈：HowHow 音檔 →（載入失敗或選 tts）合成語音 →（再失敗）呼叫端退嗶聲。
+ */
 export function speakCount(step: 3 | 2 | 1 | 'GO'): boolean {
+  if (VOICE_TUNING.source === 'howhow') {
+    if (step === 'GO') {
+      const shoot = VOICE_TUNING.shootClip
+      if (playClip(VOICE_TUNING.goClip, VOICE_TUNING.goClipRate, () => playClip(shoot))) return true
+    } else if (playClip(HOWHOW_NUMBER[step])) {
+      return true
+    }
+    // 音檔不可用 → 落到 TTS
+  }
   if (step === 'GO') {
     const ok = speak('Go', { rate: VOICE_TUNING.goRate })
     if (ok) speak('Shoot!', { rate: VOICE_TUNING.shootRate, queue: true })

@@ -460,6 +460,10 @@
   font-weight: 700;
   cursor: pointer;
 }
+.lab-credit {
+  font-size: 0.62rem;
+  color: var(--text-faint);
+}
 
 /* ── 打橫提示（直向時顯示）─────────────── */
 .rotate-hint {
