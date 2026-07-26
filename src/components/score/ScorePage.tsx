@@ -4,6 +4,7 @@ import { useMatch } from '../../hooks/useMatch'
 import { FINISH_POINTS, type Finish, type Side, scoreOf, winner } from '../../lib/scoring'
 import { speechSupported } from '../../lib/sound'
 import { CountdownOverlay } from './CountdownOverlay'
+import { VoiceLab } from './VoiceLab'
 import './score.css'
 
 // 分值單一來源為 scoring.ts 的 FINISH_POINTS，這裡只定義顯示名稱，避免按鈕「+N」與實際加分不一致
@@ -214,6 +215,8 @@ export function ScorePage({ onExit }: ScorePageProps) {
           </div>
         </div>
       )}
+
+      {import.meta.env.DEV && canSpeak && <VoiceLab />}
 
       <div className="rotate-hint" aria-hidden="true">
         <div className="rotate-icon">⟳</div>

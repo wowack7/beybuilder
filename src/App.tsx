@@ -18,13 +18,16 @@ function formatDataDate(iso: string): string {
 
 type Tab = 'deck' | 'build' | 'inventory' | 'tier' | 'score'
 
-const TABS: { id: Tab; label: string }[] = [
+const ALL_TABS: { id: Tab; label: string }[] = [
   { id: 'deck', label: '最強戰隊' },
   { id: 'build', label: '自組隊伍' },
   { id: 'inventory', label: '零件庫' },
   { id: 'tier', label: '天梯' },
   { id: 'score', label: '計分' },
 ]
+
+// 計分頁尚在本地確認（語音調校中），先不上線——正式 build 不顯示（用戶決策 2026-07-20）
+const TABS = import.meta.env.DEV ? ALL_TABS : ALL_TABS.filter((t) => t.id !== 'score')
 
 function App() {
   const [tab, setTab] = useState<Tab>('deck')

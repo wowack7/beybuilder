@@ -411,6 +411,56 @@
   }
 }
 
+/* ── VoiceLab（dev 專用調校面板）─────────────── */
+.voice-lab {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 0.6rem;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 15rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px dashed var(--accent-deep);
+  border-radius: var(--radius-md, 0.6rem);
+  background: oklch(12% 0.02 265 / 0.92);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+.lab-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--accent);
+}
+.voice-lab label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.voice-lab code {
+  color: var(--accent);
+  margin-left: 0.3em;
+}
+.voice-lab select,
+.voice-lab input[type='range'] {
+  width: 100%;
+}
+.lab-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+.lab-actions button {
+  flex: 1;
+  padding: 0.35em 0.4em;
+  border: 1px solid var(--accent-deep);
+  border-radius: var(--radius-sm, 0.4rem);
+  background: var(--accent-ink);
+  color: var(--accent);
+  font-weight: 700;
+  cursor: pointer;
+}
+
 /* ── 打橫提示（直向時顯示）─────────────── */
 .rotate-hint {
   display: none;

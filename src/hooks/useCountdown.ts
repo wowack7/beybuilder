@@ -4,7 +4,7 @@
  * voiceEnabled 且裝置支援時唸「3、2、1、Go Shoot!」；否則（或唸失敗）退回嗶聲。
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { beepGo, beepTick, speak } from '../lib/sound'
+import { beepGo, beepTick, speakCount } from '../lib/sound'
 
 export type CountStep = 3 | 2 | 1 | 'GO' | null
 
@@ -30,20 +30,12 @@ export function useCountdown(voiceEnabled = false): UseCountdown {
     timers.current = []
   }, [])
 
-  // 官方唸法「Three, Two, One, Go~~ Shoot!」。
-  // Go 拆兩段：慢速（0.45）把單音節「Go」拉成長音，再佇列正常速「Shoot!」收尾——
-  // 用 rate 而非「Goooo」文字 hack，避免部分 TTS 把連寫母音唸成別的字。
+  // 官方唸法「Three, Two, One, Go~~ Shoot!」；聲音與快慢的參數單一來源在 sound.ts 的 VOICE_TUNING
   const announce = useCallback((v: CountStep) => {
     if (v === null) return
-    if (v === 'GO') {
-      if (voiceRef.current && speak('Go', 'en-US', 0.35)) {
-        speak('Shoot!', 'en-US', 1.1, true)
-      } else {
-        beepGo()
-      }
-    } else {
-      const word = { 3: 'Three', 2: 'Two', 1: 'One' }[v]
-      if (!(voiceRef.current && speak(word))) beepTick()
+    if (!(voiceRef.current && speakCount(v))) {
+      if (v === 'GO') beepGo()
+      else beepTick()
     }
   }, [])
 
