@@ -53,6 +53,13 @@ export const beepGo = (): void => beep(880, 380, 0.2)
 export const speechSupported = (): boolean =>
   typeof window !== 'undefined' && 'speechSynthesis' in window
 
+/** Shoot 段落選項：發射（兩段串接）或咻（單段） */
+export const SHOOT_PRESETS = {
+  fashe: ['fa1', 'she4'],
+  xiu1: ['xiu1'],
+  xiu4: ['xiu4'],
+} as const
+
 /**
  * 倒數語音參數。dev 的 VoiceLab 面板會即時改這些值試聽（module 單例，
  * 刻意可變——正式站不載入 VoiceLab，這裡的初始值就是正式值）。
@@ -63,11 +70,14 @@ export const VOICE_TUNING = {
    * 切分自 EarlySpringCommitee/HowHow-parser，需標註出處）；tts＝合成語音。
    */
   source: 'howhow' as 'howhow' | 'tts',
-  /** HowHow 模式：Go/Shoot 用哪個聲調的音檔（public/howhow/*.mp3） */
+  /** HowHow 模式：Go 用哪個聲調的音檔（public/howhow/*.mp3） */
   goClip: 'gou4',
-  shootClip: 'xiu1',
-  /** HowHow 模式：Go 音檔播放速度（<1 拉長） */
-  goClipRate: 0.85,
+  /** HowHow 模式：Shoot 段落（見 SHOOT_PRESETS） */
+  shootPreset: 'fashe' as keyof typeof SHOOT_PRESETS,
+  /** HowHow 模式：Go 音檔播放速度（<1 拉長；gou4 原長僅 ~0.3s，要「狗~~」得壓很低） */
+  goClipRate: 0.25,
+  /** 拉長時不保音高（磁帶慢速感，聲音變低沉）；false = 保音高（極慢時會有顆粒感） */
+  goPitchDrop: true,
   /** TTS 模式：指定語音名稱；null = 自動挑（見 pickVoice） */
   voiceName: null as string | null,
   numberRate: 1.15,
@@ -98,19 +108,30 @@ function getClip(name: string): HTMLAudioElement | null {
 }
 
 /** 播一個 HowHow 音檔；onEnded 可串下一段。回傳是否成功起播 */
-function playClip(name: string, rate = 1, onEnded?: () => void): boolean {
+function playClip(name: string, rate = 1, onEnded?: () => void, pitchDrop = false): boolean {
   const a = getClip(name)
   if (!a) return false
   try {
     a.pause()
     a.currentTime = 0
     a.playbackRate = rate
+    // pitchDrop：不保音高＝磁帶慢速感；Safari 用 webkit 前綴
+    const el = a as HTMLAudioElement & { preservesPitch?: boolean; webkitPreservesPitch?: boolean }
+    if ('preservesPitch' in el) el.preservesPitch = !pitchDrop
+    if ('webkitPreservesPitch' in el) el.webkitPreservesPitch = !pitchDrop
     if (onEnded) a.addEventListener('ended', onEnded, { once: true })
     void a.play().catch(() => clipFailed.add(name))
     return true
   } catch {
     return false
   }
+}
+
+/** 依序串播多個音檔（前一段 ended 才播下一段） */
+function playClipsSeq(names: readonly string[]): void {
+  if (!names.length) return
+  const [head, ...rest] = names
+  playClip(head, 1, rest.length ? () => playClipsSeq(rest) : undefined)
 }
 
 // getVoices() 在部分瀏覽器是非同步載入：先掛 listener 讓清單就緒後能重挑
@@ -193,8 +214,11 @@ const HOWHOW_NUMBER: Record<3 | 2 | 1, string> = { 3: 'san1', 2: 'er4', 1: 'yi1'
 export function speakCount(step: 3 | 2 | 1 | 'GO'): boolean {
   if (VOICE_TUNING.source === 'howhow') {
     if (step === 'GO') {
-      const shoot = VOICE_TUNING.shootClip
-      if (playClip(VOICE_TUNING.goClip, VOICE_TUNING.goClipRate, () => playClip(shoot))) return true
+      const shoot = SHOOT_PRESETS[VOICE_TUNING.shootPreset]
+      if (
+        playClip(VOICE_TUNING.goClip, VOICE_TUNING.goClipRate, () => playClipsSeq(shoot), VOICE_TUNING.goPitchDrop)
+      )
+        return true
     } else if (playClip(HOWHOW_NUMBER[step])) {
       return true
     }

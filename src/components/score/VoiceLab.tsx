@@ -57,22 +57,34 @@ export function VoiceLab() {
             </select>
           </label>
           <label>
-            Shoot 音檔
-            <select value={VOICE_TUNING.shootClip} onChange={(e) => set('shootClip', e.target.value)}>
-              <option value="xiu1">xiu1（咻，長）</option>
-              <option value="xiu4">xiu4（秀，短）</option>
+            Shoot 段落
+            <select
+              value={VOICE_TUNING.shootPreset}
+              onChange={(e) => set('shootPreset', e.target.value as typeof VOICE_TUNING.shootPreset)}
+            >
+              <option value="fashe">發射（fa1＋she4）</option>
+              <option value="xiu1">咻（xiu1，長）</option>
+              <option value="xiu4">秀（xiu4，短）</option>
             </select>
           </label>
           <label>
             Go 播放速度 <code>{VOICE_TUNING.goClipRate.toFixed(2)}</code>
             <input
               type="range"
-              min="0.5"
+              min="0.2"
               max="1.2"
               step="0.05"
               value={VOICE_TUNING.goClipRate}
               onChange={(e) => set('goClipRate', Number(e.target.value))}
             />
+          </label>
+          <label className="lab-check">
+            <input
+              type="checkbox"
+              checked={VOICE_TUNING.goPitchDrop}
+              onChange={(e) => set('goPitchDrop', e.target.checked)}
+            />
+            拉長時降音高（磁帶感）
           </label>
         </>
       )}

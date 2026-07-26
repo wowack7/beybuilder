@@ -464,6 +464,14 @@
   font-size: 0.62rem;
   color: var(--text-faint);
 }
+.voice-lab .lab-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.35rem;
+}
+.voice-lab .lab-check input {
+  width: auto;
+}
 
 /* ── 打橫提示（直向時顯示）─────────────── */
 .rotate-hint {
