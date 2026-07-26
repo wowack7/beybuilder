@@ -70,14 +70,17 @@ export const VOICE_TUNING = {
    * 切分自 EarlySpringCommitee/HowHow-parser，需標註出處）；tts＝合成語音。
    */
   source: 'howhow' as 'howhow' | 'tts',
-  /** HowHow 模式：Go 用哪個聲調的音檔（public/howhow/*.mp3） */
-  goClip: 'gou4',
+  /** HowHow 模式：Go 用哪個聲調的音檔。gou1（平聲）比 gou4（去聲）耐拉——音高不下墜 */
+  goClip: 'gou1',
   /** HowHow 模式：Shoot 段落（見 SHOOT_PRESETS） */
   shootPreset: 'fashe' as keyof typeof SHOOT_PRESETS,
-  /** HowHow 模式：Go 音檔播放速度（<1 拉長；gou4 原長僅 ~0.3s，要「狗~~」得壓很低） */
-  goClipRate: 0.25,
-  /** 拉長時不保音高（磁帶慢速感，聲音變低沉）；false = 保音高（極慢時會有顆粒感） */
-  goPitchDrop: true,
+  /**
+   * HowHow 模式：Go 音檔播放速度。實測 0.25 的 4 倍拉伸怎麼調都怪（用戶 2026-07-27），
+   * 0.6 左右是自然上限；「長」的感覺靠與發射之間的串接停頓，不靠硬拉。
+   */
+  goClipRate: 0.6,
+  /** 拉長時不保音高（磁帶慢速感）；溫和倍速下保音高較自然，預設關 */
+  goPitchDrop: false,
   /** TTS 模式：指定語音名稱；null = 自動挑（見 pickVoice） */
   voiceName: null as string | null,
   numberRate: 1.15,

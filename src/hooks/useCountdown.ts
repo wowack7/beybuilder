@@ -9,8 +9,8 @@ import { beepGo, beepTick, speakCount } from '../lib/sound'
 export type CountStep = 3 | 2 | 1 | 'GO' | null
 
 const STEP_MS = 1000
-/** GO 畫面停留時間：配合「狗~~（0.25 速 ≈1.2s）＋發射（≈0.9s）」語音 */
-const GO_HOLD_MS = 2200
+/** GO 畫面停留時間：配合「狗~（0.6 速 ≈0.6s）＋發射（≈0.9s）」語音 */
+const GO_HOLD_MS = 1800
 
 export interface UseCountdown {
   step: CountStep
