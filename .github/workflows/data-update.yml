@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  # 觸發 deploy.yml 的 workflow_dispatch 需要（見下方 Trigger deploy 步驟）
+  actions: write
 
 jobs:
   update:
@@ -25,6 +27,7 @@ jobs:
         run: npm test
       - run: npm run build
       - name: Commit and push if data changed
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -33,6 +36,17 @@ jobs:
             git add src/data public/img
             git commit -m "chore: weekly data update"
             git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
           else
             echo "資料無變動，略過 commit"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
           fi
+
+      # GITHUB_TOKEN 發出的 push 不會觸發其他 workflow（GitHub 防迴圈機制），
+      # 所以上面的 commit 不會讓 deploy.yml 自己跑起來——必須在這裡明確派工。
+      # workflow_dispatch 是該機制的例外，可用 GITHUB_TOKEN 觸發。
+      - name: Trigger deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy.yml --ref main
