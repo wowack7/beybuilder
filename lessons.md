@@ -6,14 +6,14 @@
 
 - tags: schedule, data-update, mechanism, ci
 - 機制（部署 GitHub Pages 後）：
-  - **正式源頭：GitHub Actions** `data-update.yml` 每週一 01:00 UTC（台北 09:00）在雲端跑 `data:update`＋test＋build，資料有變才 commit → 自動觸發重新部署。不依賴本機。
+  - **正式源頭：GitHub Actions** `data-update.yml` 每週一 01:00 UTC（台北 09:00）在雲端跑 `data:update`＋test＋build，資料有變才 commit → **再明確 `gh workflow run deploy.yml` 派工部署**（不會自動觸發，原因見 L10）。不依賴本機。
   - **本機 Claude 排程** `beybuilder-weekly-data-update` 已改職責為「git pull 同步 CI 的資料 commit」，避免本機與 CI 雙頭改 `src/data/` 造成分歧。
 - 已驗：deploy.yml 由真實 push 驗活 ✅；data-update.yml 由 workflow_dispatch 等效觸發驗活 ✅（run 28776064225，success，2026-07-06）——workflow 本體在真實 CI 環境可跑。
-- **待驗**：cron 觸發本身（2026-07-13 後）。驗活指令：
+- 已驗：cron 觸發本身 ✅（2026-08-10 查核：7/13、7/20、7/27、8/03、8/10 五次皆 `event=schedule` 且 success）。驗活指令：
   ```
   gh run list --workflow=data-update.yml --limit 3   # 應出現 event=schedule 的 run
   ```
-  驗過請把本行改成「已驗」。
+- 注意：本卡原寫「commit → 自動觸發重新部署」是**錯的**，害線上資料停更三週未被發現（2026-08-11 修正，見 L10）。
 
 ## L2 排程/新 shell 的 node 是系統 16 版（2026-07-06）
 
@@ -67,3 +67,17 @@
 - 解：驗收前 `rm -rf dist node_modules/.tmp` 再 build，並檢查 build 的 exit code，不能只看最後幾行 log。
 - 解2：`tsconfig.app.json` 加 `"types": ["vite/client", "node"]`（`@types/node` 本來就是 devDep）。
 - 驗證教訓：GA「裝好」的證據不是 gtag.js 載入，而是 **`_ga` cookie 被設定**（純前端寫入、擋廣告也擋不掉）或 GA 即時報表有數。本次就是靠 `/(^|;)\s*_ga/.test(document.cookie)` 在正式站確認。標準報表另有 24–48h 延遲，只有「即時」是即時的。
+
+## L10 GITHUB_TOKEN 發出的 push 不會觸發其他 workflow（2026-08-11）
+
+- tags: ci, github-actions, deploy, mechanism
+- 坑：`data-update.yml` 用 checkout 預設的 `GITHUB_TOKEN` 做 `git push`，GitHub 為防迴圈**不讓這種 push 產生新的 workflow run**，所以 `deploy.yml`（`on: push`）從沒被資料 commit 觸發過。7/27、8/03、8/10 三次資料更新全綠、commit 也確實進了 repo，但線上站台一直停在最後一次**人工** push（7/26）當下的資料日期 **7/20**，停更三週無人察覺。
+- 症狀樣貌：workflow 全部 success、repo 有新 commit、線上就是舊的。只看 `gh run list --workflow=data-update.yml` 永遠是綠的，看不出問題。
+- 解：在 push 之後明確派工——`gh workflow run deploy.yml --ref main`（需 `permissions: actions: write` 與 `env: GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}`）。**`workflow_dispatch` 與 `repository_dispatch` 是防迴圈機制的明文例外**，可用 GITHUB_TOKEN 觸發，故不必引入 PAT。判決見 docs/Decisions.md [2026-08-11]。
+- 驗活指令（真正該看的是「線上產物」，不是 workflow 綠燈）：
+  ```
+  curl -s https://beybuilder.5-seven.dog/tier/ | grep -o '資料更新於 [0-9-]*'   # 應接近今天
+  gh run list --workflow=deploy.yml --limit 3   # 資料更新後應出現 event=workflow_dispatch 的 run
+  ```
+- 已驗 ✅：run 31517263477（data-update, workflow_dispatch）→ commit 8484661 → `Trigger deploy` 步驟 success（非 skipped）→ deploy run（`event=workflow_dispatch`, sha 8484661）success → 線上顯示 2026-08-11。
+- 通則（ops-discipline「Living Proof」的實例）：**機制的驗活證據必須是真實產物**（線上頁面的日期、檔案 mtime、送達的通知），不能是「workflow 綠燈」。這次綠燈連續騙了三週。

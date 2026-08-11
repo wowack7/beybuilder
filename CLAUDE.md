@@ -17,7 +17,8 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 ## Deploy（GitHub Pages）
 
 - 正式站：https://beybuilder.5-seven.dog/ （自訂子網域，DNS 為 GoDaddy 的 CNAME `beybuilder` → `wowack7.github.io`；`public/CNAME` 告訴 GitHub 掛此域，舊 `wowack7.github.io/beybuilder/` 由 GitHub 自動 301 過來）。repo `wowack7/beybuilder`，public
-- push main → `.github/workflows/deploy.yml` 自動 test+build+部署；`data-update.yml` 每週一 01:00 UTC 雲端更新資料並 commit（資料自動更新的正式源頭——本機 Claude 排程只負責 git pull 同步）
+- **人工** push main → `.github/workflows/deploy.yml` 自動 test+build+部署；`data-update.yml` 每週一 01:00 UTC 雲端更新資料並 commit（資料自動更新的正式源頭——本機 Claude 排程只負責 git pull 同步）
+- `data-update.yml` 的 commit **不會自動觸發部署**，必須由它自己 `gh workflow run deploy.yml` 明確派工（GITHUB_TOKEN 發出的 push 不觸發其他 workflow；此機制曾讓線上資料靜默停更三週）。驗活看**線上產物**而非 workflow 綠燈：`curl -s https://beybuilder.5-seven.dog/tier/ | grep -o '資料更新於 [0-9-]*'`。判決見 `docs/Decisions.md` [2026-08-11]，坑點見 lessons.md L10
 - `vite.config.ts` base 一律 `/`（站台在子網域根）。網址／base 單一來源在 `src/lib/site.ts`（`SITE_URL`/`BASE_PATH`），`site.test.ts` 讀 `index.html`、`vite.config.ts` 比對，換域漏改就紅燈
 - **phstudy 匯入**：`src/lib/importPh.ts`＋映射表 `src/data/ph_map.json`（data:update 生成，含 hardcoded.json 聯名套組）。三種方式（`ImportPhBody`，全程瀏覽器端解析不上傳）：①**檔案匯入**（主要、手機也適用）——phstudy「下載」匯出 `{parts:[...]}` JSON 檔，本站選檔即解析；②書籤小工具跳轉 `#phimport=<base64>`（電腦一鍵）；③手動貼 JSON。三者最後都進 `parsePhInventory`（吃 partId，忽略其他欄位）
 - **GA4 分析**：`src/lib/analytics.ts`（gtag.js，只做頁面瀏覽），`main.tsx` 開頭呼叫 `initAnalytics()`。僅 `import.meta.env.PROD` 才載入——本機 dev 不追蹤。Measurement ID `G-NNJPTBMXKW` 硬編於該檔（公開值）
