@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local AI agent config (not shared)
+.codex/
+AGENTS.md
