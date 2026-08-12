@@ -81,3 +81,10 @@
   ```
 - 已驗 ✅：run 31517263477（data-update, workflow_dispatch）→ commit 8484661 → `Trigger deploy` 步驟 success（非 skipped）→ deploy run（`event=workflow_dispatch`, sha 8484661）success → 線上顯示 2026-08-11。
 - 通則（ops-discipline「Living Proof」的實例）：**機制的驗活證據必須是真實產物**（線上頁面的日期、檔案 mtime、送達的通知），不能是「workflow 綠燈」。這次綠燈連續騙了三週。
+
+## L11 來源資料的「型號」不是唯一鍵——聯名/變體共用型號（2026-08-12）
+
+- tags: data, identity, dedupe, inventory
+- 坑：products.json 有四組型號各對應兩件不同商品（BX-00-02 丘巴卡/風暴兵、BX-00-03 紅浩克/美國隊長、BX-00-04 終極蜘蛛人/綠惡魔、BXG-39 飛龍懸浮兩變體）。庫存以 `p.id` 判斷擁有 → 擁有其一整對都被視為已擁有，「只看已擁有」多出四顆沒擁有的；且 `new Map(products.map(p => [p.id, p]))` 索引被最後一筆靜默覆寫，引擎實際採計的零件可能不是使用者選的那件（React key 重複同理）。
+- 解：id 唯一化為「型號::名稱」，邏輯單一來源在 transform.ts 的 `dedupeProductIds`——`transformAll` 產資料時套用，`data.ts` 載入時再套一次（護住尚未重生的舊資料檔，管線重生後為 no-op）。顯示用 `productModel()` 剝後綴；舊 localStorage 與舊 ph_map 的裸型號鍵由 `legacyProductIdMap` 遷移到「最後一筆」（＝沿用舊 Map 覆寫行為，既有使用者牌組不悄悄改變）；`buildPhMap` 改以 phstudy 標題含名稱消歧、消歧不到不猜。`data.test.ts` 鎖住出貨資料 id 必唯一。
+- 通則：**拿來當儲存鍵／Map 鍵／React key 的欄位，先驗唯一性**（加 dataset sanity test），別信任來源資料「編號」的唯一性語意。重複鍵的症狀很隱晦：不報錯，只會「多出/少掉幾筆」或「查到別筆資料」。
