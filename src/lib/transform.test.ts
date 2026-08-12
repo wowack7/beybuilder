@@ -1,5 +1,14 @@
 import { describe, expect, test } from 'vitest'
-import { parseCsv, parseSiteCombos, transformAll } from './transform'
+import type { Product } from '../types'
+import {
+  buildPhMap,
+  dedupeProductIds,
+  legacyProductIdMap,
+  parseCsv,
+  parseSiteCombos,
+  productModel,
+  transformAll,
+} from './transform'
 
 describe('parseCsv', () => {
   test('handles quoted fields with commas and escaped quotes', () => {
@@ -56,5 +65,67 @@ describe('transformAll tier inheritance', () => {
     expect(byName.get('魔導神杖(綠)')).toMatchObject({ tier: 'X', tierInherited: true })
     expect(byName.get('蒼穹龍騎士')).toMatchObject({ tier: '', tierInherited: false })
     expect(byName.get('蒼穹龍騎士(左)')).toMatchObject({ tier: 'S+', tierInherited: false })
+  })
+
+  test('duplicated model ids (聯名共用型號) come out unique', () => {
+    const dupCsv = [
+      header,
+      row('BX-00-03', '紅浩克', ''),
+      row('BX-00-03', '美國隊長', ''),
+      row('BX-35', '鮫', 'S'),
+    ].join('\n')
+    const { products } = transformAll({ tierCsv: dupCsv, comboCsv, partsCsv })
+    expect(products.map((p) => p.id)).toEqual(['BX-00-03::紅浩克', 'BX-00-03::美國隊長', 'BX-35'])
+  })
+})
+
+const mkProduct = (id: string, name: string): Product => ({
+  id,
+  name,
+  type: 'attack',
+  tier: '',
+  buy: '',
+  ratchet: '1-80',
+  ratchetTier: '',
+  bit: 'R',
+  bitTier: '',
+  assist: '',
+  source: '',
+  img: '',
+})
+
+describe('product id 唯一化', () => {
+  const deduped = dedupeProductIds([
+    mkProduct('BX-00-03', '紅浩克'),
+    mkProduct('BX-00-03', '美國隊長'),
+    mkProduct('BX-35', '鮫'),
+  ])
+
+  test('productModel strips the name suffix, plain ids pass through', () => {
+    expect(productModel('BX-00-03::美國隊長')).toBe('BX-00-03')
+    expect(productModel('BX-35')).toBe('BX-35')
+  })
+
+  test('legacyProductIdMap maps the bare model to the LAST duplicate（舊 Map 覆寫行為）', () => {
+    const legacy = legacyProductIdMap(deduped)
+    expect(legacy.get('BX-00-03')).toBe('BX-00-03::美國隊長')
+    expect(legacy.has('BX-35')).toBe(false)
+  })
+
+  test('buildPhMap 以標題消歧共用型號，消歧不到不猜', () => {
+    const parts = { blades: [], ratchets: [], bits: [], assists: [] }
+    const phData = {
+      BeybladeSeries: {
+        'SE-PRD-100000-00': { catalog_title: { 'zh-TW': 'BX-00-03 美國隊長 4-70GB' } },
+        'SE-PRD-100001-00': { catalog_title: { 'zh-TW': 'BX-00-03 紅浩克 1-80R' } },
+        'SE-PRD-100002-00': { catalog_title: { 'zh-TW': 'BX-35 鮫 5-80GB' } },
+        'SE-PRD-100003-00': { catalog_title: { 'zh-TW': 'BX-00-03 來路不明' } },
+      },
+    }
+    const map = buildPhMap([phData], deduped, parts)
+    expect(map.sets['PRD-100000-00']).toBe('BX-00-03::美國隊長')
+    expect(map.sets['PRD-100001-00']).toBe('BX-00-03::紅浩克')
+    expect(map.sets['PRD-100002-00']).toBe('BX-35')
+    expect(map.sets['PRD-100003-00']).toBeUndefined()
   })
 })

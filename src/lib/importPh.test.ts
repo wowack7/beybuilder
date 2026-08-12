@@ -66,6 +66,30 @@ describe('parsePhInventory', () => {
   })
 })
 
+describe('聯名共用型號（產品 id 唯一化後）', () => {
+  const dup = [
+    mkProduct('BX-00-03::紅浩克', '紅浩克', '1-80', 'R'),
+    mkProduct('BX-00-03::美國隊長', '美國隊長', '4-70', 'GB'),
+  ]
+  const legacyMap: PhMap = {
+    sets: { 'PRD-555555-00': 'BX-00-03' }, // 舊 ph_map 存裸型號
+    blades: {},
+    ratchets: {},
+    bits: {},
+    assists: {},
+  }
+
+  test('舊 ph_map 的裸型號遷移為唯一化後的 id（沿用最後一筆）', () => {
+    const r = parsePhInventory(
+      raw(['BL-PRD-555555-00', 'RC-PRD-555555-00', 'BT-PRD-555555-00']),
+      legacyMap,
+      dup,
+    )
+    expect(r.additions.productIds).toEqual(['BX-00-03::美國隊長'])
+    expect(r.unmatched).toEqual([])
+  })
+})
+
 describe('decodeImportHash', () => {
   test('roundtrips UTF-8 payloads and rejects other hashes', () => {
     const json = '{"parts":[{"partId":"BL-PRD-111111-00"}],"註":"中文"}'

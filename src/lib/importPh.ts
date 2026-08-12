@@ -10,7 +10,7 @@
  * - ME/OV（金屬刃/上蓋刃）本站不建模，忽略不計
  */
 import type { Inventory, Product } from '../types'
-import type { PhMap } from './transform'
+import { legacyProductIdMap, type PhMap } from './transform'
 
 export interface PhImportResult {
   additions: Inventory
@@ -43,6 +43,13 @@ export function parsePhInventory(
   }
 
   const productById = new Map(products.map((p) => [p.id, p]))
+  // ph_map 舊檔可能存裸型號（重複型號唯一化前的鍵）→ 遷移為唯一化後的 id
+  const legacyIds = legacyProductIdMap(products)
+  const setProductId = (suffix: string): string | undefined => {
+    const pid = map.sets[suffix]
+    const canon = pid ? (legacyIds.get(pid) ?? pid) : undefined
+    return canon && productById.has(canon) ? canon : undefined
+  }
   const suffixOf = (id: string) => id.replace(KIND_PREFIX, '')
   const kindOf = (id: string) => id.match(KIND_PREFIX)?.[1] ?? ''
 
@@ -63,8 +70,8 @@ export function parsePhInventory(
   const productSuffixes = new Set<string>()
   for (const [suffix, kinds] of kindsBySuffix) {
     if (!(kinds.has('BL') && kinds.has('RC') && kinds.has('BT'))) continue
-    const pid = map.sets[suffix]
-    if (pid && productById.has(pid)) {
+    const pid = setProductId(suffix)
+    if (pid) {
       productIds.add(pid)
       productSuffixes.add(suffix)
     }
@@ -74,7 +81,7 @@ export function parsePhInventory(
   for (const [suffix, kinds] of kindsBySuffix) {
     if (productSuffixes.has(suffix)) continue
     if (!(kinds.has('MB') && kinds.has('LC'))) continue
-    const pid = map.sets[suffix]
+    const pid = setProductId(suffix)
     const name = pid ? productById.get(pid)?.name : map.blades[suffix]
     if (name) cxBladeSuffixes.add(suffix)
   }
@@ -126,7 +133,7 @@ export function parsePhInventory(
       case 'MB':
       case 'LC': {
         if (cxBladeSuffixes.has(suffix) && kind === 'MB') {
-          const pid = map.sets[suffix]
+          const pid = setProductId(suffix)
           const name = pid ? productById.get(pid)?.name : map.blades[suffix]
           if (name && !covered.blades.has(name)) extras.blades.add(name)
         } else if (!cxBladeSuffixes.has(suffix)) {

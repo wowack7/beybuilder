@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { canonicalProductId } from '../lib/data'
 import type { Inventory } from '../types'
 
 const STORAGE_KEY = 'beybuilder.inventory.v1'
@@ -17,7 +18,10 @@ function load(): Inventory {
     if (!raw) return EMPTY
     const parsed = JSON.parse(raw) as Partial<Inventory>
     return {
-      productIds: Array.isArray(parsed.productIds) ? parsed.productIds : [],
+      // 重複型號的舊儲存鍵（如 BX-00-03）遷移為唯一化後的 id
+      productIds: Array.isArray(parsed.productIds)
+        ? [...new Set(parsed.productIds.map(canonicalProductId))]
+        : [],
       extraBlades: Array.isArray(parsed.extraBlades) ? parsed.extraBlades : [],
       extraRatchets: Array.isArray(parsed.extraRatchets) ? parsed.extraRatchets : [],
       extraBits: Array.isArray(parsed.extraBits) ? parsed.extraBits : [],

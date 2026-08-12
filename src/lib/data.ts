@@ -13,7 +13,7 @@ import phMapJson from '../data/ph_map.json'
 import productsJson from '../data/products.json'
 import siteCombosJson from '../data/site_combos.json'
 import type { MetaCombo, PartsDb, Product, SiteCombo } from '../types'
-import type { PhMap } from './transform'
+import { dedupeProductIds, legacyProductIdMap, productModel, type PhMap } from './transform'
 
 /** phstudy 倉庫匯入映射表（隨每週資料更新重生） */
 export const phMap = phMapJson as PhMap
@@ -28,7 +28,17 @@ export function imgUrl(src: string): string {
   return local ? import.meta.env.BASE_URL + local : src
 }
 
-export const products = productsJson as Product[]
+/**
+ * 產品 id 唯一化：聯名/變體會共用型號（詳 transform.ts 的 dedupeProductIds），
+ * 資料管線已唯一化後這裡是 no-op，留著保護尚未重生的舊資料檔。
+ */
+export const products = dedupeProductIds(productsJson as Product[])
+
+const legacyIds = legacyProductIdMap(products)
+/** 舊版儲存的重複型號 id → 唯一化後 id；無需遷移者原樣返回 */
+export const canonicalProductId = (id: string) => legacyIds.get(id) ?? id
+/** 唯一化後的 id → 顯示用型號 */
+export { productModel }
 export const partsDb = partsJson as PartsDb
 export const metaCombos = combosJson as MetaCombo[]
 export const siteCombos = siteCombosJson as SiteCombo[]

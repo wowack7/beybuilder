@@ -70,6 +70,41 @@ const tierRank = (t: string) => {
 }
 const bestTier = (a: string, b: string) => (tierRank(a) <= tierRank(b) ? a : b)
 
+/**
+ * 產品 id 唯一化。聯名/變體商品會共用同一型號（如 BX-00-03 同時是紅浩克與美國隊長），
+ * 但 id 是庫存儲存鍵與各處 Map 索引鍵，重複會讓「擁有其一」被當成「兩件都擁有」。
+ * 重複型號的每一件一律改為「型號::名稱」（不取決於列序，來源換行序身分也不變）；
+ * 顯示時用 productModel() 取回型號。
+ */
+export const PRODUCT_ID_SEP = '::'
+
+export function dedupeProductIds(products: Product[]): Product[] {
+  const count = new Map<string, number>()
+  for (const p of products) count.set(p.id, (count.get(p.id) ?? 0) + 1)
+  const used = new Set<string>()
+  return products.map((p) => {
+    let id = (count.get(p.id) ?? 0) > 1 ? p.id + PRODUCT_ID_SEP + p.name : p.id
+    let n = 2
+    while (used.has(id)) id = `${p.id}${PRODUCT_ID_SEP}${p.name}${PRODUCT_ID_SEP}${n++}`
+    used.add(id)
+    return id === p.id ? p : { ...p, id }
+  })
+}
+
+/** 唯一化後的 id → 顯示用型號 */
+export const productModel = (id: string) => id.split(PRODUCT_ID_SEP)[0]
+
+/**
+ * 舊庫存鍵遷移：唯一化前，重複型號在 `new Map(products.map(p => [p.id, p]))`
+ * 一律被「最後一筆」覆寫，引擎實際採計的就是最後一筆——沿用該對應，
+ * 升級後既有使用者的牌組結果不會悄悄改變。
+ */
+export function legacyProductIdMap(products: Product[]): Map<string, string> {
+  const last = new Map<string, string>()
+  for (const p of products) if (p.id.includes(PRODUCT_ID_SEP)) last.set(productModel(p.id), p.id)
+  return last
+}
+
 /** 零件補充資料（phstudy 或既有內建資料皆可作為來源） */
 export interface Enrichment {
   ratchetStats: (id: string) => PartStats | undefined
@@ -246,25 +281,27 @@ export function transformAll(raw: RawSheets, enrich?: Enrichment): DataBundle {
   const comboRows = toObjects(parseCsv(raw.comboCsv))
   const partRows = toObjects(parseCsv(raw.partsCsv))
 
-  // ---- 產品（tier 主表，每列一個產品） ----
-  const products: Product[] = tierRows
-    .filter((r) => r['型號 (ID)'])
-    .map((r) => ({
-      id: r['型號 (ID)'],
-      name: r['中文名稱 (Name)'],
-      type: r['類型 (Type)'] || '',
-      tier: r['階級 (Tier)'] === '-' ? '' : r['階級 (Tier)'] || '',
-      buy: r['購買建議 (Buy)'] || '',
-      ratchet: r['原裝固鎖 (Ratchet)'] || '',
-      ratchetTier: r['固鎖階級 (Ratchet Tier)'] || '',
-      bit: r['原裝軸心 (Bit)'] || '',
-      bitTier: r['軸心階級 (Bit Tier)'] || '',
-      // 來源表頭有一欄拼寫缺右括號，兩種都接
-      assist: r['原裝輔助戰刃 (Assist Blade'] || r['原裝輔助戰刃 (Assist Blade)'] || '',
-      source: r['來源產品 (Source)'] || '',
-      img: r['圖片網址 (Img)'] || '',
-      ...(enrich?.cxNames(r['型號 (ID)']) ?? {}),
-    }))
+  // ---- 產品（tier 主表，每列一個產品；型號重複時 dedupeProductIds 加名稱後綴） ----
+  const products: Product[] = dedupeProductIds(
+    tierRows
+      .filter((r) => r['型號 (ID)'])
+      .map((r) => ({
+        id: r['型號 (ID)'],
+        name: r['中文名稱 (Name)'],
+        type: r['類型 (Type)'] || '',
+        tier: r['階級 (Tier)'] === '-' ? '' : r['階級 (Tier)'] || '',
+        buy: r['購買建議 (Buy)'] || '',
+        ratchet: r['原裝固鎖 (Ratchet)'] || '',
+        ratchetTier: r['固鎖階級 (Ratchet Tier)'] || '',
+        bit: r['原裝軸心 (Bit)'] || '',
+        bitTier: r['軸心階級 (Bit Tier)'] || '',
+        // 來源表頭有一欄拼寫缺右括號，兩種都接
+        assist: r['原裝輔助戰刃 (Assist Blade'] || r['原裝輔助戰刃 (Assist Blade)'] || '',
+        source: r['來源產品 (Source)'] || '',
+        img: r['圖片網址 (Img)'] || '',
+        ...(enrich?.cxNames(r['型號 (ID)']) ?? {}),
+      })),
+  )
 
   // ---- blades：以名稱聚合產品，變體無階級時自家族基底繼承 ----
   const bladeMap = new Map<string, Blade>()
@@ -412,21 +449,36 @@ export interface PhMap {
  */
 export function buildPhMap(phDataList: any[], products: Product[], parts: PartsDb): PhMap {
   const map: PhMap = { sets: {}, blades: {}, ratchets: {}, bits: {}, assists: {} }
-  const productById = new Map(products.map((p) => [p.id, p]))
   const bladeNames = parts.blades.map((b) => b.name)
   const title = (p: any): string => p.catalog_title?.['zh-TW'] ?? p.catalog_title?.['ja-JP'] ?? ''
   const codeOf = (t: string) => t.match(/^([A-Z]{2,4}-\d+(?:-\d+)?)/)?.[1] ?? ''
   const suffixOf = (id: string) => id.replace(/^[A-Z]{2}-/, '')
 
+  // 型號 → 產品。同型號多件（聯名/變體）時以「標題含其名稱」消歧，取最長匹配；
+  // 消歧不到就不猜（寧可匯入時列為 unmatched，也不對到錯的產品）
+  const byModel = new Map<string, Product[]>()
+  for (const p of products) {
+    const m = productModel(p.id)
+    if (!byModel.has(m)) byModel.set(m, [])
+    byModel.get(m)!.push(p)
+  }
+  const matchProduct = (t: string): Product | undefined => {
+    const cands = byModel.get(codeOf(t))
+    if (!cands) return undefined
+    if (cands.length === 1) return cands[0]
+    const hits = cands.filter((p) => p.name && t.includes(p.name))
+    return hits.length ? hits.reduce((a, b) => (b.name.length > a.name.length ? b : a)) : undefined
+  }
+
   for (const phData of phDataList) {
     for (const [id, p] of Object.entries<any>(phData?.BeybladeSeries ?? {})) {
-      const prod = productById.get(codeOf(title(p)))
+      const prod = matchProduct(title(p))
       if (prod && !map.sets[suffixOf(id)]) map.sets[suffixOf(id)] = prod.id
     }
     for (const [id, p] of Object.entries<any>(phData?.BeybladePartsBlade ?? {})) {
       const suffix = suffixOf(id)
       if (map.blades[suffix]) continue
-      const prod = productById.get(codeOf(title(p)))
+      const prod = matchProduct(title(p))
       if (prod) {
         map.blades[suffix] = prod.name
         continue

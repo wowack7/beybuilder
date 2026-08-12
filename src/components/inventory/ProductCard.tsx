@@ -1,4 +1,4 @@
-import { imgUrl } from '../../lib/data'
+import { imgUrl, productModel } from '../../lib/data'
 import type { Product } from '../../types'
 import { TierBadge } from '../ui/TierBadge'
 import { TypeTag } from '../ui/TypeTag'
@@ -27,7 +27,7 @@ export function ProductCard({ product, owned, onToggle }: ProductCardProps) {
           X
         </span>
       )}
-      <span className="product-id">{product.id}</span>
+      <span className="product-id">{productModel(product.id)}</span>
       <span className="product-name">
         {product.name}
         <TierBadge tier={product.tier} />
