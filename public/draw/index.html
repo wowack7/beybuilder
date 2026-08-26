@@ -219,15 +219,18 @@ main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 
 .clear-done {
   flex: 0 0 auto;
-  padding: 0.2rem 0.6rem;
+  padding: 0.24rem 0.7rem;
   font: inherit;
-  font-size: 0.72rem;
-  color: var(--color-text-dim);
-  background: var(--color-chip);
-  border: 1px solid var(--color-line);
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--color-warn-ink);
+  background: var(--color-warn-soft);
+  border: 1.5px solid var(--color-warn);
   border-radius: 999px;
   cursor: pointer;
+  transition: transform var(--duration-fast) ease;
 }
+.clear-done::before { content: '↺ '; }
 .clear-done:active { transform: scale(0.95); }
 
 .group-sep { border: 0; border-top: 1px dashed color-mix(in oklab, var(--color-text-dim) 45%, transparent); margin: 0 0.9rem; }
@@ -270,7 +273,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   <nav class="chips" id="storeChips" aria-label="店家篩選"></nav>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=b07a2fe0"></script>
+<script src="data.js?v=ba7a31ea"></script>
 <script>
 (function () {
   'use strict';
