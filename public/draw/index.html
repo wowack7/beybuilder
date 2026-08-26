@@ -283,7 +283,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   <nav class="chips" id="itemChips" aria-label="品項篩選（可複選）"></nav>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=40d655b5"></script>
+<script src="data.js?v=f1a241f7"></script>
 <script>
 (function () {
   'use strict';
@@ -505,8 +505,9 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       var section = el('section', 'store');
       var head = el('div', 'store-head');
       head.appendChild(el('h2', '', storeName));
+      // 尚未開始（soon）不掛標籤：頂端橫幅已經講了，店名旁再標一次是噪音
       var st = statusOf(storeMeta[storeName]);
-      if (st) head.appendChild(el('span', 'tag tag-' + st.k, st.t));
+      if (st && st.k !== 'soon') head.appendChild(el('span', 'tag tag-' + st.k, st.t));
       head.appendChild(el('span', 'count', storeItems.length + ' 項'));
       section.appendChild(head);
 
