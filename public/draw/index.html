@@ -76,6 +76,20 @@ h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em; }
 h1 em { font-style: normal; color: var(--color-accent-ink); }
 .meta { font-size: 0.75rem; color: var(--color-text-dim); }
 
+.search {
+  margin-top: 0.55rem;
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.9rem;
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+}
+.search:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; border-color: transparent; }
+.search::placeholder { color: var(--color-text-dim); }
+
 .chips { display: flex; gap: 0.4rem; margin-top: 0.55rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
 .chips::-webkit-scrollbar { display: none; }
 .chip {
@@ -274,12 +288,13 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     <p class="lead"><span class="badge">怎麼用</span><span>把本頁網址丟進 LINE，用 <b>LINE 內建瀏覽器</b>開啟，點「抽選」直接開抽選頁，全程不跳出 LINE。</span></p>
     <p class="warn"><span class="badge">先設定</span><span>把<b>「使用預設瀏覽器開啟連結」關掉</b><span class="path">LINE ▸ 設定 ▸ LINE Labs</span>，否則點連結會被丟到外部瀏覽器。</span></p>
   </aside>
+  <input class="search" id="search" type="search" placeholder="搜尋品項（例：BX-51、旋風、獅鷲）" aria-label="搜尋品項">
   <nav class="chips" id="cityChips" aria-label="縣市篩選"></nav>
   <nav class="chips" id="storeChips" aria-label="店家篩選"></nav>
   <nav class="chips" id="itemChips" aria-label="品項篩選（可複選）"></nav>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=86bcd01b"></script>
+<script src="data.js?v=325fe7d2"></script>
 <script>
 (function () {
   'use strict';
@@ -363,11 +378,14 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     return f ? f[1].toUpperCase() : null;
   }
 
+  function norm(str) { return str.toLowerCase().replace(/[\s-]/g, ''); }
+
   var params = new URLSearchParams(location.search);
   var state = {
     i: (params.get('i') || '').split(',').filter(Boolean),
     c: params.get('c') || '',
-    s: params.get('s') || ''
+    s: params.get('s') || '',
+    q: params.get('q') || ''
   };
   if (state.c && cityOrder.indexOf(state.c) === -1) state.c = '';
   if (state.s && storeOrder.indexOf(state.s) === -1) state.s = '';
@@ -377,6 +395,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     if (state.i.length && state.i.indexOf(tagOf(it.n)) === -1) return false;
     if (state.c && it.c !== state.c) return false;
     if (state.s && it.s !== state.s) return false;
+    if (state.q && norm(it.n).indexOf(norm(state.q)) === -1) return false;
     return true;
   }
 
@@ -385,6 +404,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     if (state.i.length) p.set('i', state.i.join(','));
     if (state.c) p.set('c', state.c);
     if (state.s) p.set('s', state.s);
+    if (state.q) p.set('q', state.q);
     var qs = p.toString();
     history.replaceState(null, '', qs ? '?' + qs : location.pathname);
   }
@@ -441,9 +461,11 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 
   // 品項標籤：可複選（OR），數量依目前的縣市／店家篩選即時算
   function renderItemChips() {
+    // 型號籤的數量跟著縣市／店家／關鍵字連動（但不受已選型號影響，否則會自我收斂）
     var scope = DATA.items.filter(function (it) {
       if (state.c && it.c !== state.c) return false;
       if (state.s && it.s !== state.s) return false;
+      if (state.q && norm(it.n).indexOf(norm(state.q)) === -1) return false;
       return true;
     });
     var counts = {};
@@ -457,7 +479,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 
     var nav = document.getElementById('itemChips');
     nav.textContent = '';
-    if (tags.length < 2) return;
+    // 只剩一種型號就不必顯示這排；但已經選了型號時一定要留著，否則沒地方取消
+    if (tags.length < 2 && !state.i.length) return;
 
     var hint = el('span', 'chips-hint');
     hint.innerHTML = state.i.length ? '已選 <b>' + state.i.length + '</b> 項' : '品項<b>可複選</b>';
@@ -488,8 +511,11 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     document.getElementById('meta').textContent =
       visible.length + ' 項 · 更新 ' + DATA.updated;
 
-    if (visible.length === 0 && !DATA.stores.some(function (m) { return m.p; })) {
-      main.appendChild(el('p', 'empty', '目前沒有符合的品項。'));
+    // 有下任何篩選卻篩不到東西才提示；沒篩選時的空清單交給下面的「尚未公布」名單說明
+    var filtering = !!(state.q || state.i.length || state.c || state.s);
+    if (visible.length === 0) {
+      if (filtering) main.appendChild(el('p', 'empty', '沒有符合的品項，換個關鍵字或型號試試。'));
+      if (!state.q) renderPending();
       return;
     }
 
@@ -525,7 +551,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       main.appendChild(section);
     });
 
-    renderPending();
+    if (!state.q) renderPending();
   }
 
   function renderStale() {
@@ -589,6 +615,15 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     done = loadDone();
     renderList();
     renderClearDone();
+  });
+
+  var searchInput = document.getElementById('search');
+  searchInput.value = state.q;
+  searchInput.addEventListener('input', function () {
+    state.q = searchInput.value.trim();
+    renderList();
+    renderItemChips();
+    syncUrl();
   });
 
   update();
