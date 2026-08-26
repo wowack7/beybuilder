@@ -26,3 +26,6 @@ dist-ssr
 # Local AI agent config (not shared)
 .codex/
 AGENTS.md
+
+# 抽選目錄的上游來源網址（本機設定，不進版控）
+data/draw/source.local.json

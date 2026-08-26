@@ -23,6 +23,28 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **phstudy 匯入**：`src/lib/importPh.ts`＋映射表 `src/data/ph_map.json`（data:update 生成，含 hardcoded.json 聯名套組）。三種方式（`ImportPhBody`，全程瀏覽器端解析不上傳）：①**檔案匯入**（主要、手機也適用）——phstudy「下載」匯出 `{parts:[...]}` JSON 檔，本站選檔即解析；②書籤小工具跳轉 `#phimport=<base64>`（電腦一鍵）；③手動貼 JSON。三者最後都進 `parsePhInventory`（吃 partId，忽略其他欄位）
 - **GA4 分析**：`src/lib/analytics.ts`（gtag.js，只做頁面瀏覽），`main.tsx` 開頭呼叫 `initAnalytics()`。僅 `import.meta.env.PROD` 才載入——本機 dev 不追蹤。Measurement ID `G-NNJPTBMXKW` 硬編於該檔（公開值）
 
+## 抽選目錄 `/draw/`（刻意不進 Vite bundle 的純靜態單頁）
+
+戰鬥陀螺各店 LINE 官方帳號抽選（購買券）的連結目錄，2026-08-26 從獨立 repo 併入本站。
+
+- 網址 <https://beybuilder.5-seven.dog/draw/>；`public/draw/index.html` ＋ `public/draw/data.js`
+  由 Vite 原樣複製到 `dist/draw/`，**不是 React 分頁、也沒有 router**
+- **為什麼獨立於 SPA**：這頁的使用情境是搶券時在 LINE 內建瀏覽器單手快點，
+  必須秒開；走 SPA 要先載 React bundle。核心賣點是「連結一律同分頁開、不跳出 LINE」，
+  全頁禁用 `target="_blank"`／`window.open`，所有 `lin.ee` 都預先解析成 `liff.line.me` 直連
+- 掛 `noindex,nofollow`：這是個人工具，不進站台 SEO；因此首頁靜態骨架**不放內鏈**（與 `/tier/` 不同）
+- **資料**：`data/draw/`（`source-links.txt` 正本／`mapping.tsv` lin.ee→liff／`stores.tsv` 座標與
+  上游店名對照／`anchors.tsv` 排序錨點／`voom.tsv` 各店 VOOM 帳號）。
+  `data/draw/source.local.json`（上游彙整頁網址）**不進版控**
+- **指令**：`npm run draw:build`（重建 data.js＋把內容雜湊寫回 index.html 的 `?v=`）、
+  `npm run draw:sync`（比對上游，`-- --write` 才改檔）。兩者都**不串在 `npm run build`**：
+  `data.js` 是已 commit 的產物，資料要換批才手動重跑
+- **cache-busting 必要**：LINE 內建瀏覽器快取極黏，不換 `data.js?v=` 使用者會停在舊清單（實測踩過）
+- 店家排序＝到 `anchors.tsv` 最近錨點的直線距離＋`stores.tsv` 第 6 欄體感調整；
+  **距離與錨點只在 build 階段使用，不寫進 `data.js`、畫面也不顯示**（那是使用者的活動範圍）
+- 每家店在正本標 `@YYYY-MM-DD[~YYYY-MM-DD]` 抽選日期或 `@待公布`，頁面自動判定
+  「已結束／MM/DD 開始／進行中／待公布」並在頂端彙總
+
 ## SEO
 
 本站是 client-rendered SPA，爬蟲抓首頁只看得到歡迎頁文案（庫存空的），沒有任何零件名稱。因此：

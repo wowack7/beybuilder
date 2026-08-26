@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#06C755">
+<meta name="robots" content="noindex,nofollow">
+<title>戰鬥陀螺抽選目錄</title>
+<style>
+:root {
+  --color-bg: oklch(97.5% 0.006 90);
+  --color-surface: oklch(100% 0 0);
+  --color-text: oklch(22% 0.015 260);
+  --color-text-dim: oklch(48% 0.015 260);
+  --color-line: oklch(90% 0.008 90);
+  --color-accent: #06C755;
+  --color-accent-ink: oklch(38% 0.12 152);
+  --color-accent-soft: oklch(95% 0.045 152);
+  --color-chip: oklch(93.5% 0.01 90);
+  --color-stale: oklch(55% 0.19 25);
+  --color-stale-soft: oklch(96% 0.04 25);
+  --color-stale-ink: oklch(42% 0.17 25);
+  --color-warn: oklch(62% 0.15 65);
+  --color-warn-soft: oklch(96% 0.05 80);
+  --color-warn-ink: oklch(42% 0.12 60);
+  --radius-card: 14px;
+  --space-gutter: clamp(0.75rem, 3vw, 1.5rem);
+  --text-base: 0.9375rem;
+  --duration-fast: 150ms;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: oklch(19% 0.012 260);
+    --color-surface: oklch(24% 0.014 260);
+    --color-text: oklch(93% 0.005 260);
+    --color-text-dim: oklch(66% 0.01 260);
+    --color-line: oklch(31% 0.014 260);
+    --color-accent-ink: oklch(82% 0.14 152);
+    --color-accent-soft: oklch(30% 0.045 152);
+    --color-chip: oklch(29% 0.014 260);
+    --color-stale: oklch(65% 0.18 25);
+    --color-stale-soft: oklch(28% 0.06 25);
+    --color-stale-ink: oklch(85% 0.11 25);
+    --color-warn: oklch(72% 0.14 70);
+    --color-warn-soft: oklch(28% 0.045 70);
+    --color-warn-ink: oklch(85% 0.11 75);
+  }
+}
+* { box-sizing: border-box; margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: var(--text-base)/1.5 "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+  padding-bottom: 3rem;
+}
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in oklab, var(--color-bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.75rem var(--space-gutter) 0.6rem;
+}
+.masthead { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em; }
+h1 em { font-style: normal; color: var(--color-accent-ink); }
+.meta { font-size: 0.75rem; color: var(--color-text-dim); }
+
+.search {
+  margin-top: 0.55rem;
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.9rem;
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+}
+.search:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; border-color: transparent; }
+.search::placeholder { color: var(--color-text-dim); }
+
+.chips { display: flex; gap: 0.4rem; margin-top: 0.55rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: 0 0 auto;
+  padding: 0.34rem 0.8rem;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--color-text-dim);
+  background: var(--color-chip);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform var(--duration-fast) ease;
+}
+.chip:active { transform: scale(0.95); }
+.chip[aria-pressed="true"] {
+  color: var(--color-accent-ink);
+  background: var(--color-accent-soft);
+  border-color: color-mix(in oklab, var(--color-accent) 45%, transparent);
+  font-weight: 700;
+}
+.chip small { opacity: 0.7; font-size: 0.9em; }
+
+main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
+
+.store { margin-bottom: 1.1rem; }
+.store-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.35rem 0.2rem;
+}
+.store-head h2 { font-size: 1rem; font-weight: 800; }
+.store-head .count { font-size: 0.72rem; color: var(--color-text-dim); }
+.store-head .tag {
+  flex: 0 0 auto;
+  padding: 0.06rem 0.4rem;
+  font-size: 0.66rem;
+  font-weight: 800;
+  border-radius: 5px;
+}
+.tag-over { color: var(--color-text-dim); background: var(--color-chip); }
+.tag-soon { color: #fff; background: var(--color-accent); }
+.tag-live { color: #fff; background: var(--color-accent); }
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 48px;
+  padding: 0.55rem 0.9rem;
+  color: inherit;
+  text-decoration: none;
+  border-top: 1px solid var(--color-line);
+  transition: background var(--duration-fast) ease;
+}
+.item:first-child, .group-sep + .item { border-top: 0; }
+.item:active { background: var(--color-accent-soft); }
+.item .name { flex: 1; }
+.item .go {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-accent);
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+}
+.item.done .name { color: var(--color-text-dim); }
+.item.done .go { color: var(--color-text-dim); background: var(--color-chip); }
+
+.stale {
+  margin-top: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--color-stale-ink);
+  background: var(--color-stale-soft);
+  border: 1px solid color-mix(in oklab, var(--color-stale) 45%, transparent);
+  border-radius: 12px;
+}
+.stale b { font-weight: 800; }
+
+.notice {
+  margin-top: 0.6rem;
+  border: 1px solid var(--color-line);
+  border-left: 3px solid var(--color-warn);
+  border-radius: 0 12px 12px 0;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.notice p {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.notice b { font-weight: 800; }
+.notice .warn {
+  border-top: 1px solid var(--color-line);
+  color: var(--color-warn-ink);
+}
+.badge {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  border-radius: 5px;
+  color: var(--color-text-dim);
+  background: var(--color-chip);
+}
+.warn .badge { color: #fff; background: var(--color-warn); }
+.path {
+  display: inline-block;
+  margin: 0 0.15rem;
+  padding: 0.02rem 0.4rem;
+  font-size: 0.92em;
+  font-weight: 700;
+  white-space: nowrap;
+  border-radius: 5px;
+  color: var(--color-text-dim);
+  background: var(--color-chip);
+}
+
+.clear-done {
+  flex: 0 0 auto;
+  padding: 0.2rem 0.6rem;
+  font: inherit;
+  font-size: 0.72rem;
+  color: var(--color-text-dim);
+  background: var(--color-chip);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.clear-done:active { transform: scale(0.95); }
+
+.group-sep { border: 0; border-top: 1px dashed color-mix(in oklab, var(--color-text-dim) 45%, transparent); margin: 0 0.9rem; }
+
+.pending {
+  margin-top: 1.4rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-line);
+}
+.pending h2 { font-size: 0.85rem; font-weight: 800; }
+.pending p { margin-top: 0.15rem; font-size: 0.72rem; color: var(--color-text-dim); }
+.pending ul { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.6rem; list-style: none; padding: 0; }
+.pending li {
+  padding: 0.18rem 0.5rem;
+  font-size: 0.72rem;
+  color: var(--color-text-dim);
+  background: var(--color-chip);
+  border-radius: 6px;
+}
+.pending li b { font-weight: 700; color: var(--color-text); }
+
+.empty { text-align: center; color: var(--color-text-dim); padding: 3rem 0; }
+footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-size: 0.75rem; color: var(--color-text-dim); }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="masthead">
+    <h1>戰鬥陀螺<em>抽選目錄</em></h1>
+    <span class="meta" id="meta"></span>
+    <button class="clear-done" id="clearDone" type="button" hidden></button>
+  </div>
+  <aside class="stale" id="stale" hidden></aside>
+  <aside class="notice">
+    <p class="lead"><span class="badge">怎麼用</span><span>把本頁網址丟進 LINE，用 <b>LINE 內建瀏覽器</b>開啟，點「抽選」直接開抽選頁，全程不跳出 LINE。</span></p>
+    <p class="warn"><span class="badge">先設定</span><span>把<b>「使用預設瀏覽器開啟連結」關掉</b><span class="path">LINE ▸ 設定 ▸ LINE Labs</span>，否則點連結會被丟到外部瀏覽器。</span></p>
+  </aside>
+  <input class="search" id="search" type="search" placeholder="搜尋品項（例：BX-51、旋風、獅鷲）" aria-label="搜尋品項">
+  <nav class="chips" id="cityChips" aria-label="縣市篩選"></nav>
+  <nav class="chips" id="storeChips" aria-label="店家篩選"></nav>
+</header>
+<main id="list" aria-live="polite"></main>
+<script src="data.js?v=b07a2fe0"></script>
+<script>
+(function () {
+  'use strict';
+  var DATA = window.FUNBOX_DATA;
+
+  var DONE_KEY = 'funbox:done:v1';
+  var done = loadDone();
+
+  function loadDone() {
+    var map = {};
+    try {
+      var raw = localStorage.getItem(DONE_KEY);
+      if (raw) {
+        JSON.parse(raw).forEach(function (u) { map[u] = 1; });
+      }
+    } catch (err) {
+      /* 無痕模式或關閉 site data：降級為本次瀏覽有效 */
+    }
+    return map;
+  }
+
+  function saveDone() {
+    try {
+      localStorage.setItem(DONE_KEY, JSON.stringify(Object.keys(done)));
+    } catch (err) {
+      /* 寫入失敗不影響瀏覽 */
+    }
+  }
+
+  function doneCount() { return Object.keys(done).length; }
+
+  function markDone(url, node) {
+    if (done[url]) return;
+    done[url] = 1;
+    saveDone();
+    node.classList.add('done');
+    node.querySelector('.go').textContent = '已抽';
+    renderClearDone();
+  }
+
+  function renderClearDone() {
+    var btn = document.getElementById('clearDone');
+    var n = doneCount();
+    btn.hidden = n === 0;
+    btn.textContent = '已抽 ' + n + ' · 清除';
+  }
+
+  // DATA.stores 已依「到活動區域最近」排序，渲染與篩選都吃這個順序
+  var storeOrder = DATA.stores.map(function (s) { return s.n; });
+  var storeMeta = {};
+  DATA.stores.forEach(function (s) { storeMeta[s.n] = s; });
+  var storeCounts = {};
+  DATA.items.forEach(function (it) { storeCounts[it.s] = (storeCounts[it.s] || 0) + 1; });
+  var cityOrder = [];
+  DATA.stores.forEach(function (s) {
+    if (cityOrder.indexOf(s.c) === -1) cityOrder.push(s.c);
+  });
+  var cityCounts = {};
+  DATA.items.forEach(function (it) { cityCounts[it.c] = (cityCounts[it.c] || 0) + 1; });
+  DATA.stores.forEach(function (m) { if (!(m.c in cityCounts)) cityCounts[m.c] = 0; });
+
+  var TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+
+  // 每家店的批次狀態：已結束 / 尚未開始 / 進行中
+  function statusOf(m) {
+    if (!m) return null;
+    if (m.p) return { k: 'pending', t: '待公布' };
+    if (!m.rs) return null;
+    var start = new Date(m.rs + 'T00:00:00');
+    var end = m.re ? new Date(m.re + 'T23:59:59') : null;
+    if (end && end < TODAY) return { k: 'over', t: '已結束' };
+    if (start > TODAY) return { k: 'soon', t: m.rs.slice(5).replace('-', '/') + ' 開始' };
+    return { k: 'live', t: '進行中' };
+  }
+
+  var params = new URLSearchParams(location.search);
+  var state = {
+    c: params.get('c') || '',
+    s: params.get('s') || '',
+    q: params.get('q') || ''
+  };
+  if (state.c && cityOrder.indexOf(state.c) === -1) state.c = '';
+  if (state.s && storeOrder.indexOf(state.s) === -1) state.s = '';
+  if (state.s && state.c && storeMeta[state.s].c !== state.c) state.c = storeMeta[state.s].c;
+
+  function norm(str) { return str.toLowerCase().replace(/[\s-]/g, ''); }
+
+  function matches(it) {
+    if (state.c && it.c !== state.c) return false;
+    if (state.s && it.s !== state.s) return false;
+    if (state.q && norm(it.n).indexOf(norm(state.q)) === -1) return false;
+    return true;
+  }
+
+  function syncUrl() {
+    var p = new URLSearchParams();
+    if (state.c) p.set('c', state.c);
+    if (state.s) p.set('s', state.s);
+    if (state.q) p.set('q', state.q);
+    var qs = p.toString();
+    history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+  }
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function chip(label, count, pressed, onTap) {
+    var btn = el('button', 'chip');
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    btn.textContent = label + ' ';
+    if (count != null) {
+      var small = el('small', '', String(count));
+      btn.appendChild(small);
+    }
+    btn.addEventListener('click', onTap);
+    return btn;
+  }
+
+  function renderChips() {
+    var cityNav = document.getElementById('cityChips');
+    cityNav.textContent = '';
+    cityNav.appendChild(chip('全部', DATA.items.length, state.c === '', function () {
+      state.c = '';
+      update();
+    }));
+    cityOrder.forEach(function (c) {
+      cityNav.appendChild(chip(c, cityCounts[c] || null, state.c === c, function () {
+        state.c = state.c === c ? '' : c;
+        state.s = '';
+        update();
+      }));
+    });
+
+    // 店家籤只列出目前縣市的店，依距離近→遠
+    var shown = storeOrder.filter(function (s) { return !state.c || storeMeta[s].c === state.c; });
+    var storeNav = document.getElementById('storeChips');
+    storeNav.textContent = '';
+    storeNav.appendChild(chip('全部店家', null, state.s === '', function () { state.s = ''; update(); }));
+    shown.filter(function (s) { return storeCounts[s]; }).forEach(function (s) {
+      storeNav.appendChild(chip(s, storeCounts[s], state.s === s, function () {
+        state.s = state.s === s ? '' : s;
+        update();
+      }));
+    });
+  }
+
+  function renderList() {
+    var main = document.getElementById('list');
+    main.textContent = '';
+    var visible = DATA.items.filter(matches);
+    document.getElementById('meta').textContent =
+      visible.length + ' 項 · 更新 ' + DATA.updated;
+
+    if (visible.length === 0 && !DATA.stores.some(function (m) { return m.p; })) {
+      main.appendChild(el('p', 'empty', '沒有符合的品項，換個關鍵字試試。'));
+      return;
+    }
+
+    storeOrder.forEach(function (storeName) {
+      var storeItems = visible.filter(function (it) { return it.s === storeName; });
+      if (storeItems.length === 0) return;
+
+      var section = el('section', 'store');
+      var head = el('div', 'store-head');
+      head.appendChild(el('h2', '', storeName));
+      var st = statusOf(storeMeta[storeName]);
+      if (st) head.appendChild(el('span', 'tag tag-' + st.k, st.t));
+      head.appendChild(el('span', 'count', storeItems.length + ' 項'));
+      section.appendChild(head);
+
+      var card = el('div', 'card');
+      var lastGroup = storeItems[0].g;
+      storeItems.forEach(function (it) {
+        if (it.g !== lastGroup) {
+          card.appendChild(el('hr', 'group-sep'));
+          lastGroup = it.g;
+        }
+        var a = el('a', 'item');
+        a.href = it.u;
+        a.appendChild(el('span', 'name', it.n));
+        a.appendChild(el('span', 'go', done[it.u] ? '已抽' : '抽選'));
+        if (done[it.u]) a.classList.add('done');
+        a.addEventListener('click', function () { markDone(it.u, a); });
+        card.appendChild(a);
+      });
+      section.appendChild(card);
+      main.appendChild(section);
+    });
+
+    if (!state.q) renderPending();
+  }
+
+  function renderStale() {
+    var box = document.getElementById('stale');
+    var groups = { over: 0, soon: 0, live: 0, pending: 0 };
+    var soonDate = '';
+    DATA.stores.forEach(function (m) {
+      var st = statusOf(m);
+      if (!st) return;
+      groups[st.k] += 1;
+      if (st.k === 'soon' && (!soonDate || m.rs < soonDate)) soonDate = m.rs;
+    });
+    var parts = [];
+    if (groups.soon) parts.push('<b>' + groups.soon + ' 家已公布新一批</b>（' +
+      soonDate.slice(5).replace('-', '/') + ' 開始）');
+    if (groups.live) parts.push('<b>' + groups.live + ' 家抽選進行中</b>');
+    if (groups.over) parts.push('<b>' + groups.over + ' 家還是上一批</b>，連結點得開但已無法抽');
+    if (groups.pending) parts.push(groups.pending + ' 家尚未公布');
+    box.hidden = parts.length === 0;
+    box.innerHTML = parts.join('；') + '。';
+  }
+
+  function renderPending() {
+    var main = document.getElementById('list');
+    var list = DATA.stores.filter(function (m) {
+      return m.p && (!state.c || m.c === state.c);
+    });
+    if (list.length === 0) return;
+
+    var sec = el('section', 'pending');
+    sec.appendChild(el('h2', '', '尚未公布新一批（' + list.length + ' 家）'));
+    sec.appendChild(el('p', '', '這些店的上一批已結束，連結先移除；等各店 LINE 官方帳號公布後補上。'));
+    var ul = el('ul');
+    list.forEach(function (m) {
+      var li = el('li');
+      li.appendChild(el('b', '', m.n));
+      if (!state.c) li.appendChild(document.createTextNode(' ' + m.c));
+      ul.appendChild(li);
+    });
+    sec.appendChild(ul);
+    main.appendChild(sec);
+  }
+
+  function update() {
+    renderStale();
+    renderChips();
+    renderList();
+    renderClearDone();
+    syncUrl();
+  }
+
+  document.getElementById('clearDone').addEventListener('click', function () {
+    if (!confirm('清除 ' + doneCount() + ' 筆已抽紀錄？')) return;
+    done = {};
+    saveDone();
+    renderList();
+    renderClearDone();
+  });
+
+  window.addEventListener('pageshow', function () {
+    done = loadDone();
+    renderList();
+    renderClearDone();
+  });
+
+  var searchInput = document.getElementById('search');
+  searchInput.value = state.q;
+  searchInput.addEventListener('input', function () {
+    state.q = searchInput.value.trim();
+    renderList();
+    syncUrl();
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
