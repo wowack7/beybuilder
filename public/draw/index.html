@@ -17,6 +17,9 @@
   --color-accent-ink: oklch(38% 0.12 152);
   --color-accent-soft: oklch(95% 0.045 152);
   --color-chip: oklch(93.5% 0.01 90);
+  --color-tag: oklch(52% 0.17 275);
+  --color-tag-soft: oklch(95% 0.045 275);
+  --color-tag-ink: oklch(42% 0.16 275);
   --color-stale: oklch(55% 0.19 25);
   --color-stale-soft: oklch(96% 0.04 25);
   --color-stale-ink: oklch(42% 0.17 25);
@@ -38,6 +41,9 @@
     --color-accent-ink: oklch(82% 0.14 152);
     --color-accent-soft: oklch(30% 0.045 152);
     --color-chip: oklch(29% 0.014 260);
+    --color-tag: oklch(62% 0.17 275);
+    --color-tag-soft: oklch(30% 0.06 275);
+    --color-tag-ink: oklch(85% 0.10 275);
     --color-stale: oklch(65% 0.18 25);
     --color-stale-soft: oklch(28% 0.06 25);
     --color-stale-ink: oklch(85% 0.11 25);
@@ -106,7 +112,8 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   font-weight: 700;
 }
 .chip small { opacity: 0.7; font-size: 0.9em; }
-.chip-item[aria-pressed="true"] { background: var(--color-accent); color: #fff; border-color: transparent; }
+.chip-item { color: var(--color-tag-ink); background: var(--color-tag-soft); }
+.chip-item[aria-pressed="true"] { color: #fff; background: var(--color-tag); border-color: transparent; font-weight: 700; }
 .chip-item[aria-pressed="true"] small { opacity: 0.85; }
 
 main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
@@ -276,7 +283,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   <nav class="chips" id="itemChips" aria-label="品項篩選（可複選）"></nav>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=76f7da65"></script>
+<script src="data.js?v=40d655b5"></script>
 <script>
 (function () {
   'use strict';
