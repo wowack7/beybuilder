@@ -106,6 +106,8 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   font-weight: 700;
 }
 .chip small { opacity: 0.7; font-size: 0.9em; }
+.chip-item[aria-pressed="true"] { background: var(--color-accent); color: #fff; border-color: transparent; }
+.chip-item[aria-pressed="true"] small { opacity: 0.85; }
 
 main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 
@@ -271,9 +273,10 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   <input class="search" id="search" type="search" placeholder="搜尋品項（例：BX-51、旋風、獅鷲）" aria-label="搜尋品項">
   <nav class="chips" id="cityChips" aria-label="縣市篩選"></nav>
   <nav class="chips" id="storeChips" aria-label="店家篩選"></nav>
+  <nav class="chips" id="itemChips" aria-label="品項篩選（可複選）"></nav>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=ba7a31ea"></script>
+<script src="data.js?v=76f7da65"></script>
 <script>
 (function () {
   'use strict';
@@ -349,8 +352,17 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     return { k: 'live', t: '進行中' };
   }
 
+  // 品項標籤＝型號（BX-51 / UX-19 / CX-18…）；抓不到編號就退成純字母（BXG）
+  function tagOf(name) {
+    var m = name.match(/^([A-Za-z]+)[-\s]?(\d{1,3})(?![0-9])/);
+    if (m) return (m[1] + '-' + m[2]).toUpperCase();
+    var f = name.match(/^([A-Za-z]+)/);
+    return f ? f[1].toUpperCase() : null;
+  }
+
   var params = new URLSearchParams(location.search);
   var state = {
+    i: (params.get('i') || '').split(',').filter(Boolean),
     c: params.get('c') || '',
     s: params.get('s') || '',
     q: params.get('q') || ''
@@ -362,6 +374,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   function norm(str) { return str.toLowerCase().replace(/[\s-]/g, ''); }
 
   function matches(it) {
+    if (state.i.length && state.i.indexOf(tagOf(it.n)) === -1) return false;
     if (state.c && it.c !== state.c) return false;
     if (state.s && it.s !== state.s) return false;
     if (state.q && norm(it.n).indexOf(norm(state.q)) === -1) return false;
@@ -370,6 +383,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 
   function syncUrl() {
     var p = new URLSearchParams();
+    if (state.i.length) p.set('i', state.i.join(','));
     if (state.c) p.set('c', state.c);
     if (state.s) p.set('s', state.s);
     if (state.q) p.set('q', state.q);
@@ -422,6 +436,46 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
         state.s = state.s === s ? '' : s;
         update();
       }));
+    });
+
+    renderItemChips();
+  }
+
+  // 品項標籤：可複選（OR），數量依目前的縣市／店家篩選即時算
+  function renderItemChips() {
+    var scope = DATA.items.filter(function (it) {
+      if (state.c && it.c !== state.c) return false;
+      if (state.s && it.s !== state.s) return false;
+      return true;
+    });
+    var counts = {};
+    scope.forEach(function (it) {
+      var t = tagOf(it.n);
+      if (t) counts[t] = (counts[t] || 0) + 1;
+    });
+    var tags = Object.keys(counts).sort(function (a, b) {
+      return counts[b] - counts[a] || (a < b ? -1 : 1);
+    });
+
+    var nav = document.getElementById('itemChips');
+    nav.textContent = '';
+    if (tags.length < 2) return;
+
+    if (state.i.length) {
+      nav.appendChild(chip('清除品項', null, false, function () {
+        state.i = [];
+        update();
+      }));
+    }
+    tags.forEach(function (t) {
+      var on = state.i.indexOf(t) !== -1;
+      var btn = chip(t, counts[t], on, function () {
+        state.i = on ? state.i.filter(function (x) { return x !== t; }) : state.i.concat([t]);
+        update();
+      });
+      btn.className = 'chip chip-item';
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      nav.appendChild(btn);
     });
   }
 
