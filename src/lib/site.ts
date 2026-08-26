@@ -19,5 +19,8 @@ export const BASE_PATH = '/'
 /** 靜態天梯總表（由 scripts/gen-seo.mjs 於 build 後產出） */
 export const TIER_PATH = 'tier/'
 
+/** 抽選目錄（public/draw 的純靜態單頁，非 React 分頁） */
+export const DRAW_PATH = 'draw/'
+
 /** 社群分享縮圖（public/og.png，由 scripts/gen-og.mjs 產出） */
 export const OG_IMAGE_URL = `${SITE_URL}og.png`

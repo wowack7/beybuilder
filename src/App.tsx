@@ -10,6 +10,7 @@ import { Modal } from './components/ui/Modal'
 import { useInventory } from './hooks/useInventory'
 import { dataStatus } from './lib/data'
 import { decodeImportHash } from './lib/importPh'
+import { BASE_PATH, DRAW_PATH } from './lib/site'
 
 function formatDataDate(iso: string): string {
   const d = new Date(iso)
@@ -79,6 +80,10 @@ function App() {
                 )}
               </button>
             ))}
+            {/* 抽選目錄是站內的純靜態頁（public/draw），不是 React 分頁——用真連結整頁跳轉 */}
+            <a className="tab tab-draw" href={`${BASE_PATH}${DRAW_PATH}`}>
+              官方抽買
+            </a>
           </div>
           <button type="button" className="nav-import" onClick={() => setImportOpen(true)}>
             匯入零件

@@ -198,6 +198,20 @@ nav[aria-label='主導覽'] {
   box-shadow: 0 0 16px var(--accent-glow);
 }
 
+.tab-draw {
+  color: var(--line-green);
+  border-color: color-mix(in oklch, var(--line-green) 45%, transparent);
+  background: color-mix(in oklch, var(--line-green) 12%, transparent);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tab-draw:hover {
+  color: var(--line-green-ink);
+  background: var(--line-green);
+}
+
 .tab .count {
   font-size: 0.75em;
   opacity: 0.75;

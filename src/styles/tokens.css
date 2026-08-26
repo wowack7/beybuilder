@@ -15,6 +15,11 @@
   --accent-ink: oklch(20% 0.05 55);
   --accent-glow: oklch(76% 0.19 55 / 0.16);
 
+  /* LINE 官方抽買入口（/draw/）專用綠：刻意不同於熾焰橘 accent，一眼看出是外部性質的分頁 */
+  --line-green: oklch(72% 0.19 152);
+  --line-green-deep: oklch(58% 0.16 152);
+  --line-green-ink: oklch(18% 0.04 152);
+
   --gold: oklch(82% 0.13 85);
   --silver: oklch(80% 0.02 260);
   --danger: oklch(66% 0.19 25);

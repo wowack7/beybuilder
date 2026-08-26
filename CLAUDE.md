@@ -32,7 +32,10 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **為什麼獨立於 SPA**：這頁的使用情境是搶券時在 LINE 內建瀏覽器單手快點，
   必須秒開；走 SPA 要先載 React bundle。核心賣點是「連結一律同分頁開、不跳出 LINE」，
   全頁禁用 `target="_blank"`／`window.open`，所有 `lin.ee` 都預先解析成 `liff.line.me` 直連
-- 掛 `noindex,nofollow`：這是個人工具，不進站台 SEO；因此首頁靜態骨架**不放內鏈**（與 `/tier/` 不同）
+- 掛 `noindex,nofollow`：這是個人工具，不進站台 SEO；因此首頁靜態骨架**不放內鏈**（與 `/tier/` 不同）。
+  站頭導覽有一顆綠色「官方抽買」（`.tab-draw`，`--line-green` 系；`App.tsx` 裡是真 `<a>` 整頁跳轉，
+  不是 React 分頁）——它在 JSX 裡，不會出現在原始 HTML，所以不影響 noindex 的意圖
+- 路徑常數 `DRAW_PATH` 放在 `src/lib/site.ts`（與 `TIER_PATH` 同一處）
 - **資料**：`data/draw/`（`source-links.txt` 正本／`mapping.tsv` lin.ee→liff／`stores.tsv` 座標與
   上游店名對照／`anchors.tsv` 排序錨點／`voom.tsv` 各店 VOOM 帳號）。
   `data/draw/source.local.json`（上游彙整頁網址）**不進版控**
