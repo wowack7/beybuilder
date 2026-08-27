@@ -41,7 +41,11 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   `data/draw/source.local.json`（上游彙整頁網址）**不進版控**
 - **指令**：`npm run draw:build`（重建 data.js＋把內容雜湊寫回 index.html 的 `?v=`）、
   `npm run draw:sync`（比對上游，`-- --write` 才改檔）。兩者都**不串在 `npm run build`**：
-  `data.js` 是已 commit 的產物，資料要換批才手動重跑
+  `data.js` 是已 commit 的產物，資料要換批才重跑
+- **sync 是增量合併，不是覆寫**：各店逐日陸續公布，覆寫會把還沒公布的店整批抹掉。
+  規則：①上游店名用正規化鍵模糊比對（上游每批都會微調 `Funbox`／`FunBox Toys-`／空格／尾綴「店」）；
+  ②同一批次（**比開始日**，因為上游常先只給開始日、之後才補結束日）取聯集，
+  保留人工從 VOOM 補進、上游還沒收的品項；③換批才整店換掉；④上游沒列的店原封不動
 - **cache-busting 必要**：LINE 內建瀏覽器快取極黏，不換 `data.js?v=` 使用者會停在舊清單（實測踩過）
 - 店家排序＝到 `anchors.tsv` 最近錨點的直線距離＋`stores.tsv` 第 6 欄體感調整；
   **距離與錨點只在 build 階段使用，不寫進 `data.js`、畫面也不顯示**（那是使用者的活動範圍）

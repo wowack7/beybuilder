@@ -60,11 +60,22 @@ console.log(`\n上游: ${stores.length} 家店 / ${stores.reduce((n, s) => n + s
 // --- 對照本站店名（data/stores.tsv 的第一欄＝本站店名，第五欄＝上游店名） ---
 const tsv = readFileSync(join(root, `${DATA}/stores.tsv`), 'utf8').split('\n')
   .map((l) => l.trim()).filter((l) => l && !l.startsWith('#')).map((l) => l.split('\t'));
-const bySrcName = new Map(tsv.filter((r) => r[4]).map((r) => [r[4], r[0]]));
-const known = new Set(tsv.map((r) => r[0]));
+// 上游每批都會微調店名（Funbox／FunBox Toys-／多餘空格／尾綴「店」），用正規化鍵比對
+const key = (n) =>
+  n
+    .toLowerCase()
+    .replace(/[\s\-－–—_]/g, '')
+    .replace(/^funbox(toys?)?/, '')
+    .replace(/店$/, '');
+const bySrcName = new Map();
+for (const r of tsv) {
+  if (r[4]) bySrcName.set(key(r[4]), r[0]);
+  bySrcName.set(key(r[0]), r[0]);
+}
+const matchStore = (srcName) => bySrcName.get(key(srcName)) ?? null;
 
-const picked = stores.filter((s) => all || bySrcName.has(s.store));
-const unmapped = stores.filter((s) => !bySrcName.has(s.store));
+const picked = stores.filter((s) => (all || matchStore(s.store)) && s.items.length);
+const unmapped = stores.filter((s) => !matchStore(s.store) && s.items.length);
 console.log(`已對照店名: ${stores.length - unmapped.length} 家；未對照: ${unmapped.length} 家`);
 if (unmapped.length && !all) {
   console.log('  未對照（要收錄請在 data/draw/stores.tsv 補一列：本站店名<TAB>縣市<TAB>lat<TAB>lng<TAB>上游店名）:');
@@ -102,23 +113,90 @@ console.log('');
 const fails = needCodes.filter((c) => mapping.get(c) === 'FAIL');
 if (fails.length) console.log(`⚠️  轉址失敗 ${fails.length} 筆: ${fails.join(', ')}`);
 
-// --- 寫回正本（依縣市分區；店內分組線不保留，上游沒有這個資訊） ---
-const out = [
-  '# 資料正本：以縣市分區，`### 縣市` → `[店名]` → 品名 ＋ lin.ee 網址；`—` 為店內分組線',
-  `# 由 scripts/draw-sync.mjs 於 ${new Date().toISOString().slice(0, 10)} 同步`,
-  `# 同步時上游提示：${reminder || '(無)'}`,
-  '',
-];
-const cities = [...new Set(picked.map((s) => s.city))];
-for (const c of cities) {
-  out.push(`### ${c}`, '');
-  for (const s of picked.filter((x) => x.city === c)) {
-    out.push(`[${bySrcName.get(s.store) ?? s.store}]`);
-    for (const [n, u] of s.items) out.push(n, u);
-    out.push('');
-  }
-  out.push('');
+// --- 合併回正本（只換上游這批有列的店，其餘原封不動） ---
+// 為什麼是合併不是覆寫：各店是逐日陸續公布的，覆寫會把還沒公布的店整批抹掉，
+// 也會蓋掉手動從 VOOM 補進來的資料。
+const lines = readFileSync(join(root, `${DATA}/source-links.txt`), 'utf8').split('\n');
+
+/** 從上游的「抽選日期：2026/08/28 ～ 2026/08/29」取出 @起訖 標記 */
+function roundMark(periods) {
+  const dates = [
+    ...new Set(
+      periods
+        .join(' ')
+        .match(/20\d\d\/\d{1,2}\/\d{1,2}/g)
+        ?.map((d) => d.replace(/\//g, '-').replace(/-(\d)(?!\d)/g, '-0$1')) ?? [],
+    ),
+  ].sort();
+  if (!dates.length) return null;
+  return dates.length > 1 ? `@${dates[0]}~${dates[dates.length - 1]}` : `@${dates[0]}`;
 }
+
+const byStore = new Map(picked.map((s) => [matchStore(s.store) ?? s.store, s]));
+const out = [];
+const changed = [];
+let i = 0;
+while (i < lines.length) {
+  const m = lines[i].trim().match(/^\[(.+)\]$/);
+  if (!m) { out.push(lines[i]); i += 1; continue; }
+
+  const store = m[1];
+  const body = [];
+  i += 1;
+  while (i < lines.length && !/^\[.+\]$|^###/.test(lines[i].trim())) { body.push(lines[i]); i += 1; }
+
+  const up = byStore.get(store);
+  if (!up) { out.push(`[${store}]`, ...body); continue; }
+
+  // 既有品項（品名＋網址成對）
+  const prev = [];
+  for (let k = 0; k < body.length; k += 1) {
+    const url = body[k].trim();
+    if (url.startsWith('https://lin.ee/') && k > 0) prev.push([body[k - 1].trim(), url]);
+  }
+  const prevMark = body.map((l) => l.trim()).find((l) => l.startsWith('@')) ?? '';
+  const mark = roundMark(up.periods) ?? '';
+
+  // 同一批次以「開始日」判定：上游常先只給開始日、之後才補上結束日（@2026-08-28 → @2026-08-28~2026-08-29），
+  // 比整串會誤判成換批、把人工補的資料洗掉。
+  const startOf = (mk) => (mk.startsWith('@') ? mk.slice(1).split('~')[0] : '');
+  const sameRound = !!mark && startOf(prevMark) === startOf(mark);
+  const upUrls = new Set(up.items.map(([, u]) => u));
+  // 換批（開始日不同，或原本是 @待公布）：整個換掉，舊批次的連結一律作廢
+  const keep = sameRound ? prev.filter(([, u]) => !upUrls.has(u)) : [];
+  const dropped = sameRound ? [] : prev.filter(([, u]) => !upUrls.has(u));
+  const prevUrls = new Set(prev.map(([, u]) => u));
+  const added = up.items.filter(([, u]) => !prevUrls.has(u));
+  if (added.length || dropped.length)
+    changed.push({ store, added: added.length, gone: dropped.length, kept: keep.length });
+
+  out.push(`[${store}]`);
+  if (mark) out.push(mark);
+  for (const [n, u] of up.items) out.push(n, u);
+  for (const [n, u] of keep) out.push(n, u);
+  out.push('');
+  byStore.delete(store);
+}
+
+// 上游有、正本沒有的店（新開的店）append 到最後，等人工補座標與縣市分區
+for (const [name, up] of byStore) {
+  out.push('', `### ${up.city}`, '', `[${name}]`);
+  const mark = roundMark(up.periods);
+  if (mark) out.push(mark);
+  for (const [n, u] of up.items) out.push(n, u);
+  out.push('');
+  changed.push({ store: name, added: up.items.length, gone: 0, isNew: true });
+}
+
 writeFileSync(join(root, `${DATA}/source-links.txt`), out.join('\n'));
-console.log(`\ndata/source-links.txt 已更新（${picked.length} 家 / ${[...nextUrls].length} 筆）`);
+console.log('');
+if (!changed.length) {
+  console.log('正本沒有變動');
+} else {
+  for (const c of changed) {
+    const kept = c.kept ? ` （保留人工補的 ${c.kept} 筆）` : '';
+    console.log(`  ${c.isNew ? '新店家 ' : ''}${c.store}: +${c.added} -${c.gone}${kept}`);
+  }
+}
+console.log(`\ndata/draw/source-links.txt 已更新（上游 ${picked.length} 家 / ${[...nextUrls].length} 筆）`);
 console.log('接著跑: npm run draw:build');
