@@ -41,11 +41,13 @@ export function extractLeads(text) {
   return { hit, links, dates, found: hit.length > 0 || links.length > 0 };
 }
 
+// 只削掉行尾，不能 trim()：official.tsv 的第一欄可以是空的（官方有這家、本站還沒收錄），
+// 前導 tab 一被 trim 掉，欄位就整排左移——店名會被當成粉專網址送進 page.goto()
 const readTsv = (f) =>
   readFileSync(join(root, DATA, f), 'utf8')
     .split('\n')
-    .map((l) => l.trim())
-    .filter((l) => l && !l.startsWith('#'))
+    .map((l) => l.replace(/\s+$/, ''))
+    .filter((l) => l.trim() && !l.startsWith('#'))
     .map((l) => l.split('\t'));
 
 function targets() {
