@@ -82,10 +82,11 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.3rem 0.1rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--color-text-dim);
+  padding: 0.32rem 0.1rem;
+  font-size: 1rem;           /* 收起來時這行是唯一的入口，要一眼看得到 */
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
   cursor: pointer;
   list-style: none;          /* 拿掉原生三角，右側自繪 chevron */
   user-select: none;
@@ -104,14 +105,21 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
 .fold[open] > summary::after { transform: translateY(1px) rotate(-135deg); }
 .fold-note {
   font-weight: 400;
-  font-size: 0.95em;
+  font-size: 0.78rem;        /* 標題放大了，附註維持小字才有主從 */
   color: var(--color-text-dim);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* 收起來時仍看得出有沒有在篩選 */
-.fold.is-on > summary { color: var(--color-accent-ink); }
+/* 兩個標題各給一色：說明＝橘（同「先設定」警示徽章），篩選＝綠（站台 accent） */
+#howto > summary { color: var(--color-warn-ink); }
+#filters > summary { color: var(--color-accent-ink); }
+/* 收起來時仍看得出有沒有在篩選：整行加底色，附註轉成綠色粗體 */
+.fold.is-on > summary {
+  padding: 0.32rem 0.5rem;
+  background: var(--color-accent-soft);
+  border-radius: 8px;
+}
 .fold.is-on .fold-note { color: var(--color-accent-ink); font-weight: 700; }
 .fold[open] > summary { margin-bottom: -0.1rem; }
 
@@ -152,8 +160,9 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
 }
 .chip small { opacity: 0.7; font-size: 0.9em; }
 /* 品項＝下拉勾選：型號有二十幾種，攤成一排太長，收起來只佔一行 */
-.picker > summary { color: var(--color-tag-ink); }
-.picker.is-on > summary,
+/* 它是篩選的下一層，字級退一階、用紫色與上層兩個標題區分 */
+.picker > summary { font-size: 0.88rem; color: var(--color-tag-ink); }
+.picker.is-on > summary { background: var(--color-tag-soft); }
 .picker.is-on .fold-note { color: var(--color-tag-ink); }
 .picker-panel {
   display: grid;
@@ -385,7 +394,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   </details>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=2047869e"></script>
+<script src="data.js?v=424bd338"></script>
 <script>
 (function () {
   'use strict';
