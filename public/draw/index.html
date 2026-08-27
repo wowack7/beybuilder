@@ -180,6 +180,8 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   position: relative;
   width: 100%;
   max-width: 420px;
+  max-height: 86vh;
+  overflow-y: auto;
   padding: 2.2rem 1rem 1rem;
   background: var(--color-bg);
   border-radius: var(--radius-card);
@@ -322,12 +324,28 @@ main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 .stale b { font-weight: 800; }
 
 .modal-title { font-size: 1.05rem; font-weight: 800; }
-.modal-lead { margin-top: 0.35rem; font-size: 0.82rem; line-height: 1.6; color: var(--color-text-dim); }
-.modal-lead b { font-weight: 800; color: var(--color-warn-ink); }
+.steps { margin-top: 0.7rem; display: grid; gap: 0.9rem; }
+.steps li { display: flex; gap: 0.55rem; }
+.step-n {
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--color-warn-ink);
+  background: var(--color-warn-soft);
+  border: 1.5px solid var(--color-warn);
+  border-radius: 999px;
+}
+.step-body { flex: 1 1 auto; min-width: 0; }
+.step-title { font-size: 0.88rem; font-weight: 800; line-height: 1.5; }
+.step-why { margin-top: 0.3rem; font-size: 0.76rem; line-height: 1.55; color: var(--color-text-dim); }
 
 /* LINE 設定畫面那一列的仿畫（不是截圖：inline CSS 不多一次請求、明暗色都跟著站台走） */
 .labs {
-  margin-top: 0.8rem;
+  margin-top: 0.45rem;
   padding: 0.6rem 0.7rem 0.55rem;
   background: var(--color-surface);
   border: 1px solid var(--color-line);
@@ -366,8 +384,6 @@ main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 .labs-hint { margin-top: 0.45rem; font-size: 0.74rem; font-weight: 700; color: var(--color-warn-ink); }
 .labs-hint b { font-weight: 800; }
 
-.modal-note { margin-top: 0.8rem; font-size: 0.78rem; line-height: 1.6; color: var(--color-text-dim); }
-.modal-note b { font-weight: 800; color: var(--color-text); }
 .modal-ok {
   display: block;
   width: 100%;
@@ -470,27 +486,41 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 <div class="modal-back" id="howtoModal" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
     <button class="icon-btn modal-close" id="howtoClose" type="button" aria-label="關閉">✕</button>
-    <h2 class="modal-title" id="howtoTitle">開始前，先關掉這個</h2>
-    <p class="modal-lead">否則點「抽籤」會被丟到外部瀏覽器，<b>等於跳出 LINE</b>——這頁的重點就是不跳出去。</p>
+    <h2 class="modal-title" id="howtoTitle">開始前，先做這兩件事</h2>
 
-    <!-- 這一列是 LINE 設定畫面的仿畫，不是截圖：inline HTML/CSS 沒有多一次請求、
-         明暗兩色都跟著站台走，也不必處理圖片的 cache-busting -->
-    <div class="labs">
-      <div class="labs-path">LINE ▸ 設定 ▸ <b>LINE Labs</b></div>
-      <div class="labs-row">
-        <span class="labs-name">使用預設瀏覽器開啟連結</span>
-        <span class="labs-switch" aria-hidden="true"><i></i></span>
-      </div>
-      <div class="labs-hint">保持<b>關閉</b>（灰色、圓鈕在左）</div>
-    </div>
+    <ol class="steps">
+      <li>
+        <span class="step-n">1</span>
+        <div class="step-body">
+          <p class="step-title">關掉 LINE 的「使用預設瀏覽器開啟連結」</p>
+          <!-- 這一列是 LINE 設定畫面的仿畫，不是截圖：inline CSS 不多一次請求、
+               明暗兩色跟著站台走，也不必替圖片處理 cache-busting -->
+          <div class="labs">
+            <div class="labs-path">LINE ▸ 設定 ▸ <b>LINE Labs</b></div>
+            <div class="labs-row">
+              <span class="labs-name">使用預設瀏覽器開啟連結</span>
+              <span class="labs-switch" aria-hidden="true"><i></i></span>
+            </div>
+            <div class="labs-hint">保持<b>關閉</b>（灰色、圓鈕在左）</div>
+          </div>
+          <p class="step-why">沒關掉的話，點「抽籤」會被丟到外部瀏覽器。</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-n">2</span>
+        <div class="step-body">
+          <p class="step-title">把本頁網址貼進任一個 LINE 對話，再從那裡點開</p>
+          <p class="step-why">這樣開的才是 LINE 內建瀏覽器；之後點「抽籤」全程留在 LINE 裡。</p>
+        </div>
+      </li>
+    </ol>
 
-    <p class="modal-note"><b>怎麼用</b>：把本頁網址丟進 LINE，用 LINE 內建瀏覽器開啟，點「抽籤」直接開抽籤頁，全程不跳出 LINE。</p>
     <button class="modal-ok" id="howtoOk" type="button">知道了</button>
   </div>
 </div>
 
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=9b191af2"></script>
+<script src="data.js?v=a6f50d05"></script>
 <script>
 (function () {
   'use strict';
