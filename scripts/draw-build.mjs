@@ -8,6 +8,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TIER_ORDER } from '../src/lib/transform.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = 'data/draw';
@@ -146,6 +147,41 @@ for (const s of stores) byRound[s.p ? '待公布' : s.rs ?? '(無)'] = (byRound[
 console.log('批次分佈: ' + Object.entries(byRound).map(([k, v]) => `${k} ${v}家`).join(' / '));
 console.log('最近三家: ' + stores.slice(0, 3).map((s) => `${s.n} ${s._d}km`).join(' / '));
 
+// --- 型號 → 天梯階級（頁面上的商品籤依此排序：強的在前、配件殿後） ---
+// 鍵的算法必須與 index.html 的 tagOf() 一致（那邊吃品名、這邊吃 products.json 的型號）。
+/** `BX-51 旋風發射器` / `BX-35-04` → `BX-51` / `BX-35`；抓不到編號就退成純字母（BXG） */
+function tagOf(name) {
+  const m = String(name).match(/^([A-Za-z]+)[-\s]?(\d{1,3})(?![0-9])/);
+  if (m) return (m[1] + '-' + m[2]).toUpperCase();
+  const f = String(name).match(/^([A-Za-z]+)/);
+  return f ? f[1].toUpperCase() : null;
+}
+const tierRank = (t) => {
+  const i = TIER_ORDER.indexOf(t);
+  return i === -1 ? TIER_ORDER.length : i;
+};
+const products = JSON.parse(readFileSync(join(root, 'src/data/products.json'), 'utf8'));
+// 一個型號可能對到多顆戰刃（隨機強化組、聯名款），取其中最高階＝「抽得到的最強」。
+// 值為空字串＝products.json 有這件商品但來源站沒評級（仍是陀螺，排在有階級的之後、配件之前）；
+// 整個型號不在 map 裡＝發射器／收納盒／戰鬥盤這類非陀螺商品，殿後。
+const tierByTag = {};
+for (const p of products) {
+  const tag = tagOf(String(p.id).split('::')[0]);
+  if (!tag) continue;
+  const tier = p.tier ?? '';
+  if (!(tag in tierByTag) || tierRank(tier) < tierRank(tierByTag[tag])) tierByTag[tag] = tier;
+}
+// 只夾帶這批清單用得到的型號：data.js 是 LINE 內建瀏覽器要秒開的檔案
+const usedTags = [...new Set(items.map((i) => tagOf(i.n)).filter(Boolean))];
+const tiers = Object.fromEntries(usedTags.filter((t) => t in tierByTag).map((t) => [t, tierByTag[t]]));
+const rated = usedTags.filter((t) => tiers[t]);
+console.log(
+  `型號 ${usedTags.length} 種：有階級 ${rated.length}` +
+    ` / 未評級陀螺 ${usedTags.filter((t) => t in tiers && !tiers[t]).length}` +
+    ` / 非陀螺配件 ${usedTags.filter((t) => !(t in tiers)).length}`
+);
+console.log('  ' + [...rated].sort((a, b) => tierRank(tiers[a]) - tierRank(tiers[b])).map((t) => `${t} ${tiers[t]}`).join(' / '));
+
 const updated = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Taipei' }); // 2026-08-26 22:57:31
 const body = items.map((i) => JSON.stringify(i)).join(',\n');
 const dataJs =
@@ -154,6 +190,8 @@ const dataJs =
   `  stores: [\n${stores
     .map(({ _d, ...s }) => '    ' + JSON.stringify(s))
     .join(',\n')}\n  ],\n` +
+  `  tierOrder: ${JSON.stringify(TIER_ORDER)},\n` +
+  `  tiers: ${JSON.stringify(tiers)},\n` +
   `  items: [\n${body}\n  ]\n};\n`;
 writeFileSync(join(root, `${OUT}/data.js`), dataJs);
 console.log(`${OUT}/data.js written`);

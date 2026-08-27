@@ -76,6 +76,45 @@ h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em; }
 h1 em { font-style: normal; color: var(--color-accent-ink); }
 .meta { font-size: 0.75rem; color: var(--color-text-dim); }
 
+/* 摺疊區：說明與篩選都收起來，站頭在小螢幕上只佔一行——列表才是主角 */
+.fold { margin-top: 0.5rem; }
+.fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-dim);
+  cursor: pointer;
+  list-style: none;          /* 拿掉原生三角，右側自繪 chevron */
+  user-select: none;
+}
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::after {
+  content: '';
+  margin-left: auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform var(--duration-fast) ease;
+}
+.fold[open] > summary::after { transform: translateY(1px) rotate(-135deg); }
+.fold-note {
+  font-weight: 400;
+  font-size: 0.95em;
+  color: var(--color-text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* 收起來時仍看得出有沒有在篩選 */
+.fold.is-on > summary { color: var(--color-accent-ink); }
+.fold.is-on .fold-note { color: var(--color-accent-ink); font-weight: 700; }
+.fold[open] > summary { margin-bottom: -0.1rem; }
+
 .search {
   margin-top: 0.55rem;
   display: block;
@@ -112,20 +151,63 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   font-weight: 700;
 }
 .chip small { opacity: 0.7; font-size: 0.9em; }
-.chips-hint {
+/* 品項＝下拉勾選：型號有二十幾種，攤成一排太長，收起來只佔一行 */
+.picker > summary { color: var(--color-tag-ink); }
+.picker.is-on > summary,
+.picker.is-on .fold-note { color: var(--color-tag-ink); }
+.picker-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.25rem;
+  max-height: 42vh;          /* 型號再多也不會把清單推出畫面 */
+  overflow-y: auto;
+  margin-top: 0.35rem;
+  padding: 0.4rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+}
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.45rem;
+  font-size: 0.82rem;
+  color: var(--color-text);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.opt:active { background: var(--color-chip); }
+.opt input { accent-color: var(--color-tag); width: 1.05rem; height: 1.05rem; margin: 0; flex: 0 0 auto; }
+.opt-tag { font-weight: 700; }
+.opt.on { background: var(--color-tag-soft); }
+.opt.on .opt-tag { color: var(--color-tag-ink); }
+.opt.on .opt-tier { background: var(--color-surface); }   /* 勾起來時底色同色，徽章要換底才看得出來 */
+.opt-tier {
   flex: 0 0 auto;
-  align-self: center;
-  padding-right: 0.1rem;
-  font-size: 0.7rem;
+  min-width: 1.6rem;
+  padding: 0 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--color-tag-ink);
+  background: var(--color-tag-soft);
+  border-radius: 5px;
+}
+.opt-tier.none { color: var(--color-text-dim); background: var(--color-chip); font-weight: 400; }
+.opt-n { margin-left: auto; font-size: 0.75rem; color: var(--color-text-dim); }
+.picker-clear {
+  grid-column: 1 / -1;
+  padding: 0.35rem;
+  font: inherit;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--color-tag-ink);
-  white-space: nowrap;
+  background: var(--color-tag-soft);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
 }
-.chips-hint b { font-weight: 800; }
-
-.chip-item { color: var(--color-tag-ink); background: var(--color-tag-soft); }
-.chip-item[aria-pressed="true"] { color: #fff; background: var(--color-tag); border-color: transparent; font-weight: 700; }
-.chip-item[aria-pressed="true"] small { opacity: 0.85; }
 
 main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 
@@ -284,17 +366,26 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     <button class="clear-done" id="clearDone" type="button" hidden></button>
   </div>
   <aside class="stale" id="stale" hidden></aside>
-  <aside class="notice">
-    <p class="lead"><span class="badge">怎麼用</span><span>把本頁網址丟進 LINE，用 <b>LINE 內建瀏覽器</b>開啟，點「抽選」直接開抽選頁，全程不跳出 LINE。</span></p>
-    <p class="warn"><span class="badge">先設定</span><span>把<b>「使用預設瀏覽器開啟連結」關掉</b><span class="path">LINE ▸ 設定 ▸ LINE Labs</span>，否則點連結會被丟到外部瀏覽器。</span></p>
-  </aside>
-  <input class="search" id="search" type="search" placeholder="搜尋品項（例：BX-51、旋風、獅鷲）" aria-label="搜尋品項">
-  <nav class="chips" id="cityChips" aria-label="縣市篩選"></nav>
-  <nav class="chips" id="storeChips" aria-label="店家篩選"></nav>
-  <nav class="chips" id="itemChips" aria-label="品項篩選（可複選）"></nav>
+  <details class="fold" id="howto">
+    <summary>怎麼用<span class="fold-note">LINE 內建瀏覽器開啟 · 先關掉預設瀏覽器</span></summary>
+    <aside class="notice">
+      <p class="lead"><span class="badge">怎麼用</span><span>把本頁網址丟進 LINE，用 <b>LINE 內建瀏覽器</b>開啟，點「抽選」直接開抽選頁，全程不跳出 LINE。</span></p>
+      <p class="warn"><span class="badge">先設定</span><span>把<b>「使用預設瀏覽器開啟連結」關掉</b><span class="path">LINE ▸ 設定 ▸ LINE Labs</span>，否則點連結會被丟到外部瀏覽器。</span></p>
+    </aside>
+  </details>
+  <details class="fold" id="filters">
+    <summary id="filterSummary">篩選<span class="fold-note">縣市 · 店家 · 品項 · 搜尋</span></summary>
+    <input class="search" id="search" type="search" placeholder="搜尋品項（例：BX-51、旋風、獅鷲）" aria-label="搜尋品項">
+    <nav class="chips" id="cityChips" aria-label="縣市篩選"></nav>
+    <nav class="chips" id="storeChips" aria-label="店家篩選"></nav>
+    <details class="fold picker" id="itemPicker">
+      <summary id="itemSummary">品項<span class="fold-note">全部</span></summary>
+      <div class="picker-panel" id="itemOptions" role="group" aria-label="品項篩選（可複選）"></div>
+    </details>
+  </details>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=a47898a3"></script>
+<script src="data.js?v=6696aab1"></script>
 <script>
 (function () {
   'use strict';
@@ -380,6 +471,16 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 
   function norm(str) { return str.toLowerCase().replace(/[\s-]/g, ''); }
 
+  // 天梯階級（X 最高）。這頁不進 bundle、import 不到 src/lib/transform.ts 的 TIER_ORDER，
+  // 所以由 draw-build 把那份順序原樣寫進 data.js——不在這裡抄第二份，免得日後改階級尺度時漏改。
+  var TIER_ORDER = DATA.tierOrder || [];
+  var TIERS = DATA.tiers || {};
+  function tierRank(tag) {
+    if (!(tag in TIERS)) return TIER_ORDER.length + 1;   // 非陀螺（發射器／收納盒／戰鬥盤）
+    var i = TIER_ORDER.indexOf(TIERS[tag]);
+    return i === -1 ? TIER_ORDER.length : i;             // 有商品但來源站沒評級
+  }
+
   var params = new URLSearchParams(location.search);
   var state = {
     i: (params.get('i') || '').split(',').filter(Boolean),
@@ -461,7 +562,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 
   // 品項標籤：可複選（OR），數量依目前的縣市／店家篩選即時算
   function renderItemChips() {
-    // 型號籤的數量跟著縣市／店家／關鍵字連動（但不受已選型號影響，否則會自我收斂）
+    // 數量跟著縣市／店家／關鍵字連動（但不受已選型號影響，否則會自我收斂）
     var scope = DATA.items.filter(function (it) {
       if (state.c && it.c !== state.c) return false;
       if (state.s && it.s !== state.s) return false;
@@ -473,34 +574,53 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       var t = tagOf(it.n);
       if (t) counts[t] = (counts[t] || 0) + 1;
     });
+    // 排序＝天梯強度：有階級的照 X>S+>…>E，其次是未評級的陀螺，發射器／收納盒等配件殿後；
+    // 同階再比筆數。階級由 draw-build 從 products.json 併進 DATA.tiers（值為空字串＝有商品未評級）。
     var tags = Object.keys(counts).sort(function (a, b) {
-      return counts[b] - counts[a] || (a < b ? -1 : 1);
+      return tierRank(a) - tierRank(b) || counts[b] - counts[a] || (a < b ? -1 : 1);
     });
 
-    var nav = document.getElementById('itemChips');
-    nav.textContent = '';
-    // 只剩一種型號就不必顯示這排；但已經選了型號時一定要留著，否則沒地方取消
-    if (tags.length < 2 && !state.i.length) return;
+    var picker = document.getElementById('itemPicker');
+    var panel = document.getElementById('itemOptions');
+    panel.textContent = '';
+    // 只剩一種型號就不必顯示；但已經選了型號時一定要留著，否則沒地方取消
+    picker.hidden = tags.length < 2 && !state.i.length;
+    if (picker.hidden) return;
 
-    var hint = el('span', 'chips-hint');
-    hint.innerHTML = state.i.length ? '已選 <b>' + state.i.length + '</b> 項' : '品項<b>可複選</b>';
-    nav.appendChild(hint);
+    var sum = document.getElementById('itemSummary');
+    sum.textContent = '品項';
+    sum.appendChild(el('span', 'fold-note',
+      state.i.length ? state.i.join('、') : '全部 ' + tags.length + ' 種'));
+    picker.classList.toggle('is-on', state.i.length > 0);
 
     if (state.i.length) {
-      nav.appendChild(chip('清除品項', null, false, function () {
+      var clear = el('button', 'picker-clear', '清除品項（已選 ' + state.i.length + '）');
+      clear.type = 'button';
+      clear.addEventListener('click', function () {
         state.i = [];
         update();
-      }));
+      });
+      panel.appendChild(clear);
     }
+
     tags.forEach(function (t) {
       var on = state.i.indexOf(t) !== -1;
-      var btn = chip(t, counts[t], on, function () {
-        state.i = on ? state.i.filter(function (x) { return x !== t; }) : state.i.concat([t]);
+      var label = el('label', 'opt' + (on ? ' on' : ''));
+      var box = el('input');
+      box.type = 'checkbox';
+      box.checked = on;
+      box.addEventListener('change', function () {
+        state.i = box.checked
+          ? state.i.concat([t])
+          : state.i.filter(function (x) { return x !== t; });
         update();
       });
-      btn.className = 'chip chip-item';
-      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      nav.appendChild(btn);
+      label.appendChild(box);
+      label.appendChild(el('span', 'opt-tag', t));
+      var tier = TIERS[t] || '';
+      label.appendChild(el('span', 'opt-tier' + (tier ? '' : ' none'), tier || '—'));
+      label.appendChild(el('span', 'opt-n', String(counts[t])));
+      panel.appendChild(label);
     });
   }
 
@@ -509,7 +629,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     main.textContent = '';
     var visible = DATA.items.filter(matches);
     document.getElementById('meta').textContent =
-      visible.length + ' 項 · 更新 ' + DATA.updated;
+      visible.length + ' 項 · 已公布 ' + publishedCount() + '/' + DATA.stores.length +
+      ' 家 · 更新 ' + DATA.updated;
 
     // 有下任何篩選卻篩不到東西才提示；沒篩選時的空清單交給下面的「尚未公布」名單說明
     var filtering = !!(state.q || state.i.length || state.c || state.s);
@@ -554,24 +675,26 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     if (!state.q) renderPending();
   }
 
-  function renderStale() {
-    var box = document.getElementById('stale');
-    var groups = { over: 0, soon: 0, live: 0, pending: 0 };
-    var soonDate = '';
+  /** 這批公布進度：分子＝已標日期的店，分母＝全部店家（各店逐日陸續公布，這個比例天天在動） */
+  function publishedCount() {
+    var n = 0;
     DATA.stores.forEach(function (m) {
       var st = statusOf(m);
-      if (!st) return;
-      groups[st.k] += 1;
-      if (st.k === 'soon' && (!soonDate || m.rs < soonDate)) soonDate = m.rs;
+      if (st && st.k !== 'pending') n += 1;
     });
-    var parts = [];
-    if (groups.soon) parts.push('<b>' + groups.soon + ' 家已公布新一批</b>（' +
-      soonDate.slice(5).replace('-', '/') + ' 開始）');
-    if (groups.live) parts.push('<b>' + groups.live + ' 家抽選進行中</b>');
-    if (groups.over) parts.push('<b>' + groups.over + ' 家還是上一批</b>，連結點得開但已無法抽');
-    if (groups.pending) parts.push(groups.pending + ' 家尚未公布');
-    box.hidden = parts.length === 0;
-    box.innerHTML = parts.join('；') + '。';
+    return n;
+  }
+
+  // 「幾家已公布／幾家還沒」寫在站頭的更新時間旁（見 renderList）就夠了。
+  // 這個橫幅只留真正需要警告的一種：上一批已結束、連結還點得開但抽不到。
+  function renderStale() {
+    var box = document.getElementById('stale');
+    var over = DATA.stores.filter(function (m) {
+      var st = statusOf(m);
+      return st && st.k === 'over';
+    }).length;
+    box.hidden = over === 0;
+    box.innerHTML = '<b>' + over + ' 家還是上一批</b>，連結點得開但已無法抽。';
   }
 
   function renderPending() {
@@ -595,11 +718,46 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     main.appendChild(sec);
   }
 
+  // 篩選收起來時，摘要要說得出「現在正在篩什麼」，否則使用者會看不懂清單為何變短
+  function renderFilterSummary() {
+    var on = [];
+    if (state.c) on.push(state.c);
+    if (state.s) on.push(state.s);
+    if (state.i.length) on.push(state.i.join('、'));
+    if (state.q) on.push('「' + state.q + '」');
+    var sum = document.getElementById('filterSummary');
+    sum.textContent = on.length ? '篩選中' : '篩選';
+    sum.appendChild(el('span', 'fold-note', on.length ? on.join(' · ') : '縣市 · 店家 · 品項 · 搜尋'));
+    document.getElementById('filters').classList.toggle('is-on', on.length > 0);
+  }
+
+  // 展開狀態記在 localStorage（每台裝置各自記）；讀不到就用預設
+  var FOLD_KEY = 'funbox:fold:v1';
+  function initFolds() {
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(FOLD_KEY)) || {}; } catch (err) { /* 無痕模式 */ }
+    var filtering = !!(state.c || state.s || state.i.length || state.q);
+    // 預設兩個都收起——這頁的主角是清單。說明的摘要那行已經把「用內建瀏覽器開」
+    // 與「先關掉預設瀏覽器」講完，要細節再點開。
+    // 篩選則有例外：從分享連結進來（網址帶條件）一律展開，否則使用者不知道清單被篩過。
+    document.getElementById('howto').open = 'howto' in saved ? !!saved.howto : false;
+    document.getElementById('filters').open = filtering || ('filters' in saved ? !!saved.filters : false);
+    // 先套預設再掛 listener，免得上面這行把「自動展開」也存成使用者偏好
+    ['howto', 'filters'].forEach(function (id) {
+      var d = document.getElementById(id);
+      d.addEventListener('toggle', function () {
+        saved[id] = d.open;
+        try { localStorage.setItem(FOLD_KEY, JSON.stringify(saved)); } catch (err) { /* 同上 */ }
+      });
+    });
+  }
+
   function update() {
     renderStale();
     renderChips();
     renderList();
     renderClearDone();
+    renderFilterSummary();
     syncUrl();
   }
 
@@ -626,6 +784,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     syncUrl();
   });
 
+  initFolds();
   update();
 })();
 </script>
