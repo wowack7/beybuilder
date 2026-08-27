@@ -103,7 +103,7 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
 /* 面板收起來時，這行是「清單為何變短」的唯一線索；沒篩選就整行不存在 */
 .active-filter {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.4rem;
   width: 100%;
   margin-top: 0.5rem;
@@ -112,6 +112,8 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   font-size: 0.85rem;
   font-weight: 800;
   text-align: left;
+  white-space: nowrap;      /* 這行永遠只佔一行；擠不下的是中間那段，不是頭尾 */
+  overflow: hidden;
   color: var(--color-tag-ink);
   background: var(--color-tag-soft);
   border: 0;
@@ -119,8 +121,11 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   cursor: pointer;
 }
 .active-filter[hidden] { display: none; }
-.active-filter .what { font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.active-filter .x { margin-left: auto; font-weight: 700; opacity: 0.75; }
+/* 頭尾不准縮：flex 預設會把它們壓到比內容窄，中文就一個字一行地斷開（實機踩過）。
+   要被犧牲的是中間那段條件，用 min-width:0 讓它縮到 ellipsis */
+.active-filter .n { flex: 0 0 auto; }
+.active-filter .what { flex: 1 1 auto; min-width: 0; font-weight: 400; overflow: hidden; text-overflow: ellipsis; }
+.active-filter .x { flex: 0 0 auto; margin-left: auto; padding-left: 0.2rem; font-size: 0.8rem; font-weight: 700; opacity: 0.8; }
 
 /* 面板浮在清單上（.top 是 sticky＝已定位，absolute 以它為基準），不把清單推下去 */
 .panel {
@@ -483,7 +488,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 </div>
 
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=156e58d1"></script>
+<script src="data.js?v=9e4a7540"></script>
 <script>
 (function () {
   'use strict';
@@ -874,7 +879,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     bar.hidden = on.length === 0;
     bar.textContent = '';
     if (!bar.hidden) {
-      bar.appendChild(el('span', '', '篩選中 ' + visibleCount + ' 項'));
+      bar.appendChild(el('span', 'n', '篩選中 ' + visibleCount + ' 項'));
       bar.appendChild(el('span', 'what', on.join(' · ')));
       bar.appendChild(el('span', 'x', '✕ 清除'));
     }
