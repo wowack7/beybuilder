@@ -56,11 +56,25 @@ async function main() {
   ]
   const empty = TIER_REQUIRED.filter(([k]) => !bundle.parts[k].some((x) => x.tier))
   if (empty.length && !process.argv.includes('--allow-missing-tiers')) {
-    const headers = [...new Set(parseCsv(tierCsv)[0] ?? [])].filter((h) => h.includes('階級'))
+    // 診斷要一次講完：欄名在不在、在第幾欄（同名可能不只一欄——toObjects 讓最後一欄
+    // 覆蓋前面的，多一欄空的就會把有值的那欄蓋掉）、每一欄各有幾格非空。
+    const rows = parseCsv(tierCsv)
+    const header = rows[0] ?? []
+    const body = rows.slice(1)
+    const describe = (col) => {
+      const at = header.map((h, i) => (h === col ? i : -1)).filter((i) => i !== -1)
+      if (!at.length) return `  ${JSON.stringify(col)}：來源表沒有這一欄`
+      return at
+        .map((i) => `  ${JSON.stringify(col)} 在第 ${i} 欄：非空 ${body.filter((r) => (r[i] ?? '').trim()).length}/${body.length} 列`)
+        .join('\n') + (at.length > 1 ? `  ← 同名欄位 ${at.length} 個，最後一個會蓋掉前面的` : '')
+    }
     throw new Error(
       `這幾類零件一個階級都沒抓到：${empty.map(([k, col]) => `${k}（讀 ${col}）`).join('、')}\n` +
-        `來源表目前含「階級」的欄位：${headers.length ? headers.map((h) => JSON.stringify(h)).join(' / ') : '(一個都沒有)'}\n` +
-        `→ 多半是來源表改了欄名，對照上面的清單改 src/lib/transform.ts 的欄位鍵。\n` +
+        empty.map(([, col]) => describe(col)).join('\n') + '\n' +
+        `來源表所有含「階級」的欄位（含重複，附索引）：\n` +
+        header.map((h, i) => [h, i]).filter(([h]) => h.includes('階級'))
+          .map(([h, i]) => `  ${i}: ${JSON.stringify(h)}`).join('\n') + '\n' +
+        `→ 非空 0 列＝來源站把這欄清空了；非空很多列卻抓不到＝同名欄位打架或解析錯位。\n` +
         `→ 確認來源站真的移除了評級，才加 --allow-missing-tiers 放行。`,
     )
   }
