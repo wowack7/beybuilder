@@ -1,7 +1,7 @@
 /**
  * Build 後產生「爬蟲不必執行 JS 就讀得到」的靜態內容：
  *   dist/tier/index.html — 天梯階級總表（全部戰刃／固鎖／軸心／輔助刃）＋熱門實戰組合
- *   dist/sitemap.xml     — 首頁與天梯總表
+ *   dist/sitemap.xml     — 首頁、天梯總表與抽選目錄
  *
  * 為什麼需要：本站是 client-rendered SPA，爬蟲抓到的首頁只有歡迎頁文案，
  * 沒有任何零件名稱，長尾關鍵字（如「隕星龍騎士 天梯」）永遠搜不到。
@@ -16,7 +16,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { PALETTE } from '../src/lib/palette.ts'
-import { SITE_URL, TIER_OG_IMAGE_URL, TIER_PATH } from '../src/lib/site.ts'
+import { DRAW_PATH, SITE_URL, TIER_OG_IMAGE_URL, TIER_PATH } from '../src/lib/site.ts'
 import { TIER_ORDER } from '../src/lib/transform.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -150,11 +150,60 @@ const STYLE = `
   tbody tr:last-child td { border-bottom: 0; }
   td.num { text-align: right; font-variant-numeric: tabular-nums; }
   td.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .faq details {
+    border-top: 1px solid var(--line); padding: .8rem 0;
+  }
+  .faq summary { cursor: pointer; font-weight: 700; }
+  .faq p { margin: .5rem 0 0; color: var(--text-dim); font-size: .92rem; line-height: 1.7; }
   footer.page { margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--text-faint); font-size: .85rem; }
   footer.page a { color: var(--text-dim); }
 `
 
-function tierPageHead({ title, desc, url }) {
+/**
+ * FAQ：同一份資料同時渲染成頁面內容與 FAQPage 結構化資料。
+ * Google 要求結構化資料的答案必須在頁面上看得到，所以不能只放 JSON-LD。
+ * 問題挑真的有人會搜的（階級怎麼看、多久更新、資料哪來、能不能算自己的牌組）。
+ */
+function faqItems({ blades, ratchets, bits, assists, date, comboCount }) {
+  return [
+    {
+      q: 'Beyblade X 的天梯階級怎麼看？',
+      a: `階級由高到低是 ${TIER_ORDER.join(' → ')}，X 為最高階。同一階內沒有先後之分，本頁依名稱排序。標示「${UNRATED}」代表來源站尚未給出評等，不是評價低。`,
+    },
+    {
+      q: '這份天梯資料多久更新一次？',
+      a: `每週自動重新抓取一次來源站資料並重新產生本頁，目前這份更新於 ${date}。戰刃 ${blades.length} 款、固鎖 ${ratchets.length} 款、軸心 ${bits.length} 款、輔助刃 ${assists.length} 款。`,
+    },
+    {
+      q: '熱門實戰組合的勝場與奪冠率是怎麼算的？',
+      a: `直接採用來源站彙整的賽事統計，本頁列出勝場最高的 ${TOP_COMBOS} 組（資料庫共 ${comboCount} 組）。本站不會顯示自訂的推薦分數——那只是站內排序用的近似值，不是真實戰績。`,
+    },
+    {
+      q: '重塗版、特別版的戰刃算不算同一顆？',
+      a: '算。顏色與版本差異（含賽事特別版）視為同一零件，變體若沒有獨立評級就繼承同家族基底名的階級；左迴旋與右迴旋則視為不同零件。',
+    },
+    {
+      q: '可以用我自己有的零件算出最強戰隊嗎？',
+      a: '可以。回到 BeyBuilder X 首頁登錄你擁有的商品，系統會在官方 3on3 規則（同一隊伍內戰刃、固鎖、軸心不得重複）下算出總分最高的三顆組合。',
+    },
+  ]
+}
+
+function faqSection(items) {
+  return `
+  <section id="faq">
+    <h2>常見問題</h2>
+    <div class="faq">
+      ${items
+        .map(
+          ({ q, a }) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`,
+        )
+        .join('\n      ')}
+    </div>
+  </section>`
+}
+
+function tierPageHead({ title, desc, url, faq, date }) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -172,8 +221,19 @@ function tierPageHead({ title, desc, url }) {
         url,
         inLanguage: 'zh-Hant-TW',
         isAccessibleForFree: true,
+        dateModified: date,
         creator: { '@type': 'Person', name: 'stan-yao' },
         isBasedOn: 'https://stan-yao.github.io/beyblade_x_tier/',
+        license: 'https://beybuilder.5-seven.dog/tier/',
+      },
+      // FAQPage：答案在頁面上也看得到（見 faqSection），不是只給爬蟲的影子內容
+      {
+        '@type': 'FAQPage',
+        mainEntity: faq.map(({ q, a }) => ({
+          '@type': 'Question',
+          name: q,
+          acceptedAnswer: { '@type': 'Answer', text: a },
+        })),
       },
     ],
   }
@@ -215,11 +275,12 @@ export function buildTierPage({ parts, combos, generatedAt }) {
   const desc = `Beyblade X 全零件天梯階級一覽：${blades.length} 款戰刃、${ratchets.length} 款固鎖、${bits.length} 款軸心的階級評等，以及依勝場排序的熱門實戰組合。`
 
   const top = [...combos].sort((a, b) => (b.wins ?? 0) - (a.wins ?? 0)).slice(0, TOP_COMBOS)
+  const faq = faqItems({ blades, ratchets, bits, assists, date, comboCount: combos.length })
 
   return `<!doctype html>
 <html lang="zh-Hant-TW">
 <head>
-${tierPageHead({ title, desc, url })}
+${tierPageHead({ title, desc, url, faq, date })}
 </head>
 <body>
 <div class="wrap">
@@ -229,7 +290,7 @@ ${tierPageHead({ title, desc, url })}
     <p class="lede">收錄 ${blades.length} 款戰刃、${ratchets.length} 款固鎖、${bits.length} 款軸心與 ${assists.length} 款輔助刃的天梯階級（<strong>X</strong> 為最高階，依序 ${TIER_ORDER.slice(0, 4).join(' → ')} → … → ${TIER_ORDER.at(-1)}），以及依賽事勝場排序的熱門實戰組合。資料更新於 ${esc(date)}。</p>
     <a class="cta" href="${SITE_URL}">用你的零件算出最強 3on3 戰隊 →</a>
     <nav class="toc" aria-label="頁內導覽">
-      <a href="#blades">戰刃</a><a href="#ratchets">固鎖</a><a href="#bits">軸心</a><a href="#assists">輔助刃</a><a href="#combos">熱門實戰組合</a>
+      <a href="#blades">戰刃</a><a href="#ratchets">固鎖</a><a href="#bits">軸心</a><a href="#assists">輔助刃</a><a href="#combos">熱門實戰組合</a><a href="#faq">常見問題</a>
     </nav>
   </header>
 
@@ -237,13 +298,14 @@ ${tierPageHead({ title, desc, url })}
     ${tierSection('blades', '戰刃 Blade', '重塗與特別版視為同一零件，變體無獨立評級時繼承同家族基底名的階級。', blades, (b) => b.name)}
     ${tierSection('ratchets', '固鎖 Ratchet', '型號格式為「齒數-高度」，例如 3-60。', ratchets, (r) => r.id)}
     ${tierSection('bits', '軸心 Bit', '以代號表示，例如 J（Jaggy）、V（Vortex）。', bits, (b) => b.id)}
-    ${tierSection('assists', '輔助刃 Assist Blade', 'CX 系列第三層零件，來源站未提供獨立階級評等。', assists, (a) => `輔助${a.id}`)}
+    ${tierSection('assists', '輔助刃 Assist Blade', 'CX 系列第三層零件，來源站自 2026 年 8 月起開始提供階級評等。', assists, (a) => `輔助${a.id}`)}
     ${comboTable(top)}
+    ${faqSection(faq)}
   </main>
 
   <footer class="page">
     <p>天梯階級與實戰統計資料來自 <a href="https://stan-yao.github.io/beyblade_x_tier/" rel="noreferrer">stan-yao 的 Beyblade X 天梯站</a>；零件數值參考 <a href="https://beyblade.phstudy.org/" rel="noreferrer">beyblade.phstudy.org</a>。本站僅供玩家交流參考，Beyblade X 為 TAKARA TOMY 之商標。</p>
-    <p><a href="${SITE_URL}">BeyBuilder X — 戰鬥陀螺 Beyblade X 配裝模擬器</a>｜資料更新：${esc(date)}</p>
+    <p><a href="${SITE_URL}">BeyBuilder X — 戰鬥陀螺 Beyblade X 配裝模擬器</a>｜<a href="${SITE_URL + DRAW_PATH}">戰鬥陀螺抽選目錄</a>｜資料更新：${esc(date)}</p>
   </footer>
 </div>
 </body>
@@ -254,13 +316,15 @@ ${tierPageHead({ title, desc, url })}
 export function buildSitemap(generatedAt) {
   const date = generatedAt.slice(0, 10)
   const urls = [
-    { loc: SITE_URL, priority: '1.0' },
-    { loc: SITE_URL + TIER_PATH, priority: '0.8' },
+    { loc: SITE_URL, priority: '1.0', freq: 'weekly' },
+    { loc: SITE_URL + TIER_PATH, priority: '0.8', freq: 'weekly' },
+    // 抽選目錄隨各店公布逐日變動，換批時整批連結會失效，故 daily
+    { loc: SITE_URL + DRAW_PATH, priority: '0.7', freq: 'daily' },
   ]
   const body = urls
     .map(
       (u) =>
-        `  <url><loc>${u.loc}</loc><lastmod>${date}</lastmod><changefreq>weekly</changefreq><priority>${u.priority}</priority></url>`,
+        `  <url><loc>${u.loc}</loc><lastmod>${date}</lastmod><changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`,
     )
     .join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>

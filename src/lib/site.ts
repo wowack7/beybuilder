@@ -27,3 +27,6 @@ export const OG_IMAGE_URL = `${SITE_URL}og.png`
 
 /** /tier/ 專用的分享縮圖（同一套版型換文案，同樣由 gen-og.mjs 產出） */
 export const TIER_OG_IMAGE_URL = `${SITE_URL}og-tier.png`
+
+/** /draw/ 抽選目錄專用的分享縮圖 */
+export const DRAW_OG_IMAGE_URL = `${SITE_URL}og-draw.png`

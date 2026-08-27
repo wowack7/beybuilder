@@ -2,6 +2,7 @@
  * 產生社群分享縮圖（1200×630）：
  *   public/og.png       —— 全站預設（首頁／分享 App）
  *   public/og-tier.png  —— /tier/ 靜態天梯頁專用（同一套版型，換文案）
+ *   public/og-draw.png  —— /draw/ 抽選目錄專用
  * 一次性腳本：改了視覺才需重跑（`node scripts/gen-og.mjs`），產物已 commit，
  * 不掛在 build 上（省 build 時間）。
  *
@@ -13,7 +14,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { PALETTE as C } from '../src/lib/palette.ts'
-import { SITE_URL, TIER_PATH } from '../src/lib/site.ts'
+import { DRAW_PATH, SITE_URL, TIER_PATH } from '../src/lib/site.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -93,6 +94,14 @@ const PAGES = [
     title: '戰刃・固鎖・軸心・輔助刃 階級一覽',
     sub: '含實戰組合 Top 60（資料來源：stan-yao 天梯站）',
     pathLabel: `${domainLabel}/${TIER_PATH}`.replace(/\/$/, ''),
+  },
+  {
+    file: 'og-draw.png',
+    kicker: '抽選',
+    kickerAccent: '目錄',
+    title: '戰鬥陀螺各店 LINE 抽選連結一次看',
+    sub: '依縣市、店家、品項篩選；連結一律在 LINE 內開啟',
+    pathLabel: `${domainLabel}/${DRAW_PATH}`.replace(/\/$/, ''),
   },
 ]
 

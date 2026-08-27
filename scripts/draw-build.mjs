@@ -10,6 +10,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TIER_ORDER } from '../src/lib/transform.ts';
 import { GA_ID } from '../src/lib/analytics.ts';
+import { DRAW_PATH, SITE_URL } from '../src/lib/site.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = 'data/draw';
@@ -198,12 +199,90 @@ const dataJs =
 writeFileSync(join(root, `${OUT}/data.js`), dataJs);
 console.log(`${OUT}/data.js written`);
 
+// --- 給爬蟲的靜態內容 -------------------------------------------------------
+// 這頁的清單全靠 JS 從 data.js 渲染，原始 HTML 一個店名都沒有。把當批清單直接
+// 寫進 <main>，爬蟲不必執行 JS 就讀得到；JS 起來時 renderList() 的
+// main.textContent = '' 會把它清掉再自己畫，所以不會有兩份清單並存。
+const esc = (t) =>
+  String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const mmdd = (d) => (d ? d.slice(5).replace('-', '/') : '');
+const openStores = stores.filter((s) => s.rs);
+const itemsOf = (name) => items.filter((i) => i.s === name);
+
+const seoHtml =
+  `\n<section class="store">\n<h2>本批抽選店家（${openStores.length} 家 / 共 ${stores.length} 家）</h2>\n` +
+  `<p>戰鬥陀螺 Beyblade X 各店 LINE 官方帳號抽選（購買券）連結目錄。` +
+  `以下為目前已公布的店家與品項，點開頁面後可依縣市、店家、品項篩選。</p>\n</section>\n` +
+  openStores
+    .map((s) => {
+      const list = itemsOf(s.n);
+      if (!list.length) return '';
+      const period = s.re && s.re !== s.rs ? `${mmdd(s.rs)}–${mmdd(s.re)}` : mmdd(s.rs);
+      return (
+        `<section class="store">\n<h2>${esc(s.n)}（${esc(s.c)}）</h2>\n` +
+        `<p>抽選期間 ${esc(period)}，共 ${list.length} 項</p>\n<ul>\n` +
+        list.map((i) => `<li>${esc(i.n)}</li>`).join('\n') +
+        `\n</ul>\n</section>`
+      );
+    })
+    .filter(Boolean)
+    .join('\n') +
+  `\n<p><a href="${SITE_URL}">BeyBuilder X 配裝模擬器</a>｜` +
+  `<a href="${SITE_URL}tier/">Beyblade X 天梯階級總表</a></p>\n`;
+
+// JSON-LD：一個目錄頁＋已公布店家的清單（只放頁面上真的有的東西）
+const ld = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'BeyBuilder X 配裝模擬器', item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: '戰鬥陀螺抽選目錄', item: SITE_URL + DRAW_PATH },
+      ],
+    },
+    {
+      '@type': 'CollectionPage',
+      name: '戰鬥陀螺抽選目錄',
+      description: '戰鬥陀螺 Beyblade X 各店 LINE 官方帳號抽選（購買券）連結目錄，依縣市、店家、品項篩選。',
+      url: SITE_URL + DRAW_PATH,
+      inLanguage: 'zh-Hant-TW',
+      isAccessibleForFree: true,
+      dateModified: updated.replace(' ', 'T') + '+08:00',
+      mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: openStores.length,
+        itemListElement: openStores.map((s, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: `${s.n}（${s.c}）`,
+        })),
+      },
+    },
+  ],
+};
+
 // cache-busting：把內容雜湊寫進 index.html 的 script src
 // （LINE 內建瀏覽器與 GitHub Pages 都會快取 data.js；不換 URL 使用者會停在舊清單）
 const hash = createHash('sha256').update(dataJs).digest('hex').slice(0, 8);
 const indexPath = join(root, `${OUT}/index.html`);
 const html = readFileSync(indexPath, 'utf8');
-const nextHtml = html.replace(/src="data\.js(\?v=[a-f0-9]+)?"/, `src="data.js?v=${hash}"`);
+let nextHtml = html.replace(/src="data\.js(\?v=[a-f0-9]+)?"/, `src="data.js?v=${hash}"`);
 if (nextHtml === html && !html.includes(`data.js?v=${hash}`)) throw new Error('index.html 找不到 data.js 的 script 標籤');
+
+const seoBefore = nextHtml;
+nextHtml = nextHtml.replace(/<!--seo-->[\s\S]*?<!--\/seo-->/, `<!--seo-->${seoHtml}<!--/seo-->`);
+if (nextHtml === seoBefore) throw new Error('index.html 找不到 <!--seo--> 標記，靜態內容無處可放');
+
+const ldBefore = nextHtml;
+nextHtml = nextHtml.replace(
+  /(<script type="application\/ld\+json" id="draw-ld">)[\s\S]*?(<\/script>)/,
+  `$1${JSON.stringify(ld)}$2`,
+);
+if (nextHtml === ldBefore) throw new Error('index.html 找不到 id="draw-ld" 的 JSON-LD 標籤');
+
 writeFileSync(indexPath, nextHtml);
-console.log(`${OUT}/index.html → data.js?v=${hash}`);
+console.log(
+  `${OUT}/index.html → data.js?v=${hash}；靜態內容 ${openStores.length} 家 / ${items.length} 筆` +
+    `（${(seoHtml.length / 1024).toFixed(1)}kB）`,
+);

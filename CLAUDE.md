@@ -32,9 +32,17 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **為什麼獨立於 SPA**：這頁的使用情境是搶券時在 LINE 內建瀏覽器單手快點，
   必須秒開；走 SPA 要先載 React bundle。核心賣點是「連結一律同分頁開、不跳出 LINE」，
   全頁禁用 `target="_blank"`／`window.open`，所有 `lin.ee` 都預先解析成 `liff.line.me` 直連
-- 掛 `noindex,nofollow`：這是個人工具，不進站台 SEO；因此首頁靜態骨架**不放內鏈**（與 `/tier/` 不同）。
-  站頭導覽有一顆綠色「官方抽買」（`.tab-draw`，`--line-green` 系；`App.tsx` 裡是真 `<a>` 整頁跳轉，
-  不是 React 分頁）——它在 JSX 裡，不會出現在原始 HTML，所以不影響 noindex 的意圖
+- **2026-08-27 起改為可被檢索**（原本掛 `noindex,nofollow`，理由是「個人工具不進站台 SEO」，
+  用戶決策推翻）：`index,follow` ＋ 完整 head（description／canonical／og／twitter／
+  專屬縮圖 `og-draw.png`）＋ 首頁靜態骨架的內鏈 ＋ 進 sitemap（`changefreq: daily`，
+  各店逐日公布、換批連結會失效）
+- **爬蟲讀得到的靜態內容由 `draw-build` 寫進 `<main>`**（`<!--seo-->…<!--/seo-->` 標記之間）：
+  清單本來全靠 JS 從 data.js 渲染，原始 HTML 一個店名都沒有。JS 起來時 `renderList()` 的
+  `main.textContent = ''` 會清掉它再自己畫，所以不會有兩份清單並存（實測 JS 關閉時讀得到
+  19 家 195 筆，JS 開啟時靜態殘留為 0）。同段一併重寫 `id="draw-ld"` 的 JSON-LD
+  （BreadcrumbList ＋ CollectionPage ＋ 已公布店家的 ItemList）；兩個標記找不到就 throw
+- 站頭導覽有一顆綠色「官方抽買」（`.tab-draw`，`--line-green` 系；`App.tsx` 裡是真 `<a>` 整頁跳轉，
+  不是 React 分頁）
 - 路徑常數 `DRAW_PATH` 放在 `src/lib/site.ts`（與 `TIER_PATH` 同一處）
 - **資料**：`data/draw/`（`source-links.txt` 正本／`mapping.tsv` lin.ee→liff／`stores.tsv` 座標與
   上游店名對照／`anchors.tsv` 排序錨點／`voom.tsv` 各店 VOOM 帳號）。
@@ -93,14 +101,17 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **`src/lib/site.ts`** — 站台位址單一來源（`SITE_URL`/`BASE_PATH`/`TIER_PATH`/`OG_IMAGE_URL`）。`index.html` 與 `vite.config.ts` 無法 import 它、只能寫死字面量，**`src/lib/site.test.ts` 會實際讀這兩個檔比對**，換網域漏改一處就紅燈（canonical/og:image/sitemap 指錯不會有 runtime 錯誤，只會靜默掉出搜尋結果）
 - **`src/lib/palette.ts`** — tokens 的程式端鏡像（oklch 三元組＋`oklchToHex`）。og 縮圖與靜態天梯頁吃不到 CSS 變數，色碼一律由此**算出**而非手打；`palette.test.ts` 比對它與 `tokens.css`
 - **`scripts/gen-seo.mjs`** — 串在 `npm run build` 之後，產 `dist/tier/index.html`（全部戰刃/固鎖/軸心/輔助刃階級＋Top 60 實戰組合，長尾關鍵字的唯一來源）與 `dist/sitemap.xml`。純函式有 `scripts/gen-seo.test.mjs` 覆蓋（階級排序、不外洩 score、HTML escape、缺 assists 不炸 build）
-- **`scripts/gen-og.mjs`** — 一次性產兩張 1200×630 分享縮圖：`public/og.png`（全站預設）與
-  `public/og-tier.png`（`/tier/` 專用，同一套版型換文案——這頁是站上唯一被爬蟲讀得到內容的頁，
-  分享時該說自己是天梯總表）。網址常數在 `site.ts` 的 `OG_IMAGE_URL`／`TIER_OG_IMAGE_URL`。
+- **`scripts/gen-og.mjs`** — 一次性產三張 1200×630 分享縮圖：`public/og.png`（全站預設）、
+  `public/og-tier.png`（`/tier/`）、`public/og-draw.png`（`/draw/`），同一套版型換文案。
+  網址常數在 `site.ts` 的 `OG_IMAGE_URL`／`TIER_OG_IMAGE_URL`／`DRAW_OG_IMAGE_URL`。
   改視覺才重跑；產物已 commit（注意 sharp/libvips 版本不同會產出位元組不同但視覺相同的檔，
   沒改視覺就別讓它進 diff）
 - **`index.html` 的 `#root` 靜態骨架** — 爬蟲唯一能讀到的 `/tier/` 內鏈（footer 那條在 React JSX 裡，原始 HTML 沒有），順帶當 JS 載入前的畫面。React `createRoot()` 掛載時會清空，實測 CLS = 0。連結用**絕對** URL：Vite 不改寫 `<a href>`，相對路徑在子路徑下會解析錯
 - 同理 `<meta content="...">` 也不被 Vite 改寫 base，canonical/og:image 一律寫絕對 URL
-- **robots.txt**：站台現在在子網域根 `beybuilder.5-seven.dog/`，爬蟲會讀 `beybuilder.5-seven.dog/robots.txt`——目前沒放（404＝允許全抓，可接受）；若日後要放 sitemap 指引就丟 `public/robots.txt`。sitemap 仍靠 Search Console 手動提交
+- **`public/robots.txt`**：全站 Allow ＋ `Sitemap:` 指向 `sitemap.xml`（2026-08-27 補上，原本 404）
+- **`/tier/` 的常見問題**：`faqItems()` 一份資料同時渲染成頁面上的 `<details>` 與 FAQPage 結構化資料——
+  Google 要求答案在頁面上看得見，只放 JSON-LD 會被判為影子內容。題數必須兩邊一致
+- **sitemap 收錄三頁**：首頁（weekly）、`/tier/`（weekly）、`/draw/`（daily）
 - **未完成**：Search Console 尚未驗證／未提交 sitemap（需帳號擁有者操作）。在那之前 `/tier/` 只能靠首頁內鏈被爬到
 
 ## Data pipeline（先懂這個再動資料相關程式）
