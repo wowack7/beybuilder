@@ -376,9 +376,11 @@ main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
   font: inherit;
   font-size: 0.9rem;
   font-weight: 800;
-  color: #fff;
-  background: var(--color-accent);
-  border: 0;
+  /* 用敘述裡強調字的橘（warn 系）：這顆是「我知道要去關設定了」，不是抽籤動作，
+     不該穿綠色。soft 底＋ink 字＋warn 框在明暗兩色都夠對比，不必硬編色碼 */
+  color: var(--color-warn-ink);
+  background: var(--color-warn-soft);
+  border: 1.5px solid var(--color-warn);
   border-radius: 999px;
   cursor: pointer;
 }
@@ -488,7 +490,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 </div>
 
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=9e4a7540"></script>
+<script src="data.js?v=9b191af2"></script>
 <script>
 (function () {
   'use strict';
