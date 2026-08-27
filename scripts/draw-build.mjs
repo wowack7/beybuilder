@@ -25,6 +25,24 @@ function readTsv(rel) {
     .map((l) => l.split('\t'));
 }
 
+// 同一個本站店名可以有多列（用來接住上游的不同寫法，例：Funbox-竹北遠百店／Funbox 竹北遠東店），
+// 但那些列的縣市與座標必須一致——不一致的話 coords 會靜默取第一列、排序與縣市籤就看列序決定。
+{
+  const byName = new Map();
+  for (const [n, c, lat, lng, , bias] of readTsv(`${DATA}/stores.tsv`)) {
+    const sig = [c, lat ?? '', lng ?? '', bias ?? ''].join('|');
+    if (!byName.has(n)) byName.set(n, new Set());
+    byName.get(n).add(sig);
+  }
+  const conflict = [...byName].filter(([, sigs]) => sigs.size > 1);
+  if (conflict.length)
+    throw new Error(
+      `data/draw/stores.tsv 同名店家的縣市／座標不一致：\n` +
+        conflict.map(([n, sigs]) => `  ${n}: ${[...sigs].join('  vs  ')}`).join('\n') +
+        `\n→ 同名多列只該差在「上游店名」那一欄`,
+    );
+}
+
 const anchors = readTsv(`${DATA}/anchors.tsv`).map(([n, lat, lng]) => ({ n, lat: +lat, lng: +lng }));
 // lat/lng 留空＝沒座標，排序時排在有座標的之後
 const coords = new Map(

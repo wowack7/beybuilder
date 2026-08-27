@@ -50,7 +50,12 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **`official.tsv` 的用途是「去哪查」，不是自動抓**：上游彙整頁常慢半拍，各店會先發在自己的
   FB 粉專或 LINE VOOM。`draw:sync` 乾跑會列出「上游還沒收、但查得到官方管道」的店與連結，
   查到有抽選就人工補進正本（sync 是增量合併，人工補的不會被覆寫）。
-  **FB 未登入抓不到貼文，這段刻意不做自動掃描**
+  **FB 未登入抓不到貼文**，所以自動掃描只能借用真實登入狀態——見 `draw:fb`
+- **`npm run draw:fb`**（`scripts/draw-fb-scan.mjs`，**只能在本機跑**，雲端容器連不到 facebook.com）：
+  用 Playwright 開你機器上的 Chrome（`channel: 'chrome'`）＋專屬設定檔 `data/draw/.fb-profile`
+  （含 FB 登入 cookie，已 gitignore），逐一看待查店家的粉專，抓「抽選／抽籤／購買券」等字樣、
+  日期與 `lin.ee` 連結。第一次跑會開視窗要你手動登入，之後可無頭。
+  **只讀不寫**：印出線索，補不補進正本由人決定。純函式 `extractLeads` 有測試覆蓋
 - **指令**：`npm run draw:build`（重建 data.js＋把內容雜湊寫回 index.html 的 `?v=`）、
   `npm run draw:sync`（比對上游，`-- --write` 才改檔）。兩者都**不串在 `npm run build`**：
   `data.js` 是已 commit 的產物，資料要換批才重跑

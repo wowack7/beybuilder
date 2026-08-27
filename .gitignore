@@ -29,3 +29,6 @@ AGENTS.md
 
 # 抽選目錄的上游來源網址（本機設定，不進版控）
 data/draw/source.local.json
+
+# draw:fb 用的專屬瀏覽器設定檔（含 FB 登入 cookie，絕不進版控）
+data/draw/.fb-profile/

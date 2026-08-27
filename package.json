@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "data:update": "node scripts/fetch-data.mjs && node scripts/fetch-images.mjs",
     "draw:build": "node scripts/draw-build.mjs",
-    "draw:sync": "node scripts/draw-sync.mjs"
+    "draw:sync": "node scripts/draw-sync.mjs",
+    "draw:fb": "node scripts/draw-fb-scan.mjs"
   },
   "dependencies": {
     "react": "^19.2.7",
