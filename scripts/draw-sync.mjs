@@ -54,6 +54,9 @@ const stores = blocks.map(([, city, blk]) => ({
   periods: [...blk.matchAll(/draw-start">([^<]*)</g)].map((m) => m[1]),
   items: [...blk.matchAll(/draw-product">([^<]+)<\/div><a class="draw-link" href="(https:\/\/lin\.ee\/[A-Za-z0-9]+)"/g)]
     .map((m) => [m[1], m[2]]),
+  // 診斷用：抓到 0 筆時要分得出「上游還沒放連結」還是「連結長得跟正則不一樣」
+  productCount: [...blk.matchAll(/draw-product">/g)].length,
+  hrefs: [...blk.matchAll(/href="(https?:\/\/[^"]+)"/g)].map((m) => m[1]),
 }));
 console.log(`\n上游: ${stores.length} 家店 / ${stores.reduce((n, s) => n + s.items.length, 0)} 筆`);
 
@@ -116,6 +119,26 @@ console.log(
 if (missing.length) console.log(`  上游有、正本還沒收（跑 --write 就會進來）: ${missing.join('、')}`);
 if (goneFromUpstream.length) console.log(`  正本有、上游這批沒列（可能是人工從 VOOM 補的）: ${goneFromUpstream.join('、')}`);
 if (!missing.length && !goneFromUpstream.length) console.log('  兩邊的店家名單一致');
+
+// 上游列了店、卻一筆都抓不到——這是「上游 20 家但我們只有 19 家」的常見來源，
+// 因為 picked 只收「有對照到店名且有品項」的店，0 筆的店會整家靜默消失。
+const emptyUpstream = stores.filter((s) => !s.items.length);
+if (emptyUpstream.length) {
+  console.log(`\n上游列了店但抓到 0 筆（未計入上面的家數）: ${emptyUpstream.length} 家`);
+  for (const s of emptyUpstream) {
+    const hosts = [...new Set(s.hrefs.map((u) => u.split('/')[2]))];
+    const mapped = matchStore(s.store);
+    console.log(
+      `   [${s.city}] ${s.store}${mapped ? `（＝本站「${mapped}」）` : '（店名未對照）'}` +
+        ` — 品名 ${s.productCount} 個 / 連結 ${s.hrefs.length} 條` +
+        `${hosts.length ? `，網域: ${hosts.join(', ')}` : ''}`,
+    );
+  }
+  console.log(
+    '   → 品名 0／連結 0 ＝ 上游還沒放連結，等它公布即可；' +
+      '有品名或連結卻是 0 筆 ＝ 那家的連結格式與解析器不符（本程式只認 lin.ee），要改正則',
+  );
+}
 
 if (!write) {
   console.log('\n（僅比對，未改檔。加 --write 才會覆寫 data/source-links.txt）');
