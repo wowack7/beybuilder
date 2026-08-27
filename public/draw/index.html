@@ -96,8 +96,9 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
 .icon-btn svg { width: 1.05rem; height: 1.05rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .icon-btn:active { transform: scale(0.92); }
 #howtoBtn { margin-left: auto; }
+/* 篩選一律紫、動作（抽籤鈕）一律綠：兩種顏色＝兩種語意，不互相冒充 */
 #filterBtn[aria-expanded="true"],
-#filterBtn.is-on { color: var(--color-accent-ink); background: var(--color-accent-soft); }
+#filterBtn.is-on { color: var(--color-tag-ink); background: var(--color-tag-soft); }
 
 /* 面板收起來時，這行是「清單為何變短」的唯一線索；沒篩選就整行不存在 */
 .active-filter {
@@ -111,8 +112,8 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   font-size: 0.85rem;
   font-weight: 800;
   text-align: left;
-  color: var(--color-accent-ink);
-  background: var(--color-accent-soft);
+  color: var(--color-tag-ink);
+  background: var(--color-tag-soft);
   border: 0;
   border-radius: 8px;
   cursor: pointer;
@@ -156,10 +157,8 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   font-weight: 400;
   color: color-mix(in oklab, var(--color-text-dim) 72%, var(--color-bg));
 }
-.group.is-on .group-head { color: var(--color-accent-ink); }
-.group.is-on .group-head .n { color: var(--color-accent-ink); font-weight: 700; }
-.group-item.is-on .group-head,
-.group-item.is-on .group-head .n { color: var(--color-tag-ink); }
+.group.is-on .group-head { color: var(--color-tag-ink); }
+.group.is-on .group-head .n { color: var(--color-tag-ink); font-weight: 700; }
 
 /* 首次造訪的說明彈窗 */
 .modal-back {
@@ -193,7 +192,7 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   border: 1px solid var(--color-line);
   border-radius: 999px;
 }
-.search:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; border-color: transparent; }
+.search:focus { outline: 2px solid var(--color-tag); outline-offset: 1px; border-color: transparent; }
 /* 原生的清除鈕只清字、不收起搜尋列，跟旁邊那顆 ✕ 並排會變成兩個叉 */
 .search::-webkit-search-cancel-button { display: none; }
 .search::placeholder { color: var(--color-text-dim); }
@@ -220,13 +219,10 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   cursor: pointer;
 }
 .opt:active { background: var(--color-chip); }
-.opt input { accent-color: var(--color-accent); width: 1.05rem; height: 1.05rem; margin: 0; flex: 0 0 auto; }
-.group-item .opt input { accent-color: var(--color-tag); }
+.opt input { accent-color: var(--color-tag); width: 1.05rem; height: 1.05rem; margin: 0; flex: 0 0 auto; }
 .opt-tag { font-weight: 700; }
-.opt.on { background: var(--color-accent-soft); }
-.opt.on .opt-tag { color: var(--color-accent-ink); }
-.group-item .opt.on { background: var(--color-tag-soft); }
-.group-item .opt.on .opt-tag { color: var(--color-tag-ink); }
+.opt.on { background: var(--color-tag-soft); }
+.opt.on .opt-tag { color: var(--color-tag-ink); }
 .opt.on .opt-tier { background: var(--color-surface); }   /* 勾起來時底色同色，徽章要換底才看得出來 */
 .opt-tier {
   flex: 0 0 auto;
@@ -247,13 +243,12 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   font: inherit;
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--color-accent-ink);
-  background: var(--color-accent-soft);
+  color: var(--color-tag-ink);
+  background: var(--color-tag-soft);
   border: 0;
   border-radius: 8px;
   cursor: pointer;
 }
-.group-item .picker-clear { color: var(--color-tag-ink); background: var(--color-tag-soft); }
 
 main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 
@@ -450,13 +445,13 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   <div class="modal" role="dialog" aria-modal="true" aria-label="使用說明">
     <button class="icon-btn modal-close" id="howtoClose" type="button" aria-label="關閉">✕</button>
     <aside class="notice">
-      <p class="lead"><span class="badge">怎麼用</span><span>把本頁網址丟進 LINE，用 <b>LINE 內建瀏覽器</b>開啟，點「抽選」直接開抽選頁，全程不跳出 LINE。</span></p>
+      <p class="lead"><span class="badge">怎麼用</span><span>把本頁網址丟進 LINE，用 <b>LINE 內建瀏覽器</b>開啟，點「抽籤」直接開抽選頁，全程不跳出 LINE。</span></p>
       <p class="warn"><span class="badge">先設定</span><span>把<b>「使用預設瀏覽器開啟連結」關掉</b><span class="path">LINE ▸ 設定 ▸ LINE Labs</span>，否則點連結會被丟到外部瀏覽器。</span></p>
     </aside>
   </div>
 </div>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=65e61260"></script>
+<script src="data.js?v=475e36c1"></script>
 <script>
 (function () {
   'use strict';
@@ -770,7 +765,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
         var a = el('a', 'item');
         a.href = it.u;
         a.appendChild(el('span', 'name', it.n));
-        a.appendChild(el('span', 'go', done[it.u] ? '已抽' : '抽選'));
+        a.appendChild(el('span', 'go', done[it.u] ? '已抽' : '抽籤'));
         if (done[it.u]) a.classList.add('done');
         a.addEventListener('click', function () {
           // 連結一律同分頁開（不跳出 LINE），所以事件得在導航前送出——
