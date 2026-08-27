@@ -1,5 +1,7 @@
 /**
- * 產生社群分享縮圖 public/og.png（1200×630）。
+ * 產生社群分享縮圖（1200×630）：
+ *   public/og.png       —— 全站預設（首頁／分享 App）
+ *   public/og-tier.png  —— /tier/ 靜態天梯頁專用（同一套版型，換文案）
  * 一次性腳本：改了視覺才需重跑（`node scripts/gen-og.mjs`），產物已 commit，
  * 不掛在 build 上（省 build 時間）。
  *
@@ -11,7 +13,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { PALETTE as C } from '../src/lib/palette.ts'
-import { SITE_URL } from '../src/lib/site.ts'
+import { SITE_URL, TIER_PATH } from '../src/lib/site.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -33,7 +35,11 @@ const chips = TIERS.map((t, i) => {
 
 const domainLabel = SITE_URL.replace(/^https?:\/\//, '').replace(/\/$/, '')
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+/**
+ * 兩張圖共用同一套版型（背景、斜切光帶、階級籤都一樣），只換三行字與右下角網址——
+ * 分享出去要一眼認得出是同一個站，不是兩套設計。
+ */
+const render = ({ kicker, kickerAccent, title, sub, pathLabel }) => `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
     <radialGradient id="glow" cx="0.18" cy="0" r="0.85">
       <stop offset="0" stop-color="${C.accent}" stop-opacity="0.22"/>
@@ -53,27 +59,49 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" 
   <path d="M ${W - 296} 0 L ${W - 272} 0 L ${W - 402} ${H} L ${W - 426} ${H} Z" fill="${C.accent}" fill-opacity="0.5"/>
 
   <text x="96" y="250" font-family="Helvetica, Arial, sans-serif" font-size="104"
-        font-weight="700" letter-spacing="-1" fill="${C.text}">BEY<tspan fill="${C.accent}">BUILDER X</tspan></text>
+        font-weight="700" letter-spacing="-1" fill="${C.text}">${kicker}<tspan fill="${C.accent}">${kickerAccent}</tspan></text>
 
   <text x="98" y="330" font-family="PingFang TC, Heiti TC, Noto Sans CJK TC, sans-serif"
-        font-size="44" font-weight="600" fill="${C.text}">戰鬥陀螺 Beyblade X 配裝模擬器</text>
+        font-size="44" font-weight="600" fill="${C.text}">${title}</text>
 
   <text x="98" y="392" font-family="PingFang TC, Heiti TC, Noto Sans CJK TC, sans-serif"
-        font-size="28" fill="${C.textDim}">登錄你擁有的零件，自動算出最強 3on3 出戰組合</text>
+        font-size="28" fill="${C.textDim}">${sub}</text>
 
   <rect x="96" y="424" width="132" height="6" rx="3" fill="${C.accent}"/>
 
   ${chips}
 
   <text x="${W - 96}" y="566" text-anchor="end" font-family="Helvetica, Arial, sans-serif"
-        font-size="24" fill="${C.textFaint}">${domainLabel}</text>
+        font-size="24" fill="${C.textFaint}">${pathLabel}</text>
 </svg>`
 
-// palette 量化：這張圖是平面向量稿，色數少；truecolor PNG 會是 3 倍大小而肉眼無差
-const buf = await sharp(Buffer.from(svg))
-  .png({ palette: true, quality: 90, effort: 10, compressionLevel: 9 })
-  .toBuffer()
-writeFileSync(join(ROOT, 'public', 'og.png'), buf)
+const PAGES = [
+  {
+    file: 'og.png',
+    kicker: 'BEY',
+    kickerAccent: 'BUILDER X',
+    title: '戰鬥陀螺 Beyblade X 配裝模擬器',
+    sub: '登錄你擁有的零件，自動算出最強 3on3 出戰組合',
+    pathLabel: domainLabel,
+  },
+  {
+    // /tier/ 是站上唯一被爬蟲讀得到內容的頁，分享時該說自己是天梯總表，
+    // 而不是沿用首頁那張「配裝模擬器」
+    file: 'og-tier.png',
+    kicker: '天梯',
+    kickerAccent: '總表',
+    title: '戰刃・固鎖・軸心・輔助刃 階級一覽',
+    sub: '含實戰組合 Top 60（資料來源：stan-yao 天梯站）',
+    pathLabel: `${domainLabel}/${TIER_PATH}`.replace(/\/$/, ''),
+  },
+]
 
-const meta = await sharp(buf).metadata()
-console.log(`wrote public/og.png ${meta.width}×${meta.height} ${(buf.length / 1024).toFixed(1)}kB`)
+for (const page of PAGES) {
+  // palette 量化：這是平面向量稿，色數少；truecolor PNG 會是 3 倍大小而肉眼無差
+  const buf = await sharp(Buffer.from(render(page)))
+    .png({ palette: true, quality: 90, effort: 10, compressionLevel: 9 })
+    .toBuffer()
+  writeFileSync(join(ROOT, 'public', page.file), buf)
+  const meta = await sharp(buf).metadata()
+  console.log(`wrote public/${page.file} ${meta.width}×${meta.height} ${(buf.length / 1024).toFixed(1)}kB`)
+}

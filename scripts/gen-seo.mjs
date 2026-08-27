@@ -16,7 +16,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { PALETTE } from '../src/lib/palette.ts'
-import { SITE_URL, TIER_PATH } from '../src/lib/site.ts'
+import { SITE_URL, TIER_OG_IMAGE_URL, TIER_PATH } from '../src/lib/site.ts'
 import { TIER_ORDER } from '../src/lib/transform.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -191,9 +191,12 @@ function tierPageHead({ title, desc, url }) {
 <meta property="og:url" content="${url}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
-<meta property="og:image" content="${SITE_URL}og.png">
+<meta property="og:image" content="${TIER_OG_IMAGE_URL}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="BeyBuilder X 天梯總表：戰刃、固鎖、軸心、輔助刃階級一覽">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="${SITE_URL}og.png">
+<meta name="twitter:image" content="${TIER_OG_IMAGE_URL}">
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 <style>${STYLE}</style>`
 }

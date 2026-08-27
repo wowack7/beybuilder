@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   SOURCES,
+  parseCsv,
   buildCxPartImages,
   buildPhEnrichment,
   buildPhMap,
@@ -43,6 +44,27 @@ async function main() {
   const phMap = buildPhMap([phMain, phHardcoded], bundle.products, bundle.parts)
   const cxPartImg = buildCxPartImages(phMain)
 
+  // --- 不變式：整類零件的階級不該全空 ---------------------------------------
+  // 2026-07-27 的每週更新把固鎖 36/36、軸心 52/54 的階級全洗成空字串（程式那週沒動過，
+  // 是來源表的欄位變了），天梯頁的固鎖/軸心區從此整片沒有評級，五週沒人發現。
+  // 來源表換欄名不會報錯，只會讓某一欄靜默變空——所以在寫檔前擋下來。
+  // 輔助刃（assists）不在名單裡：來源站從來就沒有評級過。
+  const TIER_REQUIRED = [
+    ['blades', '戰刃階級 (Blade Tier)'],
+    ['ratchets', '固鎖階級 (Ratchet Tier)'],
+    ['bits', '軸心階級 (Bit Tier)'],
+  ]
+  const empty = TIER_REQUIRED.filter(([k]) => !bundle.parts[k].some((x) => x.tier))
+  if (empty.length && !process.argv.includes('--allow-missing-tiers')) {
+    const headers = [...new Set(parseCsv(tierCsv)[0] ?? [])].filter((h) => h.includes('階級'))
+    throw new Error(
+      `這幾類零件一個階級都沒抓到：${empty.map(([k, col]) => `${k}（讀 ${col}）`).join('、')}\n` +
+        `來源表目前含「階級」的欄位：${headers.length ? headers.map((h) => JSON.stringify(h)).join(' / ') : '(一個都沒有)'}\n` +
+        `→ 多半是來源表改了欄名，對照上面的清單改 src/lib/transform.ts 的欄位鍵。\n` +
+        `→ 確認來源站真的移除了評級，才加 --allow-missing-tiers 放行。`,
+    )
+  }
+
   mkdirSync(OUT_DIR, { recursive: true })
   const write = (file, data) => {
     writeFileSync(join(OUT_DIR, file), JSON.stringify(data))
@@ -60,6 +82,11 @@ async function main() {
       ` ratchets=${Object.keys(phMap.ratchets).length} bits=${Object.keys(phMap.bits).length}` +
       ` assists=${Object.keys(phMap.assists).length}`,
   )
+
+  const tierCoverage = ['blades', 'ratchets', 'bits', 'assists']
+    .map((k) => `${k} ${bundle.parts[k].filter((x) => x.tier).length}/${bundle.parts[k].length}`)
+    .join(' / ')
+  console.log(`階級涵蓋率: ${tierCoverage}`)
 
   const withStats = bundle.parts.blades.filter((b) => b.stats).length
   const cxSplit = bundle.products.filter((p) => p.lockChip && p.mainBlade).length

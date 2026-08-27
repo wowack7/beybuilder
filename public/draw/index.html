@@ -394,7 +394,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   </details>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=2e9993dc"></script>
+<script src="data.js?v=57e3ab50"></script>
 <script>
 (function () {
   'use strict';
@@ -491,20 +491,34 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   }
 
   var params = new URLSearchParams(location.search);
+  // 三個維度都是可複選的 OR 清單；空陣列＝「全部」。
+  // 舊的單值分享連結（?c=台北市&s=高島屋）split 之後就是一元陣列，照樣相容。
   var state = {
     i: (params.get('i') || '').split(',').filter(Boolean),
-    c: params.get('c') || '',
-    s: params.get('s') || '',
+    c: (params.get('c') || '').split(',').filter(Boolean),
+    s: (params.get('s') || '').split(',').filter(Boolean),
     q: params.get('q') || ''
   };
-  if (state.c && cityOrder.indexOf(state.c) === -1) state.c = '';
-  if (state.s && storeOrder.indexOf(state.s) === -1) state.s = '';
-  if (state.s && state.c && storeMeta[state.s].c !== state.c) state.c = storeMeta[state.s].c;
+  state.c = state.c.filter(function (c) { return cityOrder.indexOf(c) !== -1; });
+  state.s = state.s.filter(function (s) { return storeOrder.indexOf(s) !== -1; });
+  // 選了縣市又選了不屬於它的店：以店為準把它的縣市補進來，否則清單會是空的
+  state.s.forEach(function (s) {
+    var c = storeMeta[s].c;
+    if (state.c.length && state.c.indexOf(c) === -1) state.c.push(c);
+  });
+
+  /** 切換陣列成員（複選籤共用） */
+  function toggle(list, value) {
+    var i = list.indexOf(value);
+    if (i === -1) list.push(value);
+    else list.splice(i, 1);
+    return list;
+  }
 
   function matches(it) {
     if (state.i.length && state.i.indexOf(tagOf(it.n)) === -1) return false;
-    if (state.c && it.c !== state.c) return false;
-    if (state.s && it.s !== state.s) return false;
+    if (state.c.length && state.c.indexOf(it.c) === -1) return false;
+    if (state.s.length && state.s.indexOf(it.s) === -1) return false;
     if (state.q && norm(it.n).indexOf(norm(state.q)) === -1) return false;
     return true;
   }
@@ -512,8 +526,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   function syncUrl() {
     var p = new URLSearchParams();
     if (state.i.length) p.set('i', state.i.join(','));
-    if (state.c) p.set('c', state.c);
-    if (state.s) p.set('s', state.s);
+    if (state.c.length) p.set('c', state.c.join(','));
+    if (state.s.length) p.set('s', state.s.join(','));
     if (state.q) p.set('q', state.q);
     var qs = p.toString();
     history.replaceState(null, '', qs ? '?' + qs : location.pathname);
@@ -542,33 +556,42 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   function renderChips() {
     var cityNav = document.getElementById('cityChips');
     cityNav.textContent = '';
-    cityNav.appendChild(chip('全部', DATA.items.length, state.c === '', function () {
+    // 複選之下仍留「全部」：清空比一個一個取消快，也讓「現在沒篩」看得見
+    cityNav.appendChild(chip('全部', DATA.items.length, state.c.length === 0, function () {
       trackFilter('city', '');
-      state.c = '';
+      state.c = [];
+      state.s = [];
       update();
     }));
     cityOrder.forEach(function (c) {
-      cityNav.appendChild(chip(c, cityCounts[c] || null, state.c === c, function () {
-        trackFilter('city', state.c === c ? '' : c);
-        state.c = state.c === c ? '' : c;
-        state.s = '';
+      var on = state.c.indexOf(c) !== -1;
+      cityNav.appendChild(chip(c, cityCounts[c] || null, on, function () {
+        trackFilter('city', (on ? '-' : '') + c);
+        toggle(state.c, c);
+        // 取消某個縣市時，順手丟掉它底下已選的店，否則清單會出現「不在篩選縣市裡」的店
+        state.s = state.s.filter(function (n) {
+          return !state.c.length || state.c.indexOf(storeMeta[n].c) !== -1;
+        });
         update();
       }));
     });
 
     // 店家籤只列出目前縣市的店，依距離近→遠
-    var shown = storeOrder.filter(function (s) { return !state.c || storeMeta[s].c === state.c; });
+    var shown = storeOrder.filter(function (s) {
+      return !state.c.length || state.c.indexOf(storeMeta[s].c) !== -1;
+    });
     var storeNav = document.getElementById('storeChips');
     storeNav.textContent = '';
-    storeNav.appendChild(chip('全部店家', null, state.s === '', function () {
+    storeNav.appendChild(chip('全部店家', null, state.s.length === 0, function () {
       trackFilter('store', '');
-      state.s = '';
+      state.s = [];
       update();
     }));
     shown.filter(function (s) { return storeCounts[s]; }).forEach(function (s) {
-      storeNav.appendChild(chip(s, storeCounts[s], state.s === s, function () {
-        trackFilter('store', state.s === s ? '' : s);
-        state.s = state.s === s ? '' : s;
+      var on = state.s.indexOf(s) !== -1;
+      storeNav.appendChild(chip(s, storeCounts[s], on, function () {
+        trackFilter('store', (on ? '-' : '') + s);
+        toggle(state.s, s);
         update();
       }));
     });
@@ -580,8 +603,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   function renderItemChips() {
     // 數量跟著縣市／店家／關鍵字連動（但不受已選型號影響，否則會自我收斂）
     var scope = DATA.items.filter(function (it) {
-      if (state.c && it.c !== state.c) return false;
-      if (state.s && it.s !== state.s) return false;
+      if (state.c.length && state.c.indexOf(it.c) === -1) return false;
+      if (state.s.length && state.s.indexOf(it.s) === -1) return false;
       if (state.q && norm(it.n).indexOf(norm(state.q)) === -1) return false;
       return true;
     });
@@ -651,7 +674,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       ' 家 · 更新 ' + DATA.updated;
 
     // 有下任何篩選卻篩不到東西才提示；沒篩選時的空清單交給下面的「尚未公布」名單說明
-    var filtering = !!(state.q || state.i.length || state.c || state.s);
+    var filtering = !!(state.q || state.i.length || state.c.length || state.s.length);
     if (visible.length === 0) {
       if (filtering) main.appendChild(el('p', 'empty', '沒有符合的品項，換個關鍵字或型號試試。'));
       if (!state.q) renderPending();
@@ -726,7 +749,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   function renderPending() {
     var main = document.getElementById('list');
     var list = DATA.stores.filter(function (m) {
-      return m.p && (!state.c || m.c === state.c);
+      return m.p && (!state.c.length || state.c.indexOf(m.c) !== -1);
     });
     if (list.length === 0) return;
 
@@ -737,7 +760,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     list.forEach(function (m) {
       var li = el('li');
       li.appendChild(el('b', '', m.n));
-      if (!state.c) li.appendChild(document.createTextNode(' ' + m.c));
+      if (state.c.length !== 1) li.appendChild(document.createTextNode(' ' + m.c));
       ul.appendChild(li);
     });
     sec.appendChild(ul);
@@ -747,8 +770,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   // 篩選收起來時，摘要要說得出「現在正在篩什麼」，否則使用者會看不懂清單為何變短
   function renderFilterSummary() {
     var on = [];
-    if (state.c) on.push(state.c);
-    if (state.s) on.push(state.s);
+    if (state.c.length) on.push(state.c.join('、'));
+    if (state.s.length) on.push(state.s.join('、'));
     if (state.i.length) on.push(state.i.join('、'));
     if (state.q) on.push('「' + state.q + '」');
     var sum = document.getElementById('filterSummary');
@@ -762,7 +785,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   function initFolds() {
     var saved = {};
     try { saved = JSON.parse(localStorage.getItem(FOLD_KEY)) || {}; } catch (err) { /* 無痕模式 */ }
-    var filtering = !!(state.c || state.s || state.i.length || state.q);
+    var filtering = !!(state.c.length || state.s.length || state.i.length || state.q);
     // 預設兩個都收起——這頁的主角是清單。說明的摘要那行已經把「用內建瀏覽器開」
     // 與「先關掉預設瀏覽器」講完，要細節再點開。
     // 篩選則有例外：從分享連結進來（網址帶條件）一律展開，否則使用者不知道清單被篩過。

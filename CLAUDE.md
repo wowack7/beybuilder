@@ -61,9 +61,12 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   攤開會把列表整個推出畫面。收合狀態記在 localStorage `funbox:fold:v1`；
   網址帶篩選條件（分享連結）一律自動展開篩選，且收合列會寫出正在篩什麼（`篩選中 台北市 · UX-19`），
   否則使用者不知道清單為何變短
-- 篩選：縣市籤 → 店家籤 → **品項下拉勾選（紫色、可複選 OR）** ＋ 關鍵字搜尋框
+- 篩選：縣市籤 → 店家籤 → **品項下拉勾選（紫色）** ＋ 關鍵字搜尋框
   （比對品名；品項只認型號編號，名字要靠搜尋）。型號由品名前綴自動抓（`BX-51`／`BXG`）。
-  四者都寫進網址（`?c=&s=&i=BX-10,BX-51&q=旋風`）可分享；品項數量跟著縣市／店家／關鍵字連動
+  **三個維度都可複選（OR），空＝全部**；各自留一顆「全部」籤清空（比逐一取消快，
+  也讓「現在沒篩」看得見）。取消某個縣市會連帶丟掉它底下已選的店，否則清單會冒出不屬於
+  篩選縣市的店。四者都寫進網址（`?c=台北市,新北市&s=&i=BX-10,BX-51&q=旋風`）可分享——
+  **舊的單值連結 split 後就是一元陣列，照樣相容**；品項數量跟著縣市／店家／關鍵字連動
 - **品項依天梯排序**：有階級的照 `X>S+>…>E`，其次是未評級的陀螺，發射器／收納盒等非陀螺配件殿後。
   型號→階級由 `draw-build.mjs` 從 `src/data/products.json` 併進 `data.js` 的 `tiers`
   （一號多刃如隨機強化組取最高階＝「抽得到的最強」；值為空字串＝有商品但來源站沒評級，
@@ -81,7 +84,11 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **`src/lib/site.ts`** — 站台位址單一來源（`SITE_URL`/`BASE_PATH`/`TIER_PATH`/`OG_IMAGE_URL`）。`index.html` 與 `vite.config.ts` 無法 import 它、只能寫死字面量，**`src/lib/site.test.ts` 會實際讀這兩個檔比對**，換網域漏改一處就紅燈（canonical/og:image/sitemap 指錯不會有 runtime 錯誤，只會靜默掉出搜尋結果）
 - **`src/lib/palette.ts`** — tokens 的程式端鏡像（oklch 三元組＋`oklchToHex`）。og 縮圖與靜態天梯頁吃不到 CSS 變數，色碼一律由此**算出**而非手打；`palette.test.ts` 比對它與 `tokens.css`
 - **`scripts/gen-seo.mjs`** — 串在 `npm run build` 之後，產 `dist/tier/index.html`（全部戰刃/固鎖/軸心/輔助刃階級＋Top 60 實戰組合，長尾關鍵字的唯一來源）與 `dist/sitemap.xml`。純函式有 `scripts/gen-seo.test.mjs` 覆蓋（階級排序、不外洩 score、HTML escape、缺 assists 不炸 build）
-- **`scripts/gen-og.mjs`** — 一次性產 `public/og.png`（1200×630 分享縮圖），改視覺才重跑；產物已 commit
+- **`scripts/gen-og.mjs`** — 一次性產兩張 1200×630 分享縮圖：`public/og.png`（全站預設）與
+  `public/og-tier.png`（`/tier/` 專用，同一套版型換文案——這頁是站上唯一被爬蟲讀得到內容的頁，
+  分享時該說自己是天梯總表）。網址常數在 `site.ts` 的 `OG_IMAGE_URL`／`TIER_OG_IMAGE_URL`。
+  改視覺才重跑；產物已 commit（注意 sharp/libvips 版本不同會產出位元組不同但視覺相同的檔，
+  沒改視覺就別讓它進 diff）
 - **`index.html` 的 `#root` 靜態骨架** — 爬蟲唯一能讀到的 `/tier/` 內鏈（footer 那條在 React JSX 裡，原始 HTML 沒有），順帶當 JS 載入前的畫面。React `createRoot()` 掛載時會清空，實測 CLS = 0。連結用**絕對** URL：Vite 不改寫 `<a href>`，相對路徑在子路徑下會解析錯
 - 同理 `<meta content="...">` 也不被 Vite 改寫 base，canonical/og:image 一律寫絕對 URL
 - **robots.txt**：站台現在在子網域根 `beybuilder.5-seven.dog/`，爬蟲會讀 `beybuilder.5-seven.dog/robots.txt`——目前沒放（404＝允許全抓，可接受）；若日後要放 sitemap 指引就丟 `public/robots.txt`。sitemap 仍靠 Search Console 手動提交
@@ -96,6 +103,11 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 
 要點：
 
+- **階級涵蓋率是不變式**：`fetch-data.mjs` 在寫檔前檢查 blades／ratchets／bits 三類至少各有一個階級，
+  整類全空就 throw 並印出來源表目前含「階級」的欄名（`--allow-missing-tiers` 可放行）。
+  來源表改欄名不會報錯、只會讓某欄靜默變空——2026-07-27 的每週更新就這樣把固鎖 36/36、
+  軸心 52/54 的階級洗成 0，天梯頁的固鎖/軸心區整片沒評級，五週沒人發現（見 lessons L13）
+- 輔助刃（assists）不在上述不變式內：來源站從來沒有評級過
 - 階級尺度為 `X > S+ > S > A+ > … > E`（X 最高）。順序的**唯一來源**是 `src/lib/transform.ts` 的 `TIER_ORDER`（`scripts/fetch-data.mjs`、`scripts/gen-seo.mjs` 都 import 它，勿再複製）；`src/lib/score.ts` 的 `TIER_VALUE` 是同一尺度的分數映射，改動需與 `TIER_ORDER` 同步
 - 產品（`Product`）＝一件商品：blade 名稱＋原裝 ratchet＋原裝 bit；blade 以「名稱」為身分聚合，變體（顏色/特別版）無階級時從同家族基底名繼承（`tierInherited: true`）
 - **blade 家族鍵**（重塗/版本/賽事版如(世足)視為同零件；(左)/(右)、(…型) 保留為不同零件）唯一定義在 `src/lib/family.ts`，前端與資料管線（`transform.ts` 直接 import，非複本）共用。實戰組合匹配、deck 衝突判定、天梯「可組」判定都走家族鍵。顏色詞在 `COLOR_WORDS`、版本/賽事詞在 `EDITION_WORDS`（兩者在空白尾段或括號內都會被剝除；功能標記不在表中故保留），新變體漏配就到不了基底組合，`family.test.ts` 覆蓋
