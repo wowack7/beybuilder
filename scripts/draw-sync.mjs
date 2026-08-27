@@ -69,6 +69,7 @@ const key = (n) =>
     .toLowerCase()
     .replace(/[\s\-－–—_]/g, '')
     .replace(/^funbox(toys?)?/, '')
+    .replace(/[（(][^）)]*[）)]$/, '')
     .replace(/店$/, '');
 const bySrcName = new Map();
 for (const r of tsv) {
