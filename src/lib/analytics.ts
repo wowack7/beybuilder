@@ -7,7 +7,9 @@
 
 // GA4 Measurement ID（GA 管理 → 資料串流 → 網站串流；形如 G-XXXXXXXXXX）。
 // 留空 = 不啟用 GA。
-const GA_ID = 'G-NNJPTBMXKW'
+// 匯出是為了讓 scripts/draw-build.mjs 併進 /draw/ 的 data.js——那頁不進 bundle、
+// import 不到這裡，唯一的替代是在 index.html 裡抄第二份 ID。
+export const GA_ID = 'G-NNJPTBMXKW'
 
 declare global {
   interface Window {

@@ -21,7 +21,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - `data-update.yml` 的 commit **不會自動觸發部署**，必須由它自己 `gh workflow run deploy.yml` 明確派工（GITHUB_TOKEN 發出的 push 不觸發其他 workflow；此機制曾讓線上資料靜默停更三週）。驗活看**線上產物**而非 workflow 綠燈：`curl -s https://beybuilder.5-seven.dog/tier/ | grep -o '資料更新於 [0-9-]*'`。判決見 `docs/Decisions.md` [2026-08-11]，坑點見 lessons.md L10
 - `vite.config.ts` base 一律 `/`（站台在子網域根）。網址／base 單一來源在 `src/lib/site.ts`（`SITE_URL`/`BASE_PATH`），`site.test.ts` 讀 `index.html`、`vite.config.ts` 比對，換域漏改就紅燈
 - **phstudy 匯入**：`src/lib/importPh.ts`＋映射表 `src/data/ph_map.json`（data:update 生成，含 hardcoded.json 聯名套組）。三種方式（`ImportPhBody`，全程瀏覽器端解析不上傳）：①**檔案匯入**（主要、手機也適用）——phstudy「下載」匯出 `{parts:[...]}` JSON 檔，本站選檔即解析；②書籤小工具跳轉 `#phimport=<base64>`（電腦一鍵）；③手動貼 JSON。三者最後都進 `parsePhInventory`（吃 partId，忽略其他欄位）
-- **GA4 分析**：`src/lib/analytics.ts`（gtag.js，只做頁面瀏覽），`main.tsx` 開頭呼叫 `initAnalytics()`。僅 `import.meta.env.PROD` 才載入——本機 dev 不追蹤。Measurement ID `G-NNJPTBMXKW` 硬編於該檔（公開值）
+- **GA4 分析**：`src/lib/analytics.ts`（gtag.js，只做頁面瀏覽），`main.tsx` 開頭呼叫 `initAnalytics()`。僅 `import.meta.env.PROD` 才載入——本機 dev 不追蹤。Measurement ID `G-NNJPTBMXKW` 硬編於該檔（公開值）並 `export`，供 `draw-build.mjs` 併進 `/draw/` 的 data.js（那頁 import 不到這裡，見 /draw/ 段）
 
 ## 抽選目錄 `/draw/`（刻意不進 Vite bundle 的純靜態單頁）
 
@@ -46,7 +46,15 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   規則：①上游店名用正規化鍵模糊比對（上游每批都會微調 `Funbox`／`FunBox Toys-`／空格／尾綴「店」）；
   ②同一批次（**比開始日**，因為上游常先只給開始日、之後才補結束日）取聯集，
   保留人工從 VOOM 補進、上游還沒收的品項；③換批才整店換掉；④上游沒列的店原封不動
-- **cache-busting 必要**：LINE 內建瀏覽器快取極黏，不換 `data.js?v=` 使用者會停在舊清單（實測踩過）
+- **cache-busting 必要**：LINE 內建瀏覽器快取極黏，不換 `data.js?v=` 使用者會停在舊清單（實測踩過）。
+  注意 `?v=` **只保護 `data.js`**；改 `index.html` 裡的 CSS／JS 沒有任何換 URL 機制，
+  部署後看起來「沒生效」多半是它的快取
+- **GA4**：與主站同一個串流，ID 由 `draw-build` 從 `src/lib/analytics.ts` 併進 `data.js` 的 `ga`
+  （不在 index.html 抄第二份）。gtag.js 排在 `requestIdleCallback` 才載——這頁的賣點是搶券時秒開，
+  一百多 KB 不能跟清單搶頻寬；`location.protocol !== 'https:'` 或 localhost 一律不送（本機開檔不污染資料）。
+  除 page_view 外兩個自訂事件：`draw_open`（點抽選：store/city/item/model/tier/repeat，
+  同分頁導航靠 gtag 的 sendBeacon 送達）與 `filter_use`（filter_kind＝city/store/item/search
+  ＋ filter_value；連點與打字有去抖動）。`track()` 在 gtag 不存在時靜默跳過，追蹤壞掉不影響抽券
 - 店家排序＝到 `anchors.tsv` 最近錨點的直線距離＋`stores.tsv` 第 6 欄體感調整；
   **距離與錨點只在 build 階段使用，不寫進 `data.js`、畫面也不顯示**（那是使用者的活動範圍）
 - **站頭一律收合**（`<details class="fold">`，說明與篩選各一）：這頁的主角是清單，

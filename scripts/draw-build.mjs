@@ -9,6 +9,7 @@ import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TIER_ORDER } from '../src/lib/transform.ts';
+import { GA_ID } from '../src/lib/analytics.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = 'data/draw';
@@ -190,6 +191,7 @@ const dataJs =
   `  stores: [\n${stores
     .map(({ _d, ...s }) => '    ' + JSON.stringify(s))
     .join(',\n')}\n  ],\n` +
+  `  ga: ${JSON.stringify(GA_ID)},\n` +
   `  tierOrder: ${JSON.stringify(TIER_ORDER)},\n` +
   `  tiers: ${JSON.stringify(tiers)},\n` +
   `  items: [\n${body}\n  ]\n};\n`;

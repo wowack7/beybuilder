@@ -394,7 +394,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   </details>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=424bd338"></script>
+<script src="data.js?v=0d7c28ed"></script>
 <script>
 (function () {
   'use strict';
@@ -543,11 +543,13 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     var cityNav = document.getElementById('cityChips');
     cityNav.textContent = '';
     cityNav.appendChild(chip('全部', DATA.items.length, state.c === '', function () {
+      trackFilter('city', '');
       state.c = '';
       update();
     }));
     cityOrder.forEach(function (c) {
       cityNav.appendChild(chip(c, cityCounts[c] || null, state.c === c, function () {
+        trackFilter('city', state.c === c ? '' : c);
         state.c = state.c === c ? '' : c;
         state.s = '';
         update();
@@ -558,9 +560,14 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     var shown = storeOrder.filter(function (s) { return !state.c || storeMeta[s].c === state.c; });
     var storeNav = document.getElementById('storeChips');
     storeNav.textContent = '';
-    storeNav.appendChild(chip('全部店家', null, state.s === '', function () { state.s = ''; update(); }));
+    storeNav.appendChild(chip('全部店家', null, state.s === '', function () {
+      trackFilter('store', '');
+      state.s = '';
+      update();
+    }));
     shown.filter(function (s) { return storeCounts[s]; }).forEach(function (s) {
       storeNav.appendChild(chip(s, storeCounts[s], state.s === s, function () {
+        trackFilter('store', state.s === s ? '' : s);
         state.s = state.s === s ? '' : s;
         update();
       }));
@@ -606,6 +613,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       var clear = el('button', 'picker-clear', '清除品項（已選 ' + state.i.length + '）');
       clear.type = 'button';
       clear.addEventListener('click', function () {
+        trackFilter('item', '');
         state.i = [];
         update();
       });
@@ -619,6 +627,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       box.type = 'checkbox';
       box.checked = on;
       box.addEventListener('change', function () {
+        trackFilter('item', (box.checked ? '' : '-') + t);
         state.i = box.checked
           ? state.i.concat([t])
           : state.i.filter(function (x) { return x !== t; });
@@ -674,7 +683,15 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
         a.appendChild(el('span', 'name', it.n));
         a.appendChild(el('span', 'go', done[it.u] ? '已抽' : '抽選'));
         if (done[it.u]) a.classList.add('done');
-        a.addEventListener('click', function () { markDone(it.u, a); });
+        a.addEventListener('click', function () {
+          // 連結一律同分頁開（不跳出 LINE），所以事件得在導航前送出——
+          // gtag 走 sendBeacon，卸載中仍會送達
+          track('draw_open', {
+            store: it.s, city: it.c, item: it.n, model: tagOf(it.n) || '(none)',
+            tier: TIERS[tagOf(it.n)] || '(none)', repeat: done[it.u] ? 1 : 0,
+          });
+          markDone(it.u, a);
+        });
         card.appendChild(a);
       });
       section.appendChild(card);
@@ -761,6 +778,47 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     });
   }
 
+  // --- GA4 ---------------------------------------------------------------
+  // 這頁不進 bundle，import 不到 src/lib/analytics.ts；ID 由 draw-build 併進 data.js，
+  // 不在這裡抄第二份。載入時機刻意排在畫面畫完之後：這頁的賣點是搶券時秒開，
+  // gtag.js 一百多 KB 不能跟清單搶頻寬。
+  function initGa() {
+    // 只在正式站送：file:// 開檔與本機預覽都不該污染資料
+    if (!DATA.ga || location.protocol !== 'https:') return;
+    if (/^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname)) return;
+
+    var load = function () {
+      var script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=' + DATA.ga;
+      document.head.appendChild(script);
+      window.dataLayer = window.dataLayer || [];
+      // 必須 push arguments 物件（照官方 snippet）；push 陣列會被 gtag.js 忽略，
+      // config 從此不生效、GA 完全不送資料（主站 2026-07-07 踩過這個坑）
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', DATA.ga);
+    };
+    if (window.requestIdleCallback) requestIdleCallback(load, { timeout: 3000 });
+    else setTimeout(load, 1200);
+  }
+
+  /** 沒載到 gtag（擋廣告、還沒載完、非正式站）就靜靜跳過，絕不影響頁面功能 */
+  function track(name, params) {
+    if (typeof window.gtag !== 'function') return;
+    try { window.gtag('event', name, params || {}); } catch (err) { /* 追蹤失敗不影響抽券 */ }
+  }
+
+  // 篩選事件會連續觸發（打字、連點型號），同鍵值 800ms 內只送一次
+  var lastTrack = {};
+  function trackFilter(kind, value) {
+    var key = kind + '\u0000' + value;
+    var now = Date.now();
+    if (lastTrack[key] && now - lastTrack[key] < 800) return;
+    lastTrack[key] = now;
+    track('filter_use', { filter_kind: kind, filter_value: String(value || '(clear)') });
+  }
+
   function update() {
     renderStale();
     renderChips();
@@ -786,15 +844,22 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 
   var searchInput = document.getElementById('search');
   searchInput.value = state.q;
+  var searchTimer = null;
   searchInput.addEventListener('input', function () {
     state.q = searchInput.value.trim();
     renderList();
     renderItemChips();
     syncUrl();
+    // 打字每個字都送會變雜訊，停手 1.2 秒才記一次「他在找什麼」
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function () {
+      if (state.q) track('filter_use', { filter_kind: 'search', filter_value: state.q });
+    }, 1200);
   });
 
   initFolds();
   update();
+  initGa();
 })();
 </script>
 </body>
