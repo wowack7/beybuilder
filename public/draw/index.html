@@ -316,49 +316,68 @@ main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 }
 .stale b { font-weight: 800; }
 
-.notice {
-  margin-top: 0.6rem;
-  border: 1px solid var(--color-line);
-  border-left: 3px solid var(--color-warn);
-  border-radius: 0 12px 12px 0;
+.modal-title { font-size: 1.05rem; font-weight: 800; }
+.modal-lead { margin-top: 0.35rem; font-size: 0.82rem; line-height: 1.6; color: var(--color-text-dim); }
+.modal-lead b { font-weight: 800; color: var(--color-warn-ink); }
+
+/* LINE 設定畫面那一列的仿畫（不是截圖：inline CSS 不多一次請求、明暗色都跟著站台走） */
+.labs {
+  margin-top: 0.8rem;
+  padding: 0.6rem 0.7rem 0.55rem;
   background: var(--color-surface);
-  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
 }
-.notice p {
+.labs-path { font-size: 0.72rem; font-weight: 600; color: var(--color-text-dim); }
+.labs-path b { font-weight: 800; color: var(--color-text); }
+.labs-row {
   display: flex;
-  gap: 0.5rem;
-  padding: 0.5rem 0.7rem;
-  font-size: 0.78rem;
-  line-height: 1.5;
-}
-.notice b { font-weight: 800; }
-.notice .warn {
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.45rem;
+  padding-top: 0.45rem;
   border-top: 1px solid var(--color-line);
-  color: var(--color-warn-ink);
 }
-.badge {
+.labs-name { flex: 1 1 auto; font-size: 0.86rem; font-weight: 700; }
+/* 關閉狀態的開關：灰底、圓鈕在左——就是使用者該在畫面上看到的樣子 */
+.labs-switch {
   flex: 0 0 auto;
-  align-self: flex-start;
-  padding: 0.05rem 0.4rem;
-  font-size: 0.66rem;
+  position: relative;
+  width: 2.6rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-text-dim) 45%, var(--color-bg));
+}
+.labs-switch i {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+.labs-hint { margin-top: 0.45rem; font-size: 0.74rem; font-weight: 700; color: var(--color-warn-ink); }
+.labs-hint b { font-weight: 800; }
+
+.modal-note { margin-top: 0.8rem; font-size: 0.78rem; line-height: 1.6; color: var(--color-text-dim); }
+.modal-note b { font-weight: 800; color: var(--color-text); }
+.modal-ok {
+  display: block;
+  width: 100%;
+  margin-top: 0.9rem;
+  padding: 0.6rem;
+  font: inherit;
+  font-size: 0.9rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
-  border-radius: 5px;
-  color: var(--color-text-dim);
-  background: var(--color-chip);
+  color: #fff;
+  background: var(--color-accent);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
 }
-.warn .badge { color: #fff; background: var(--color-warn); }
-.path {
-  display: inline-block;
-  margin: 0 0.15rem;
-  padding: 0.02rem 0.4rem;
-  font-size: 0.92em;
-  font-weight: 700;
-  white-space: nowrap;
-  border-radius: 5px;
-  color: var(--color-text-dim);
-  background: var(--color-chip);
-}
+.modal-ok:active { transform: scale(0.98); }
 
 .clear-done {
   flex: 0 0 auto;
@@ -442,16 +461,29 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 
 <!-- 首次造訪自動彈出：LINE Labs 那個設定沒關，這頁的核心賣點（不跳出 LINE）就不成立 -->
 <div class="modal-back" id="howtoModal" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-label="使用說明">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
     <button class="icon-btn modal-close" id="howtoClose" type="button" aria-label="關閉">✕</button>
-    <aside class="notice">
-      <p class="lead"><span class="badge">怎麼用</span><span>把本頁網址丟進 LINE，用 <b>LINE 內建瀏覽器</b>開啟，點「抽籤」直接開抽選頁，全程不跳出 LINE。</span></p>
-      <p class="warn"><span class="badge">先設定</span><span>把<b>「使用預設瀏覽器開啟連結」關掉</b><span class="path">LINE ▸ 設定 ▸ LINE Labs</span>，否則點連結會被丟到外部瀏覽器。</span></p>
-    </aside>
+    <h2 class="modal-title" id="howtoTitle">開始前，先關掉這個</h2>
+    <p class="modal-lead">否則點「抽籤」會被丟到外部瀏覽器，<b>等於跳出 LINE</b>——這頁的重點就是不跳出去。</p>
+
+    <!-- 這一列是 LINE 設定畫面的仿畫，不是截圖：inline HTML/CSS 沒有多一次請求、
+         明暗兩色都跟著站台走，也不必處理圖片的 cache-busting -->
+    <div class="labs">
+      <div class="labs-path">LINE ▸ 設定 ▸ <b>LINE Labs</b></div>
+      <div class="labs-row">
+        <span class="labs-name">使用預設瀏覽器開啟連結</span>
+        <span class="labs-switch" aria-hidden="true"><i></i></span>
+      </div>
+      <div class="labs-hint">保持<b>關閉</b>（灰色、圓鈕在左）</div>
+    </div>
+
+    <p class="modal-note"><b>怎麼用</b>：把本頁網址丟進 LINE，用 LINE 內建瀏覽器開啟，點「抽籤」直接開抽籤頁，全程不跳出 LINE。</p>
+    <button class="modal-ok" id="howtoOk" type="button">知道了</button>
   </div>
 </div>
+
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=475e36c1"></script>
+<script src="data.js?v=156e58d1"></script>
 <script>
 (function () {
   'use strict';
@@ -885,6 +917,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   }
   document.getElementById('howtoBtn').addEventListener('click', function () { showHowto(true); });
   document.getElementById('howtoClose').addEventListener('click', function () { showHowto(false); });
+  document.getElementById('howtoOk').addEventListener('click', function () { showHowto(false); });
   howto.addEventListener('click', function (e) { if (e.target === howto) showHowto(false); });
   function initHowto() {
     var seen = false;
