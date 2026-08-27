@@ -132,9 +132,19 @@ function roundMark(periods) {
   return dates.length > 1 ? `@${dates[0]}~${dates[dates.length - 1]}` : `@${dates[0]}`;
 }
 
+/** 這批上游的日期（同一頁＝同一批），個別店家解析不到 draw-start 時的後備值 */
+const markTally = new Map();
+for (const s of picked) {
+  const mk = roundMark(s.periods);
+  if (mk) markTally.set(mk, (markTally.get(mk) ?? 0) + 1);
+}
+const batchMark = [...markTally.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
+const isDateMark = (mk) => /^@\d{4}-\d{2}-\d{2}/.test(mk);
+
 const byStore = new Map(picked.map((s) => [matchStore(s.store) ?? s.store, s]));
 const out = [];
 const changed = [];
+const inherited = [];
 let i = 0;
 while (i < lines.length) {
   const m = lines[i].trim().match(/^\[(.+)\]$/);
@@ -155,7 +165,13 @@ while (i < lines.length) {
     if (url.startsWith('https://lin.ee/') && k > 0) prev.push([body[k - 1].trim(), url]);
   }
   const prevMark = body.map((l) => l.trim()).find((l) => l.startsWith('@')) ?? '';
-  const mark = roundMark(up.periods) ?? '';
+  // 上游有時只在部分店家標抽選日期（同一頁的其他店照樣有）。這時**絕不能**寫回空白：
+  // 沒有 @日期 的店在頁面上不屬於任何批次，會從彙總與「進行中」名單裡靜默消失
+  // （2026-08-27 實際發生：16 家有品項的店只剩 1 家有日期，頁面顯示「1 家」）。
+  // 後備順序：上游本次的日期 → 正本既有的 @日期 → 這批其他店的日期（新公布的店）→ 正本原樣。
+  const upMark = roundMark(up.periods) ?? '';
+  const mark = upMark || (isDateMark(prevMark) ? prevMark : batchMark || prevMark);
+  if (!upMark && mark) inherited.push(`${store} → ${mark}${isDateMark(prevMark) ? '（沿用正本）' : '（沿用這批）'}`);
 
   // 同一批次以「開始日」判定：上游常先只給開始日、之後才補上結束日（@2026-08-28 → @2026-08-28~2026-08-29），
   // 比整串會誤判成換批、把人工補的資料洗掉。
@@ -181,8 +197,9 @@ while (i < lines.length) {
 // 上游有、正本沒有的店（新開的店）append 到最後，等人工補座標與縣市分區
 for (const [name, up] of byStore) {
   out.push('', `### ${up.city}`, '', `[${name}]`);
-  const mark = roundMark(up.periods);
+  const mark = roundMark(up.periods) ?? batchMark;
   if (mark) out.push(mark);
+  if (!roundMark(up.periods) && mark) inherited.push(`${name} → ${mark}（沿用這批）`);
   for (const [n, u] of up.items) out.push(n, u);
   out.push('');
   changed.push({ store: name, added: up.items.length, gone: 0, isNew: true });
@@ -197,6 +214,10 @@ if (!changed.length) {
     const kept = c.kept ? ` （保留人工補的 ${c.kept} 筆）` : '';
     console.log(`  ${c.isNew ? '新店家 ' : ''}${c.store}: +${c.added} -${c.gone}${kept}`);
   }
+}
+if (inherited.length) {
+  console.log(`\n上游沒給抽選日期、沿用既有／本批日期的店（${inherited.length} 家）:`);
+  for (const l of inherited) console.log(`  ${l}`);
 }
 console.log(`\ndata/draw/source-links.txt 已更新（上游 ${picked.length} 家 / ${[...nextUrls].length} 筆）`);
 console.log('接著跑: npm run draw:build');

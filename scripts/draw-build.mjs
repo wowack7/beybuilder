@@ -132,6 +132,15 @@ const noCoords = stores.filter((s) => s._d === null);
 console.log(`無座標店家: ${noCoords.length}${noCoords.length ? ' → ' + noCoords.map((s) => s.n).join(', ') : ''}`);
 const noRound = stores.filter((s) => !s.rs && !s.p);
 console.log(`無抽選日期店家: ${noRound.length}${noRound.length ? ' → ' + noRound.map((s) => s.n).join(', ') : ''}`);
+// 有品項卻沒有 @日期／@待公布 的店，在頁面上不屬於任何批次：它不進頂端彙總、也不進
+// 「進行中／已結束／尚未公布」任何一區，等於靜默消失。這是資料錯誤，不是可接受狀態。
+const withItems = new Set(items.map((i) => i.s));
+const orphan = noRound.filter((s) => withItems.has(s.n)).map((s) => s.n);
+if (orphan.length)
+  throw new Error(
+    `有品項卻沒標抽選日期的店家 ${orphan.length} 家: ${orphan.join(', ')}\n` +
+    `→ 請在 data/draw/source-links.txt 的 [店名] 下補一行 @YYYY-MM-DD[~YYYY-MM-DD] 或 @待公布`,
+  );
 const byRound = {};
 for (const s of stores) byRound[s.p ? '待公布' : s.rs ?? '(無)'] = (byRound[s.p ? '待公布' : s.rs ?? '(無)'] || 0) + 1;
 console.log('批次分佈: ' + Object.entries(byRound).map(([k, v]) => `${k} ${v}家`).join(' / '));
