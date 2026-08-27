@@ -7,7 +7,7 @@
  * 用法（在你自己的機器上跑，雲端容器連不到 facebook.com）：
  *   npm run draw:fb            # 只看正本還沒收品項的店
  *   npm run draw:fb -- --all   # 看官方表上全部有粉專的店
- *   npm run draw:fb -- --headed --limit 5    # 看得到瀏覽器在做什麼、只掃 5 家
+ *   npm run draw:fb -- --headed --limit=5   # 看得到瀏覽器在做什麼、只掃 5 家（--limit 要用等號）
  *
  * 第一次跑會開一個瀏覽器視窗要你登入 FB（用的是專屬設定檔
  * data/draw/.fb-profile，不會碰你日常的 Chrome 設定檔，也不進版控）；
@@ -70,7 +70,9 @@ function targets() {
 }
 
 async function main() {
-  const { chromium } = await import('playwright');
+  // playwright-core：這支用 channel:'chrome' 開你機器上的 Chrome，不需要 Playwright 自帶的瀏覽器。
+  // 用完整版 playwright 會讓 CI 的 npm ci 每次多下載約 500MB 瀏覽器，而這支根本只能在本機跑。
+  const { chromium } = await import('playwright-core');
   const list = targets().slice(0, limit);
   if (!list.length) {
     console.log('沒有要掃的店（正本已經全部收到品項了？可加 --all 掃全部）');
