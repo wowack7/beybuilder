@@ -5,6 +5,7 @@
 import { readFileSync, writeFileSync, appendFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { LINK_SRC, linkRe, isLinkLine, normLink, isShortLink } from './draw-links.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = 'data/draw';
@@ -44,6 +45,39 @@ console.log(`→ 判定: ${expired ? '⚠️  這批連結已過期' : '✅ 這�
   `（措辭:${byWording ? '過期' : '未提'} / 日期:${byDate ? '已過' : '未過'}）`);
 if (expired && write) console.log('⚠️  仍會寫入，但請記得頁面上的過期提示要一起更新');
 
+// --- lin.ee → liff 轉址表（去重要比對終點，所以得在解析品項前就載入） ---
+const mapping = new Map(readFileSync(join(root, `${DATA}/mapping.tsv`), 'utf8').split('\n')
+  .map((l) => l.trim()).filter(Boolean).map((l) => l.split('\t')));
+
+/** 連結的最終去處：短址查轉址表（查不到退回短址本身），liff 直連本身就是終點 */
+const finalUrl = (u) => {
+  if (!isShortLink(u)) return u;
+  const r = mapping.get(u.split('/').pop());
+  return r && r !== 'FAIL' ? r : u;
+};
+
+/**
+ * 同一場抽選，上游有時同時列了 lin.ee 短址與 liff 直連
+ * （2026-08-27 嘉義三越 BX-10：lin.ee/pjDJ7QO 與 liff .../01M0YM12W4… 終點相同）。
+ * 不去重會踩到 draw-build 的「同店重複 URL」防護，整批同步中斷。
+ * 保留短址：正本既有資料全是短址形式，改用直連會讓整份檔案無謂變動。
+ */
+function dedupeByDest(items) {
+  const pick = new Map(); // 終點 → 要保留的原始連結
+  for (const [, url] of items) {
+    const dest = finalUrl(url);
+    const cur = pick.get(dest);
+    if (!cur || (!isShortLink(cur) && isShortLink(url))) pick.set(dest, url);
+  }
+  const used = new Set();
+  return items.filter(([, url]) => {
+    const dest = finalUrl(url);
+    if (used.has(dest) || pick.get(dest) !== url) return false;
+    used.add(dest);
+    return true;
+  });
+}
+
 // --- 解析店家與品項 ---
 const blocks = [...html.matchAll(
   /<div class="draw-store" data-draw-city="([^"]+)">([\s\S]*?)(?=<div class="draw-store" data-draw-city="|<div class="draw-city-group"|<\/body>)/g
@@ -52,8 +86,9 @@ const stores = blocks.map(([, city, blk]) => ({
   city,
   store: blk.match(/draw-store-name">([^<]+)</)?.[1] ?? '',
   periods: [...blk.matchAll(/draw-start">([^<]*)</g)].map((m) => m[1]),
-  items: [...blk.matchAll(/draw-product">([^<]+)<\/div><a class="draw-link" href="(https:\/\/lin\.ee\/[A-Za-z0-9]+)"/g)]
-    .map((m) => [m[1], m[2]]),
+  items: dedupeByDest([...blk.matchAll(
+    new RegExp(String.raw`draw-product">([^<]+)<\/div><a class="draw-link" href="(${LINK_SRC})[^"]*"`, 'g'),
+  )].map((m) => [m[1], normLink(m[2])])),
   // 診斷用：抓到 0 筆時要分得出「上游還沒放連結」還是「連結長得跟正則不一樣」
   productCount: [...blk.matchAll(/draw-product">/g)].length,
   hrefs: [...blk.matchAll(/href="(https?:\/\/[^"]+)"/g)].map((m) => m[1]),
@@ -88,7 +123,7 @@ if (unmapped.length && !all) {
 
 // --- 與現有正本比對 ---
 const current = readFileSync(join(root, `${DATA}/source-links.txt`), 'utf8');
-const currentUrls = new Set([...current.matchAll(/https:\/\/lin\.ee\/[A-Za-z0-9]+/g)].map((m) => m[0]));
+const currentUrls = new Set([...current.matchAll(linkRe('g'))].map((m) => m[0]));
 const nextUrls = new Set(picked.flatMap((s) => s.items.map(([, u]) => u)));
 const added = [...nextUrls].filter((u) => !currentUrls.has(u));
 const removed = [...currentUrls].filter((u) => !nextUrls.has(u));
@@ -105,7 +140,7 @@ const currentStores = new Map();
     if (h) { store = h[1]; currentStores.set(store, { mark: '', items: 0 }); continue; }
     if (!store) continue;
     if (line.startsWith('@') && !currentStores.get(store).mark) currentStores.get(store).mark = line;
-    if (/^https:\/\/lin\.ee\//.test(line)) currentStores.get(store).items += 1;
+    if (isLinkLine(line)) currentStores.get(store).items += 1;
   }
 }
 const currentWithItems = [...currentStores].filter(([, v]) => v.items).map(([n]) => n);
@@ -137,7 +172,7 @@ if (emptyUpstream.length) {
   }
   console.log(
     '   → 品名 0／連結 0 ＝ 上游還沒放連結，等它公布即可；' +
-      '有品名或連結卻是 0 筆 ＝ 那家的連結格式與解析器不符（本程式只認 lin.ee），要改正則',
+      '有品名或連結卻是 0 筆 ＝ 那家的連結格式與解析器不符（本程式認 lin.ee 短址與 liff.line.me 直連），要改 scripts/draw-links.mjs',
   );
 }
 
@@ -147,9 +182,9 @@ if (!write) {
 }
 
 // --- 補 mapping：解析新的 lin.ee 轉址 ---
-const mapping = new Map(readFileSync(join(root, `${DATA}/mapping.tsv`), 'utf8').split('\n')
-  .map((l) => l.trim()).filter(Boolean).map((l) => l.split('\t')));
-const needCodes = [...nextUrls].map((u) => u.split('/').pop()).filter((c) => !mapping.has(c));
+// liff 直連本身就是終點，不需要（也不能）解轉址；只有 lin.ee 短址要查 location
+const needCodes = [...nextUrls].filter(isShortLink)
+  .map((u) => u.split('/').pop()).filter((c) => !mapping.has(c));
 console.log(`待解析轉址: ${needCodes.length} 筆`);
 for (let i = 0; i < needCodes.length; i += 8) {
   const batch = needCodes.slice(i, i + 8);
@@ -163,6 +198,13 @@ for (let i = 0; i < needCodes.length; i += 8) {
 console.log('');
 const fails = needCodes.filter((c) => mapping.get(c) === 'FAIL');
 if (fails.length) console.log(`⚠️  轉址失敗 ${fails.length} 筆: ${fails.join(', ')}`);
+
+// 轉址解完後再去重一次：第一輪去重時新短址還沒解析，看不出它和 liff 直連是同一場抽選
+for (const s of picked) {
+  const before = s.items.length;
+  s.items = dedupeByDest(s.items);
+  if (s.items.length !== before) console.log(`  去重（同終點）: ${s.store} ${before} → ${s.items.length} 筆`);
+}
 
 // --- 合併回正本（只換上游這批有列的店，其餘原封不動） ---
 // 為什麼是合併不是覆寫：各店是逐日陸續公布的，覆寫會把還沒公布的店整批抹掉，
@@ -213,7 +255,7 @@ while (i < lines.length) {
   const prev = [];
   for (let k = 0; k < body.length; k += 1) {
     const url = body[k].trim();
-    if (url.startsWith('https://lin.ee/') && k > 0) prev.push([body[k - 1].trim(), url]);
+    if (isLinkLine(url) && k > 0) prev.push([body[k - 1].trim(), url]);
   }
   const prevMark = body.map((l) => l.trim()).find((l) => l.startsWith('@')) ?? '';
   // 上游有時只在部分店家標抽選日期（同一頁的其他店照樣有）。這時**絕不能**寫回空白：

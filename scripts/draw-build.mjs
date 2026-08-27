@@ -8,6 +8,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isLinkLine } from './draw-links.mjs';
 import { TIER_ORDER } from '../src/lib/transform.ts';
 import { GA_ID } from '../src/lib/analytics.ts';
 import { DRAW_PATH, SITE_URL } from '../src/lib/site.ts';
@@ -85,11 +86,11 @@ for (const raw of lines) {
 
   if (line === '—') { group += 1; continue; }
 
-  const urlMatch = line.match(/^https:\/\/lin\.ee\/([A-Za-z0-9]+)$/);
-  if (urlMatch) {
-    const code = urlMatch[1];
-    const resolved = mapping.get(code);
-    const url = resolved && resolved !== 'FAIL' ? resolved : `https://lin.ee/${code}`;
+  if (isLinkLine(line)) {
+    // liff 直連已經是終點；lin.ee 短址查 mapping，查不到就退回短址（頁面照樣點得開）
+    const code = line.match(/^https:\/\/lin\.ee\/([A-Za-z0-9]+)$/)?.[1];
+    const resolved = code ? mapping.get(code) : null;
+    const url = code ? (resolved && resolved !== 'FAIL' ? resolved : line) : line;
     if (!pendingName) throw new Error(`URL 前面沒有品名: ${line}`);
     items.push({ c: city, s: store, g: group, n: pendingName, u: url });
     pendingName = '';
@@ -111,7 +112,7 @@ console.log(`同店重複 URL: ${dupes.length}${dupes.length ? ' → ' + dupes.j
 console.log(`跨店共用 URL（允許）: ${crossStore.length}${crossStore.length ? ' → ' + crossStore.join(', ') : ''}`);
 console.log(`非 liff 直連: ${nonLiff.length}${nonLiff.length ? ' → ' + nonLiff.map((i) => i.n).join(', ') : ''}`);
 // 自我一致性：正本裡有幾行 lin.ee 網址，就該產出幾筆（抓解析漏吃，換批不用改常數）
-const urlLines = lines.filter((l) => /^https:\/\/lin\.ee\/[A-Za-z0-9]+$/.test(l.trim())).length;
+const urlLines = lines.filter((l) => isLinkLine(l.trim())).length;
 if (items.length !== urlLines) throw new Error(`正本有 ${urlLines} 行網址，只產出 ${items.length} 筆`);
 if (dupes.length > 0) throw new Error('同一店家有重複 URL');
 
