@@ -112,7 +112,9 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **`/tier/` 的常見問題**：`faqItems()` 一份資料同時渲染成頁面上的 `<details>` 與 FAQPage 結構化資料——
   Google 要求答案在頁面上看得見，只放 JSON-LD 會被判為影子內容。題數必須兩邊一致
 - **sitemap 收錄三頁**：首頁（weekly）、`/tier/`（weekly）、`/draw/`（daily）
-- **未完成**：Search Console 尚未驗證／未提交 sitemap（需帳號擁有者操作）。在那之前 `/tier/` 只能靠首頁內鏈被爬到
+- **Search Console 已驗證**（驗證檔 `public/google36da2f64a6ba1f25.html`，2026-07-11 加入；用戶於 2026-08-27 確認驗證完成）。
+  改網域或換 Google 帳號時那個檔不能刪。sitemap 提交狀態不在 repo 裡看得出來，
+  要確認就開 Search Console 的 Sitemap 頁
 
 ## Data pipeline（先懂這個再動資料相關程式）
 
