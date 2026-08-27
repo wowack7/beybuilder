@@ -103,10 +103,17 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   transition: transform var(--duration-fast) ease;
 }
 .fold[open] > summary::after { transform: translateY(1px) rotate(-135deg); }
+.fold-count {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
 .fold-note {
   font-weight: 400;
   font-size: 0.78rem;        /* 標題放大了，附註維持小字才有主從 */
-  color: var(--color-text-dim);
+  /* 往背景色混淡：text-dim 直接用在彩色標題旁邊還是太搶，附註就該是附註 */
+  color: color-mix(in oklab, var(--color-text-dim) 72%, var(--color-bg));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -123,8 +130,44 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
 .fold.is-on .fold-note { color: var(--color-accent-ink); font-weight: 700; }
 .fold[open] > summary { margin-bottom: -0.1rem; }
 
+/* 搜尋改成站頭的放大鏡：品項下拉已經涵蓋型號，名字搜尋是少數情況，
+   不值得長駐一整列。按鈕在站頭第一行右端，不必展開篩選就按得到 */
+.search-toggle {
+  flex: 0 0 auto;
+  margin-left: auto;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--color-text-dim);
+  background: var(--color-chip);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.search-toggle svg { width: 1.05rem; height: 1.05rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.search-toggle[aria-expanded="true"],
+.search-toggle.is-on { color: var(--color-accent-ink); background: var(--color-accent-soft); }
+.search-toggle:active { transform: scale(0.92); }
+
+.searchbar { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; }
+/* class 的 display 會蓋掉 [hidden] 的 UA 樣式——少這行搜尋列就永遠攤在那 */
+.searchbar[hidden] { display: none; }
+.search-close {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--color-text-dim);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
 .search {
-  margin-top: 0.55rem;
+  margin-top: 0;
   display: block;
   width: 100%;
   padding: 0.55rem 0.9rem;
@@ -135,6 +178,8 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   border-radius: 999px;
 }
 .search:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; border-color: transparent; }
+/* 原生的清除鈕只清字、不收起搜尋列，跟旁邊那顆 ✕ 並排會變成兩個叉 */
+.search::-webkit-search-cancel-button { display: none; }
 .search::placeholder { color: var(--color-text-dim); }
 
 .chips { display: flex; gap: 0.4rem; margin-top: 0.55rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
@@ -371,8 +416,15 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 <header class="top">
   <div class="masthead">
     <h1>戰鬥陀螺<em>抽選目錄</em></h1>
+    <button class="search-toggle" id="searchToggle" type="button" aria-label="搜尋品項" aria-expanded="false">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.8 12.8 L17 17"/></svg>
+    </button>
     <span class="meta" id="meta"></span>
     <button class="clear-done" id="clearDone" type="button" hidden></button>
+  </div>
+  <div class="searchbar" id="searchBar" hidden>
+    <input class="search" id="search" type="search" placeholder="搜尋品項（例：旋風、獅鷲、收納）" aria-label="搜尋品項">
+    <button class="search-close" id="searchClose" type="button" aria-label="關閉搜尋">✕</button>
   </div>
   <aside class="stale" id="stale" hidden></aside>
   <details class="fold" id="howto">
@@ -383,8 +435,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     </aside>
   </details>
   <details class="fold" id="filters">
-    <summary id="filterSummary">篩選<span class="fold-note">縣市 · 店家 · 品項 · 搜尋</span></summary>
-    <input class="search" id="search" type="search" placeholder="搜尋品項（例：BX-51、旋風、獅鷲）" aria-label="搜尋品項">
+    <summary id="filterSummary">篩選<span class="fold-note">縣市 · 店家 · 品項</span></summary>
     <nav class="chips" id="cityChips" aria-label="縣市篩選"></nav>
     <nav class="chips" id="storeChips" aria-label="店家篩選"></nav>
     <details class="fold picker" id="itemPicker">
@@ -394,7 +445,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   </details>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=565de58e"></script>
+<script src="data.js?v=3a083585"></script>
 <script>
 (function () {
   'use strict';
@@ -669,9 +720,11 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     var main = document.getElementById('list');
     main.textContent = '';
     var visible = DATA.items.filter(matches);
+    // 「現在看得到幾項」跟著篩選走，所以寫在篩選那行（見 renderFilterSummary）；
+    // 站頭只留跟篩選無關的兩件事：公布進度與資料更新時間
+    visibleCount = visible.length;
     document.getElementById('meta').textContent =
-      visible.length + ' 項 · 已公布 ' + publishedCount() + '/' + DATA.stores.length +
-      ' 家 · 更新 ' + DATA.updated;
+      '已公布 ' + publishedCount() + '/' + DATA.stores.length + ' 家 · 更新 ' + DATA.updated;
 
     // 有下任何篩選卻篩不到東西才提示；沒篩選時的空清單交給下面的「尚未公布」名單說明
     var filtering = !!(state.q || state.i.length || state.c.length || state.s.length);
@@ -767,7 +820,10 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     main.appendChild(sec);
   }
 
-  // 篩選收起來時，摘要要說得出「現在正在篩什麼」，否則使用者會看不懂清單為何變短
+  var visibleCount = DATA.items.length;
+
+  // 篩選收起來時，摘要要說得出「現在正在篩什麼」與「篩出幾項」，
+  // 否則使用者會看不懂清單為何變短
   function renderFilterSummary() {
     var on = [];
     if (state.c.length) on.push(state.c.join('、'));
@@ -776,8 +832,10 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     if (state.q) on.push('「' + state.q + '」');
     var sum = document.getElementById('filterSummary');
     sum.textContent = on.length ? '篩選中' : '篩選';
-    sum.appendChild(el('span', 'fold-note', on.length ? on.join(' · ') : '縣市 · 店家 · 品項 · 搜尋'));
+    sum.appendChild(el('span', 'fold-count', visibleCount + ' 項'));
+    sum.appendChild(el('span', 'fold-note', on.length ? on.join(' · ') : '縣市 · 店家 · 品項'));
     document.getElementById('filters').classList.toggle('is-on', on.length > 0);
+    document.getElementById('searchToggle').classList.toggle('is-on', !!state.q);
   }
 
   // 展開狀態記在 localStorage（每台裝置各自記）；讀不到就用預設
@@ -867,11 +925,31 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 
   var searchInput = document.getElementById('search');
   searchInput.value = state.q;
+  // 放大鏡：開→顯示搜尋列並聚焦；關→順手清掉關鍵字（留著卻看不到框最容易讓人以為清單壞了）
+  var searchBar = document.getElementById('searchBar');
+  var searchToggle = document.getElementById('searchToggle');
+  function showSearch(on, focus) {
+    searchBar.hidden = !on;
+    searchToggle.setAttribute('aria-expanded', on ? 'true' : 'false');
+    if (on && focus !== false) searchInput.focus();
+    if (!on && state.q) {
+      state.q = '';
+      searchInput.value = '';
+      update();
+    }
+  }
+  searchToggle.addEventListener('click', function () { showSearch(searchBar.hidden, true); });
+  document.getElementById('searchClose').addEventListener('click', function () { showSearch(false); });
+  searchInput.addEventListener('keydown', function (e) { if (e.key === 'Escape') showSearch(false); });
+  // 從分享連結進來就直接展開，否則使用者看不到清單為何被篩過
+  if (state.q) showSearch(true, false);
+
   var searchTimer = null;
   searchInput.addEventListener('input', function () {
     state.q = searchInput.value.trim();
     renderList();
     renderItemChips();
+    renderFilterSummary();   // 數量與「正在搜什麼」都寫在篩選那行，打字時要跟著動
     syncUrl();
     // 打字每個字都送會變雜訊，停手 1.2 秒才記一次「他在找什麼」
     clearTimeout(searchTimer);
