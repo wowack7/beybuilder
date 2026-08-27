@@ -352,8 +352,20 @@ export function transformAll(raw: RawSheets, enrich?: Enrichment): DataBundle {
     if (r['分類 (Category)'] === 'bit') bitImgs.set(name, img)
     if (r['分類 (Category)'] === 'assist') assistImgs.set(name, img)
   }
-  const ratchetTiers = new Map<string, string>()
-  const bitTiers = new Map<string, string>()
+  // 2026-07-27 起主表的「固鎖階級 (Ratchet Tier)」「軸心階級 (Bit Tier)」兩欄被清空
+  // （欄位還在、345 列全空），評級搬到零件圖鑑表的「階級 (Tier)」，而且連輔助刃都有了。
+  // 兩邊都讀、以有值者為準：主表哪天填回來也不會壞，零件表被清空也還有主表兜底。
+  const partTierByCat: Record<string, Map<string, string>> = {
+    ratchet: new Map(),
+    bit: new Map(),
+    assist: new Map(),
+  }
+  for (const r of partRows) {
+    const tier = r['階級 (Tier)'] === '-' ? '' : r['階級 (Tier)'] || ''
+    if (tier) partTierByCat[r['分類 (Category)']]?.set(r['原裝固鎖、軸心'], tier)
+  }
+  const ratchetTiers = new Map<string, string>(partTierByCat.ratchet)
+  const bitTiers = new Map<string, string>(partTierByCat.bit)
   for (const p of products) {
     if (p.ratchet && p.ratchetTier)
       ratchetTiers.set(p.ratchet, bestTier(ratchetTiers.get(p.ratchet) ?? p.ratchetTier, p.ratchetTier))
@@ -412,7 +424,8 @@ export function transformAll(raw: RawSheets, enrich?: Enrichment): DataBundle {
   for (const c of siteCombos) if (c.assist) assistIds.add(c.assist)
   const assists: SimplePart[] = [...assistIds].sort().map((id) => ({
     id,
-    tier: '', // 天梯站未對輔助刃評級
+    // 零件圖鑑表以「輔助A」為列名（與圖片同一把鑰匙）；沒評級就留空
+    tier: partTierByCat.assist.get(`輔助${id}`) ?? '',
     img: assistImgs.get(`輔助${id}`) ?? '',
     stats: enrich?.assistStats(id),
   }))

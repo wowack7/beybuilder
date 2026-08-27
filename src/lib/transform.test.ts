@@ -67,6 +67,33 @@ describe('transformAll tier inheritance', () => {
     expect(byName.get('蒼穹龍騎士(左)')).toMatchObject({ tier: 'S+', tierInherited: false })
   })
 
+  // 2026-07-27 起主表的固鎖/軸心階級欄被上游清空，評級搬到零件圖鑑表（連輔助刃都有了）。
+  // 這兩個測試鎖住「兩邊都讀、以有值者為準」，免得下次搬回去又靜默變空。
+  test('ratchet/bit/assist tiers come from the parts sheet', () => {
+    const emptyMainTier = `"BX-09","獨角刺心","blade","attack","A","","3-60","","F","","輔助A","","",""`
+    const partsWithTiers = [
+      '"原裝固鎖、軸心","分類 (Category)","圖片網址 (Img)","階級 (Tier)"',
+      '"3-60","ratchet","","S"',
+      '"F","bit","","B+"',
+      '"輔助A","assist","","A+"',
+    ].join('\n')
+    const { parts } = transformAll({
+      tierCsv: [header, emptyMainTier].join('\n'),
+      comboCsv,
+      partsCsv: partsWithTiers,
+    })
+    expect(parts.ratchets.find((r) => r.id === '3-60')?.tier).toBe('S')
+    expect(parts.bits.find((b) => b.id === 'F')?.tier).toBe('B+')
+    expect(parts.assists.find((a) => a.id === 'A')?.tier).toBe('A+')
+  })
+
+  test('main sheet tier still wins when it is the higher one (parts sheet emptied)', () => {
+    // 主表填著 S / A（見 row()），零件圖鑑沒有階級欄：仍要抓得到
+    const { parts } = transformAll({ tierCsv, comboCsv, partsCsv })
+    expect(parts.ratchets.find((r) => r.id === '3-60')?.tier).toBe('S')
+    expect(parts.bits.find((b) => b.id === 'F')?.tier).toBe('A')
+  })
+
   test('duplicated model ids (聯名共用型號) come out unique', () => {
     const dupCsv = [
       header,

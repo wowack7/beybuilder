@@ -110,7 +110,10 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   整類全空就 throw 並印出來源表目前含「階級」的欄名（`--allow-missing-tiers` 可放行）。
   來源表改欄名不會報錯、只會讓某欄靜默變空——2026-07-27 的每週更新就這樣把固鎖 36/36、
   軸心 52/54 的階級洗成 0，天梯頁的固鎖/軸心區整片沒評級，五週沒人發現（見 lessons L13）
-- 輔助刃（assists）不在上述不變式內：來源站從來沒有評級過
+- **固鎖／軸心／輔助刃的階級來自「零件圖鑑」表的 `階級 (Tier)`**（2026-07-27 起主表的
+  `固鎖階級 (Ratchet Tier)`／`軸心階級 (Bit Tier)` 兩欄被上游清空、欄位仍在）。
+  `transform.ts` 兩邊都讀、以有值者為準；輔助刃在零件圖鑑表的列名是 `輔助A`（與圖片同鍵）。
+  輔助刃不在上述不變式內：它是這次才開始有評級的，來源站未必會一直維持
 - 階級尺度為 `X > S+ > S > A+ > … > E`（X 最高）。順序的**唯一來源**是 `src/lib/transform.ts` 的 `TIER_ORDER`（`scripts/fetch-data.mjs`、`scripts/gen-seo.mjs` 都 import 它，勿再複製）；`src/lib/score.ts` 的 `TIER_VALUE` 是同一尺度的分數映射，改動需與 `TIER_ORDER` 同步
 - 產品（`Product`）＝一件商品：blade 名稱＋原裝 ratchet＋原裝 bit；blade 以「名稱」為身分聚合，變體（顏色/特別版）無階級時從同家族基底名繼承（`tierInherited: true`）
 - **blade 家族鍵**（重塗/版本/賽事版如(世足)視為同零件；(左)/(右)、(…型) 保留為不同零件）唯一定義在 `src/lib/family.ts`，前端與資料管線（`transform.ts` 直接 import，非複本）共用。實戰組合匹配、deck 衝突判定、天梯「可組」判定都走家族鍵。顏色詞在 `COLOR_WORDS`、版本/賽事詞在 `EDITION_WORDS`（兩者在空白尾段或括號內都會被剝除；功能標記不在表中故保留），新變體漏配就到不了基底組合，`family.test.ts` 覆蓋

@@ -127,7 +127,8 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   background: var(--color-accent-soft);
   border-radius: 8px;
 }
-.fold.is-on .fold-note { color: var(--color-accent-ink); font-weight: 700; }
+/* 限定 > summary >：picker 巢在 #filters 裡，用後代選擇器會把子層附註一起染色 */
+.fold.is-on > summary > .fold-note { color: var(--color-accent-ink); font-weight: 700; }
 .fold[open] > summary { margin-bottom: -0.1rem; }
 
 /* 搜尋改成站頭的放大鏡：品項下拉已經涵蓋型號，名字搜尋是少數情況，
@@ -182,33 +183,14 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
 .search::-webkit-search-cancel-button { display: none; }
 .search::placeholder { color: var(--color-text-dim); }
 
-.chips { display: flex; gap: 0.4rem; margin-top: 0.55rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
-.chips::-webkit-scrollbar { display: none; }
-.chip {
-  flex: 0 0 auto;
-  padding: 0.34rem 0.8rem;
-  font: inherit;
-  font-size: 0.82rem;
-  color: var(--color-text-dim);
-  background: var(--color-chip);
-  border: 1px solid transparent;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: transform var(--duration-fast) ease;
-}
-.chip:active { transform: scale(0.95); }
-.chip[aria-pressed="true"] {
-  color: var(--color-accent-ink);
-  background: var(--color-accent-soft);
-  border-color: color-mix(in oklab, var(--color-accent) 45%, transparent);
-  font-weight: 700;
-}
-.chip small { opacity: 0.7; font-size: 0.9em; }
-/* 品項＝下拉勾選：型號有二十幾種，攤成一排太長，收起來只佔一行 */
-/* 它是篩選的下一層，字級退一階、用紫色與上層兩個標題區分 */
-.picker > summary { font-size: 0.88rem; color: var(--color-tag-ink); }
-.picker.is-on > summary { background: var(--color-tag-soft); }
-.picker.is-on .fold-note { color: var(--color-tag-ink); }
+/* 縣市／店家／品項是同一層的三個維度，長相就該一樣：都是下拉勾選、
+   標題同尺寸同色（比上層的「篩選」退一階），作用中才上色 */
+.picker > summary { font-size: 0.88rem; color: var(--color-text); }
+.picker.is-on > summary { background: var(--color-accent-soft); color: var(--color-accent-ink); }
+.picker.is-on > summary > .fold-note { color: var(--color-accent-ink); }
+/* 品項的內容維持紫色系（沿用「商品＝紫」的既有語彙） */
+.picker-item.is-on > summary { background: var(--color-tag-soft); color: var(--color-tag-ink); }
+.picker-item.is-on > summary > .fold-note { color: var(--color-tag-ink); }
 .picker-panel {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
@@ -232,10 +214,13 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   cursor: pointer;
 }
 .opt:active { background: var(--color-chip); }
-.opt input { accent-color: var(--color-tag); width: 1.05rem; height: 1.05rem; margin: 0; flex: 0 0 auto; }
+.opt input { accent-color: var(--color-accent); width: 1.05rem; height: 1.05rem; margin: 0; flex: 0 0 auto; }
+.picker-item .opt input { accent-color: var(--color-tag); }
 .opt-tag { font-weight: 700; }
-.opt.on { background: var(--color-tag-soft); }
-.opt.on .opt-tag { color: var(--color-tag-ink); }
+.opt.on { background: var(--color-accent-soft); }
+.opt.on .opt-tag { color: var(--color-accent-ink); }
+.picker-item .opt.on { background: var(--color-tag-soft); }
+.picker-item .opt.on .opt-tag { color: var(--color-tag-ink); }
 .opt.on .opt-tier { background: var(--color-surface); }   /* 勾起來時底色同色，徽章要換底才看得出來 */
 .opt-tier {
   flex: 0 0 auto;
@@ -256,12 +241,13 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   font: inherit;
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--color-tag-ink);
-  background: var(--color-tag-soft);
+  color: var(--color-accent-ink);
+  background: var(--color-accent-soft);
   border: 0;
   border-radius: 8px;
   cursor: pointer;
 }
+.picker-item .picker-clear { color: var(--color-tag-ink); background: var(--color-tag-soft); }
 
 main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 
@@ -436,16 +422,22 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   </details>
   <details class="fold" id="filters">
     <summary id="filterSummary">篩選<span class="fold-note">縣市 · 店家 · 品項</span></summary>
-    <nav class="chips" id="cityChips" aria-label="縣市篩選"></nav>
-    <nav class="chips" id="storeChips" aria-label="店家篩選"></nav>
-    <details class="fold picker" id="itemPicker">
+    <details class="fold picker" id="cityPicker">
+      <summary id="citySummary">縣市<span class="fold-note">全部</span></summary>
+      <div class="picker-panel" id="cityOptions" role="group" aria-label="縣市篩選（可複選）"></div>
+    </details>
+    <details class="fold picker" id="storePicker">
+      <summary id="storeSummary">店家<span class="fold-note">全部</span></summary>
+      <div class="picker-panel" id="storeOptions" role="group" aria-label="店家篩選（可複選）"></div>
+    </details>
+    <details class="fold picker picker-item" id="itemPicker">
       <summary id="itemSummary">品項<span class="fold-note">全部</span></summary>
       <div class="picker-panel" id="itemOptions" role="group" aria-label="品項篩選（可複選）"></div>
     </details>
   </details>
 </header>
 <main id="list" aria-live="polite"></main>
-<script src="data.js?v=3a083585"></script>
+<script src="data.js?v=eb866906"></script>
 <script>
 (function () {
   'use strict';
@@ -591,66 +583,98 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     return node;
   }
 
-  function chip(label, count, pressed, onTap) {
-    var btn = el('button', 'chip');
-    btn.type = 'button';
-    btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
-    btn.textContent = label + ' ';
-    if (count != null) {
-      var small = el('small', '', String(count));
-      btn.appendChild(small);
+  /**
+   * 三個篩選維度共用的下拉勾選。縣市／店家／品項是同一層的東西，長相就該一樣——
+   * 一邊是橫向捲動的籤、一邊是下拉面板會讓人以為它們作用不同。
+   * opts: { key, label, options:[{value,count,badge}], selected, onToggle, onClear }
+   */
+  function renderPicker(opts) {
+    var box = document.getElementById(opts.key + 'Picker');
+    var sum = document.getElementById(opts.key + 'Summary');
+    var panel = document.getElementById(opts.key + 'Options');
+    panel.textContent = '';
+    // 只剩一個選項就不必顯示；但已經選了東西時一定要留著，否則沒地方取消
+    box.hidden = opts.options.length < 2 && !opts.selected.length;
+    if (box.hidden) return;
+
+    sum.textContent = opts.label;
+    sum.appendChild(el('span', 'fold-note',
+      opts.selected.length ? opts.selected.join('、') : '全部 ' + opts.options.length + ' 個'));
+    box.classList.toggle('is-on', opts.selected.length > 0);
+
+    // 複選之下仍留「全部」：清空比一個一個取消快，也讓「現在沒篩」看得見
+    if (opts.selected.length) {
+      var clear = el('button', 'picker-clear', '全部' + opts.label + '（清除已選 ' + opts.selected.length + '）');
+      clear.type = 'button';
+      clear.addEventListener('click', opts.onClear);
+      panel.appendChild(clear);
     }
-    btn.addEventListener('click', onTap);
-    return btn;
+
+    opts.options.forEach(function (o) {
+      var on = opts.selected.indexOf(o.value) !== -1;
+      var label = el('label', 'opt' + (on ? ' on' : ''));
+      var box2 = el('input');
+      box2.type = 'checkbox';
+      box2.checked = on;
+      box2.addEventListener('change', function () { opts.onToggle(o.value, box2.checked); });
+      label.appendChild(box2);
+      label.appendChild(el('span', 'opt-tag', o.value));
+      if (o.badge !== undefined)
+        label.appendChild(el('span', 'opt-tier' + (o.badge ? '' : ' none'), o.badge || '—'));
+      label.appendChild(el('span', 'opt-n', String(o.count)));
+      panel.appendChild(label);
+    });
   }
 
   function renderChips() {
-    var cityNav = document.getElementById('cityChips');
-    cityNav.textContent = '';
-    // 複選之下仍留「全部」：清空比一個一個取消快，也讓「現在沒篩」看得見
-    cityNav.appendChild(chip('全部', DATA.items.length, state.c.length === 0, function () {
-      trackFilter('city', '');
-      state.c = [];
-      state.s = [];
-      update();
-    }));
-    cityOrder.forEach(function (c) {
-      var on = state.c.indexOf(c) !== -1;
-      cityNav.appendChild(chip(c, cityCounts[c] || null, on, function () {
-        trackFilter('city', (on ? '-' : '') + c);
+    renderPicker({
+      key: 'city',
+      label: '縣市',
+      // 沒有品項的縣市不列：選了也是空清單，只是佔位子
+      options: cityOrder.filter(function (c) { return cityCounts[c]; })
+        .map(function (c) { return { value: c, count: cityCounts[c] }; }),
+      selected: state.c,
+      onClear: function () {
+        trackFilter('city', '');
+        state.c = [];
+        state.s = [];
+        update();
+      },
+      onToggle: function (c, checked) {
+        trackFilter('city', (checked ? '' : '-') + c);
         toggle(state.c, c);
         // 取消某個縣市時，順手丟掉它底下已選的店，否則清單會出現「不在篩選縣市裡」的店
         state.s = state.s.filter(function (n) {
           return !state.c.length || state.c.indexOf(storeMeta[n].c) !== -1;
         });
         update();
-      }));
+      },
     });
 
-    // 店家籤只列出目前縣市的店，依距離近→遠
+    // 店家只列出目前縣市底下、且真的有品項的店，依距離近→遠
     var shown = storeOrder.filter(function (s) {
-      return !state.c.length || state.c.indexOf(storeMeta[s].c) !== -1;
+      return storeCounts[s] && (!state.c.length || state.c.indexOf(storeMeta[s].c) !== -1);
     });
-    var storeNav = document.getElementById('storeChips');
-    storeNav.textContent = '';
-    storeNav.appendChild(chip('全部店家', null, state.s.length === 0, function () {
-      trackFilter('store', '');
-      state.s = [];
-      update();
-    }));
-    shown.filter(function (s) { return storeCounts[s]; }).forEach(function (s) {
-      var on = state.s.indexOf(s) !== -1;
-      storeNav.appendChild(chip(s, storeCounts[s], on, function () {
-        trackFilter('store', (on ? '-' : '') + s);
+    renderPicker({
+      key: 'store',
+      label: '店家',
+      options: shown.map(function (s) { return { value: s, count: storeCounts[s] }; }),
+      selected: state.s,
+      onClear: function () {
+        trackFilter('store', '');
+        state.s = [];
+        update();
+      },
+      onToggle: function (s, checked) {
+        trackFilter('store', (checked ? '' : '-') + s);
         toggle(state.s, s);
         update();
-      }));
+      },
     });
 
     renderItemChips();
   }
 
-  // 品項標籤：可複選（OR），數量依目前的縣市／店家篩選即時算
   function renderItemChips() {
     // 數量跟著縣市／店家／關鍵字連動（但不受已選型號影響，否則會自我收斂）
     var scope = DATA.items.filter(function (it) {
@@ -670,49 +694,21 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       return tierRank(a) - tierRank(b) || counts[b] - counts[a] || (a < b ? -1 : 1);
     });
 
-    var picker = document.getElementById('itemPicker');
-    var panel = document.getElementById('itemOptions');
-    panel.textContent = '';
-    // 只剩一種型號就不必顯示；但已經選了型號時一定要留著，否則沒地方取消
-    picker.hidden = tags.length < 2 && !state.i.length;
-    if (picker.hidden) return;
-
-    var sum = document.getElementById('itemSummary');
-    sum.textContent = '品項';
-    sum.appendChild(el('span', 'fold-note',
-      state.i.length ? state.i.join('、') : '全部 ' + tags.length + ' 種'));
-    picker.classList.toggle('is-on', state.i.length > 0);
-
-    if (state.i.length) {
-      var clear = el('button', 'picker-clear', '清除品項（已選 ' + state.i.length + '）');
-      clear.type = 'button';
-      clear.addEventListener('click', function () {
+    renderPicker({
+      key: 'item',
+      label: '品項',
+      options: tags.map(function (t) { return { value: t, count: counts[t], badge: TIERS[t] || '' }; }),
+      selected: state.i,
+      onClear: function () {
         trackFilter('item', '');
         state.i = [];
         update();
-      });
-      panel.appendChild(clear);
-    }
-
-    tags.forEach(function (t) {
-      var on = state.i.indexOf(t) !== -1;
-      var label = el('label', 'opt' + (on ? ' on' : ''));
-      var box = el('input');
-      box.type = 'checkbox';
-      box.checked = on;
-      box.addEventListener('change', function () {
-        trackFilter('item', (box.checked ? '' : '-') + t);
-        state.i = box.checked
-          ? state.i.concat([t])
-          : state.i.filter(function (x) { return x !== t; });
+      },
+      onToggle: function (t, checked) {
+        trackFilter('item', (checked ? '' : '-') + t);
+        state.i = checked ? state.i.concat([t]) : state.i.filter(function (x) { return x !== t; });
         update();
-      });
-      label.appendChild(box);
-      label.appendChild(el('span', 'opt-tag', t));
-      var tier = TIERS[t] || '';
-      label.appendChild(el('span', 'opt-tier' + (tier ? '' : ' none'), tier || '—'));
-      label.appendChild(el('span', 'opt-n', String(counts[t])));
-      panel.appendChild(label);
+      },
     });
   }
 
