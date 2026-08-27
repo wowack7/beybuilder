@@ -72,6 +72,13 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   除 page_view 外兩個自訂事件：`draw_open`（點抽選：store/city/item/model/tier/repeat，
   同分頁導航靠 gtag 的 sendBeacon 送達）與 `filter_use`（filter_kind＝city/store/item/search
   ＋ filter_value；連點與打字有去抖動）。`track()` 在 gtag 不存在時靜默跳過，追蹤壞掉不影響抽券
+- **品名一致化**：各店貼文各自打字，同一商品有大量寫法差異（價格尾綴 `850元`／全半形括號／
+  `vol.4` vs `Vol.04`／錯字「子彈獅鳶」「炫風發射器」）。`data/draw/item_names.tsv`
+  是「型號 → 標準品名」的單一來源，`draw-build` 產 data.js 時套用；**正本 `source-links.txt`
+  一律保留各店原文**（那是抄自貼文的證據，不要為了統一去改它）。型號抽取 `tagOf` 的唯一來源在
+  `scripts/draw-items.mjs`（index.html 另有一份同演算法的複本，因為那頁 import 不到，改要一起改）。
+  表裡沒收的型號**不擋 build**——新品項要能照常上線，只沿用原文並在 build 印出「未收錄型號」提醒補表。
+  篩選與天梯排序吃型號前綴、不受寫法影響，但**搜尋吃品名**，這是做這件事的主因
 - 店家排序＝到 `anchors.tsv` 最近錨點的直線距離＋`stores.tsv` 第 6 欄體感調整；
   **距離與錨點只在 build 階段使用，不寫進 `data.js`、畫面也不顯示**（那是使用者的活動範圍）
 - **站頭只有兩顆圓鈕**（右上角）：**ⓘ**＝使用說明、**🔍**＝搜尋＋篩選。

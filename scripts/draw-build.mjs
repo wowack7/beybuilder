@@ -9,6 +9,7 @@ import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isLinkLine } from './draw-links.mjs';
+import { normalizeItemName, parseItemNames, tagOf } from './draw-items.mjs';
 import { TIER_ORDER } from '../src/lib/transform.ts';
 import { GA_ID } from '../src/lib/analytics.ts';
 import { DRAW_PATH, SITE_URL } from '../src/lib/site.ts';
@@ -71,7 +72,7 @@ const mapping = new Map(
 
 const lines = readFileSync(join(root, `${DATA}/source-links.txt`), 'utf8').split('\n');
 
-const items = [];
+const rawItems = [];
 let city = '';
 let store = '';
 const rounds = new Map(); // 店名 → { s, e } 抽選日期，或 { pending: true } 尚未公布
@@ -110,13 +111,25 @@ for (const raw of lines) {
     const resolved = code ? mapping.get(code) : null;
     const url = code ? (resolved && resolved !== 'FAIL' ? resolved : line) : line;
     if (!pendingName) throw new Error(`URL 前面沒有品名: ${line}`);
-    items.push({ c: city, s: store, g: group, n: pendingName, u: url });
+    rawItems.push({ c: city, s: store, g: group, n: pendingName, u: url });
     pendingName = '';
     continue;
   }
 
   pendingName = line;
 }
+
+// --- 品名一致化 ---
+// 各店貼文各自打字，同一件商品有大量寫法差異（價格尾綴／全半形括號／大小寫／錯字）。
+// 正本保留原文當證據，對外顯示一律換成 data/draw/item_names.tsv 的標準品名——
+// 否則清單上同一商品長出好幾個名字，而且搜尋吃品名，「子彈獅鳶」那家永遠搜不到。
+// 表裡沒收的型號不擋 build（新品項要能照常上線），沿用原文並在下方印出來提醒補表。
+const stdNames = parseItemNames(readTsv(`${DATA}/item_names.tsv`));
+const items = rawItems.map((i) => ({ ...i, n: normalizeItemName(i.n, stdNames) ?? i.n }));
+const renamed = rawItems.filter((i, idx) => i.n !== items[idx].n).length;
+const unlisted = [...new Set(rawItems.filter((i) => !normalizeItemName(i.n, stdNames)).map((i) => tagOf(i.n) ?? i.n))];
+console.log(`品名一致化: ${renamed}/${items.length} 筆換成標準品名`);
+console.log(`未收錄型號: ${unlisted.length}${unlisted.length ? ' → ' + unlisted.join(', ') + '（沿用原文，請補進 data/draw/item_names.tsv）' : ''}`);
 
 // 驗證：筆數、同店重複、liff 覆蓋率
 // 跨店重複是合法的：同一場抽選可被兩家店同時列出（例：忠孝SOGO／北車地下街 共用 oDYlc3w）
@@ -170,13 +183,7 @@ console.log('最近三家: ' + stores.slice(0, 3).map((s) => `${s.n} ${s._d}km`)
 
 // --- 型號 → 天梯階級（頁面上的商品籤依此排序：強的在前、配件殿後） ---
 // 鍵的算法必須與 index.html 的 tagOf() 一致（那邊吃品名、這邊吃 products.json 的型號）。
-/** `BX-51 旋風發射器` / `BX-35-04` → `BX-51` / `BX-35`；抓不到編號就退成純字母（BXG） */
-function tagOf(name) {
-  const m = String(name).match(/^([A-Za-z]+)[-\s]?(\d{1,3})(?![0-9])/);
-  if (m) return (m[1] + '-' + m[2]).toUpperCase();
-  const f = String(name).match(/^([A-Za-z]+)/);
-  return f ? f[1].toUpperCase() : null;
-}
+// tagOf 的唯一來源在 scripts/draw-items.mjs。
 const tierRank = (t) => {
   const i = TIER_ORDER.indexOf(t);
   return i === -1 ? TIER_ORDER.length : i;
