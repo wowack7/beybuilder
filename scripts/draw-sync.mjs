@@ -90,6 +90,33 @@ const added = [...nextUrls].filter((u) => !currentUrls.has(u));
 const removed = [...currentUrls].filter((u) => !nextUrls.has(u));
 console.log(`\n與本站正本比對: 新增 ${added.length} 筆 / 消失 ${removed.length} 筆`);
 
+// --- 家數對帳：「上游說 N 家、我們的頁面只有 M 家」要能一眼看出差在哪一家 ---
+// （只印筆數的話，得自己把兩邊的店名抄下來比對）
+const currentStores = new Map();
+{
+  let store = null;
+  for (const raw of current.split('\n')) {
+    const line = raw.trim();
+    const h = line.match(/^\[(.+)\]$/);
+    if (h) { store = h[1]; currentStores.set(store, { mark: '', items: 0 }); continue; }
+    if (!store) continue;
+    if (line.startsWith('@') && !currentStores.get(store).mark) currentStores.get(store).mark = line;
+    if (/^https:\/\/lin\.ee\//.test(line)) currentStores.get(store).items += 1;
+  }
+}
+const currentWithItems = [...currentStores].filter(([, v]) => v.items).map(([n]) => n);
+const upstreamNames = picked.map((s) => matchStore(s.store) ?? s.store);
+const missing = upstreamNames.filter((n) => !currentWithItems.includes(n));
+const goneFromUpstream = currentWithItems.filter((n) => !upstreamNames.includes(n));
+console.log(
+  `\n家數對帳: 上游有品項 ${upstreamNames.length} 家` +
+    `${unmapped.length ? `（另有 ${unmapped.length} 家店名未對照，不算在內）` : ''}` +
+    ` / 正本已收錄 ${currentWithItems.length} 家`,
+);
+if (missing.length) console.log(`  上游有、正本還沒收（跑 --write 就會進來）: ${missing.join('、')}`);
+if (goneFromUpstream.length) console.log(`  正本有、上游這批沒列（可能是人工從 VOOM 補的）: ${goneFromUpstream.join('、')}`);
+if (!missing.length && !goneFromUpstream.length) console.log('  兩邊的店家名單一致');
+
 if (!write) {
   console.log('\n（僅比對，未改檔。加 --write 才會覆寫 data/source-links.txt）');
   process.exit(0);
