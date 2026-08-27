@@ -270,16 +270,14 @@ const html = readFileSync(indexPath, 'utf8');
 let nextHtml = html.replace(/src="data\.js(\?v=[a-f0-9]+)?"/, `src="data.js?v=${hash}"`);
 if (nextHtml === html && !html.includes(`data.js?v=${hash}`)) throw new Error('index.html 找不到 data.js 的 script 標籤');
 
-const seoBefore = nextHtml;
-nextHtml = nextHtml.replace(/<!--seo-->[\s\S]*?<!--\/seo-->/, `<!--seo-->${seoHtml}<!--/seo-->`);
-if (nextHtml === seoBefore) throw new Error('index.html 找不到 <!--seo--> 標記，靜態內容無處可放');
-
-const ldBefore = nextHtml;
-nextHtml = nextHtml.replace(
-  /(<script type="application\/ld\+json" id="draw-ld">)[\s\S]*?(<\/script>)/,
-  `$1${JSON.stringify(ld)}$2`,
-);
-if (nextHtml === ldBefore) throw new Error('index.html 找不到 id="draw-ld" 的 JSON-LD 標籤');
+// 檢查「標記在不在」，不是「替換前後有沒有變」——資料沒變時重跑本來就會產出一模一樣的
+// 字串，用相等判斷會把正常的冪等重建誤判成標記不見了（本次實際踩到）。
+const SEO_RE = /<!--seo-->[\s\S]*?<!--\/seo-->/;
+const LD_RE = /(<script type="application\/ld\+json" id="draw-ld">)[\s\S]*?(<\/script>)/;
+if (!SEO_RE.test(nextHtml)) throw new Error('index.html 找不到 <!--seo--> 標記，靜態內容無處可放');
+if (!LD_RE.test(nextHtml)) throw new Error('index.html 找不到 id="draw-ld" 的 JSON-LD 標籤');
+nextHtml = nextHtml.replace(SEO_RE, `<!--seo-->${seoHtml}<!--/seo-->`);
+nextHtml = nextHtml.replace(LD_RE, `$1${JSON.stringify(ld)}$2`);
 
 writeFileSync(indexPath, nextHtml);
 console.log(
