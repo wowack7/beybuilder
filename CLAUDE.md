@@ -45,8 +45,12 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   不是 React 分頁）
 - 路徑常數 `DRAW_PATH` 放在 `src/lib/site.ts`（與 `TIER_PATH` 同一處）
 - **資料**：`data/draw/`（`source-links.txt` 正本／`mapping.tsv` lin.ee→liff／`stores.tsv` 座標與
-  上游店名對照／`anchors.tsv` 排序錨點／`voom.tsv` 各店 VOOM 帳號）。
-  `data/draw/source.local.json`（上游彙整頁網址）**不進版控**
+  上游店名對照／`anchors.tsv` 排序錨點／`voom.tsv` 各店 VOOM 帳號／`official.tsv` 官方給的
+  各店粉專＋LINE 官方帳號 ID）。`data/draw/source.local.json`（上游彙整頁網址）**不進版控**
+- **`official.tsv` 的用途是「去哪查」，不是自動抓**：上游彙整頁常慢半拍，各店會先發在自己的
+  FB 粉專或 LINE VOOM。`draw:sync` 乾跑會列出「上游還沒收、但查得到官方管道」的店與連結，
+  查到有抽選就人工補進正本（sync 是增量合併，人工補的不會被覆寫）。
+  **FB 未登入抓不到貼文，這段刻意不做自動掃描**
 - **指令**：`npm run draw:build`（重建 data.js＋把內容雜湊寫回 index.html 的 `?v=`）、
   `npm run draw:sync`（比對上游，`-- --write` 才改檔）。兩者都**不串在 `npm run build`**：
   `data.js` 是已 commit 的產物，資料要換批才重跑

@@ -156,6 +156,44 @@ if (missing.length) console.log(`  上游有、正本還沒收（跑 --write 就
 if (goneFromUpstream.length) console.log(`  正本有、上游這批沒列（可能是人工從 VOOM 補的）: ${goneFromUpstream.join('、')}`);
 if (!missing.length && !goneFromUpstream.length) console.log('  兩邊的店家名單一致');
 
+// --- 待查清單：上游還沒收的店，去官方粉專／LINE 官方帳號看它是不是自己發了 -----
+// 上游彙整頁常慢半拍，各店會先發在自己的 FB 粉專或 LINE VOOM。
+// 這裡只產出「去哪看」的清單交給人工——FB 未登入抓不到貼文，機器掃不了。
+{
+  const official = new Map(
+    readFileSync(join(root, `${DATA}/official.tsv`), 'utf8')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith('#'))
+      .map((l) => l.split('\t'))
+      .filter((r) => r[0])
+      .map(([mine, , fb, oa]) => [mine, { fb, oa }]),
+  );
+  const voom = new Map(
+    readFileSync(join(root, `${DATA}/voom.tsv`), 'utf8')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith('#'))
+      .map((l) => l.split('\t')),
+  );
+  const pending = [...currentStores]
+    .filter(([n, v]) => !v.items && (official.has(n) || voom.has(n)))
+    .map(([n]) => n);
+  if (pending.length) {
+    console.log(`\n上游還沒收的店（${pending.length} 家）——各店可能已自己公布，去這裡看:`);
+    for (const n of pending) {
+      const o = official.get(n) ?? {};
+      console.log(
+        `   ${n}` +
+          (o.oa ? ` ｜ LINE ${o.oa}` : '') +
+          (voom.has(n) ? ` ｜ VOOM ${voom.get(n)}` : '') +
+          (o.fb ? `\n      FB ${o.fb}` : ''),
+      );
+    }
+    console.log('   → 查到有抽選就把品項與連結補進 data/draw/source-links.txt（sync 是增量合併，人工補的不會被覆寫）');
+  }
+}
+
 // 上游列了店、卻一筆都抓不到——這是「上游 20 家但我們只有 19 家」的常見來源，
 // 因為 picked 只收「有對照到店名且有品項」的店，0 筆的店會整家靜默消失。
 const emptyUpstream = stores.filter((s) => !s.items.length);
