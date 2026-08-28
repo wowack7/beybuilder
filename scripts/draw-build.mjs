@@ -75,7 +75,7 @@ const lines = readFileSync(join(root, `${DATA}/source-links.txt`), 'utf8').split
 const rawItems = [];
 let city = '';
 let store = '';
-const rounds = new Map(); // 店名 → { s, e } 抽選日期，或 { pending: true } 尚未公布
+const rounds = new Map(); // 店名 → { s, e } 抽選日期，或 { pending: true } 尚未公布，或 { closed: true } 整修中
 const declared = []; // 正本裡宣告過的店家（含尚未公布、沒有品項者）
 let group = 1;
 let pendingName = '';
@@ -99,6 +99,9 @@ for (const raw of lines) {
   }
 
   if (line === '@待公布') { rounds.set(store, { pending: true }); continue; }
+  // 整修／歇業：這家店這批不會有抽選，跟「還沒公布」不是同一件事——
+  // 不進待公布名單、不進「已公布 N/M」的分母。店重開時上游會再列它，sync 會自動換回 @日期。
+  if (line === '@整修中') { rounds.set(store, { closed: true }); continue; }
 
   const roundMatch = line.match(/^@(\d{4}-\d{2}-\d{2})(?:~(\d{4}-\d{2}-\d{2}))?$/);
   if (roundMatch) { rounds.set(store, { s: roundMatch[1], e: roundMatch[2] ?? null }); continue; }
@@ -155,6 +158,7 @@ const stores = declared.map(({ n, c }) => {
   const r = rounds.get(n) ?? null;
   // _d 只在 build 內用來排序，不寫進 data.js（距離與錨點＝使用者活動範圍，不公開）
   const base = { n, c, _d: d === null ? null : Math.round(d * 10) / 10 };
+  if (r?.closed) return { ...base, x: 1 };
   return r?.pending ? { ...base, p: 1 } : { ...base, rs: r?.s ?? null, re: r?.e ?? null };
 });
 stores.sort((a, b) => {
@@ -165,7 +169,7 @@ stores.sort((a, b) => {
 });
 const noCoords = stores.filter((s) => s._d === null);
 console.log(`無座標店家: ${noCoords.length}${noCoords.length ? ' → ' + noCoords.map((s) => s.n).join(', ') : ''}`);
-const noRound = stores.filter((s) => !s.rs && !s.p);
+const noRound = stores.filter((s) => !s.rs && !s.p && !s.x);
 console.log(`無抽選日期店家: ${noRound.length}${noRound.length ? ' → ' + noRound.map((s) => s.n).join(', ') : ''}`);
 // 有品項卻沒有 @日期／@待公布 的店，在頁面上不屬於任何批次：它不進頂端彙總、也不進
 // 「進行中／已結束／尚未公布」任何一區，等於靜默消失。這是資料錯誤，不是可接受狀態。
@@ -174,10 +178,11 @@ const orphan = noRound.filter((s) => withItems.has(s.n)).map((s) => s.n);
 if (orphan.length)
   throw new Error(
     `有品項卻沒標抽選日期的店家 ${orphan.length} 家: ${orphan.join(', ')}\n` +
-    `→ 請在 data/draw/source-links.txt 的 [店名] 下補一行 @YYYY-MM-DD[~YYYY-MM-DD] 或 @待公布`,
+    `→ 請在 data/draw/source-links.txt 的 [店名] 下補一行 @YYYY-MM-DD[~YYYY-MM-DD]、@待公布 或 @整修中`,
   );
 const byRound = {};
-for (const s of stores) byRound[s.p ? '待公布' : s.rs ?? '(無)'] = (byRound[s.p ? '待公布' : s.rs ?? '(無)'] || 0) + 1;
+const roundKey = (s) => (s.x ? '整修中' : s.p ? '待公布' : s.rs ?? '(無)');
+for (const s of stores) byRound[roundKey(s)] = (byRound[roundKey(s)] || 0) + 1;
 console.log('批次分佈: ' + Object.entries(byRound).map(([k, v]) => `${k} ${v}家`).join(' / '));
 console.log('最近三家: ' + stores.slice(0, 3).map((s) => `${s.n} ${s._d}km`).join(' / '));
 

@@ -176,8 +176,9 @@ if (!missing.length && !goneFromUpstream.length) console.log('  兩邊的店家�
       .filter((l) => l && !l.startsWith('#'))
       .map((l) => l.split('\t')),
   );
+  // @整修中 的店不列進待查清單：它不是「上游慢半拍」，是這家店這批本來就不會有抽選。
   const pending = [...currentStores]
-    .filter(([n, v]) => !v.items && (official.has(n) || voom.has(n)))
+    .filter(([n, v]) => !v.items && v.mark !== '@整修中' && (official.has(n) || voom.has(n)))
     .map(([n]) => n);
   if (pending.length) {
     console.log(`\n上游還沒收的店（${pending.length} 家）——各店可能已自己公布，去這裡看:`);

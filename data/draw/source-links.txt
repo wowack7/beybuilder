@@ -91,6 +91,10 @@ UX-11 衝擊龍神 9-60 LR
 https://lin.ee/WcqjWdy
 UX-19 子彈獅鷲 H
 https://lin.ee/uDrqsH5
+UX-21 惡魔冥界改造組
+https://lin.ee/Suuh0WP
+CX-13 龍王閃擊BK 1-50 I
+https://lin.ee/WuY9vYd
 CX-18 腕龍鞭打 5-70 Nr
 https://lin.ee/wlBvX5F
 BXG-01 烈焰飛鳳S 3-80 T
@@ -458,7 +462,7 @@ BXG-04 銀牙烈虎S
 https://lin.ee/qcpfI4D
 
 [宏匯]
-@待公布
+@整修中
 
 [中和環球]
 @2026-08-28~2026-08-29
