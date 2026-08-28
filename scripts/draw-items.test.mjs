@@ -60,6 +60,51 @@ describe('normalizeItemName', () => {
   });
 });
 
+describe('開賣時間註記', () => {
+  const map = parseItemNames([['UX-21', 'UX-21 惡魔冥界改造組']]);
+
+  it('丟掉價格但留住「幾點才開始」', () => {
+    expect(normalizeItemName('UX-21 惡魔冥界改造組 895元（8/29 10:30才開始）', map))
+      .toBe('UX-21 惡魔冥界改造組（8/29 10:30才開始）');
+    expect(normalizeItemName('UX-21 惡魔幽冥改造組 - 原價$895（8/29 10:00才開始）', map))
+      .toBe('UX-21 惡魔冥界改造組（8/29 10:00才開始）');
+  });
+
+  it('不把價格括號或商品描述括號當成註記留下來', () => {
+    const m2 = parseItemNames([['BX-10', 'BX-10 極限衝擊戰鬥盤']]);
+    expect(normalizeItemName('BX-10極限衝擊戰鬥盤 (原價$850)', m2)).toBe('BX-10 極限衝擊戰鬥盤');
+    expect(normalizeItemName('BX-10 極限衝擊戰鬥盤（不含陀螺）-價格850元', m2)).toBe('BX-10 極限衝擊戰鬥盤');
+  });
+});
+
+describe('真實正本：一致化不得吃掉開賣時間', () => {
+  // 2026-08-28 踩過：UX-21 明天才開賣、各店 10:00／10:30／11:00 不同，
+  // 一致化把整個品名換成標準名，27 筆的開賣時間全被洗掉。
+  const map = parseItemNames(
+    readFileSync(join(root, 'data/draw/item_names.tsv'), 'utf8')
+      .split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'))
+      .map((l) => l.split('\t')),
+  );
+  const L = readFileSync(join(root, 'data/draw/source-links.txt'), 'utf8').split('\n');
+  const names = L.filter((l, i) => {
+    const t = l.trim();
+    if (!t || t.startsWith('#') || t.startsWith('[') || t.startsWith('@') || t === '—') return false;
+    if (/^https?:\/\//.test(t)) return false;
+    return /^https?:\/\//.test((L[i + 1] ?? '').trim());
+  }).map((l) => l.trim());
+
+  it('每個帶時間註記的品名，一致化後註記還在', () => {
+    const noteRe = /[（(][^）)]*(?:才開始|開賣)[^）)]*[）)]/;
+    const withNote = names.filter((n) => noteRe.test(n));
+    expect(withNote.length).toBeGreaterThan(0);
+    const lost = withNote.filter((n) => {
+      const out = normalizeItemName(n, map) ?? n;
+      return !out.includes(n.match(noteRe)[0]);
+    });
+    expect(lost).toEqual([]);
+  });
+});
+
 describe('item_names.tsv 正本', () => {
   const rows = readFileSync(join(root, 'data/draw/item_names.tsv'), 'utf8')
     .split('\n')

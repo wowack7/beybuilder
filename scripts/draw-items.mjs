@@ -40,12 +40,24 @@ export function parseItemNames(rows) {
 }
 
 /**
- * 各店原文 → 標準品名。型號不在表裡就回傳 null，由呼叫端決定沿用原文並回報。
+ * 括號註記裡「這品項幾號幾點才開賣」的部分——同一批裡少數品項會晚一天開，
+ * 各店開始時間還不一樣（10:00／10:30／11:00）。這是使用者真的要看的資訊，
+ * 不是價格那種雜訊，一致化時必須原樣留著。
+ * 只認含日期／時刻／「開始」「開賣」字樣的括號段；`（原價$850）`、`（不含陀螺）`、
+ * `（黑）` 都不會命中——那些要嘛是雜訊、要嘛已經寫進標準品名了。
+ */
+const TIME_NOTE_RE = /[（(][^）)]*(?:才開始|開始|開賣|\d{1,2}:\d{2}|\d{1,2}\/\d{1,2})[^）)]*[）)]/g;
+
+/**
+ * 各店原文 → 標準品名（保留開賣時間註記）。型號不在表裡就回傳 null，
+ * 由呼叫端決定沿用原文並回報。
  * @param {string} name
  * @param {Map<string, string>} map
  * @returns {string|null}
  */
 export function normalizeItemName(name, map) {
   const tag = tagOf(name);
-  return tag && map.has(tag) ? map.get(tag) : null;
+  if (!tag || !map.has(tag)) return null;
+  const notes = String(name).match(TIME_NOTE_RE) ?? [];
+  return map.get(tag) + notes.join('');
 }
