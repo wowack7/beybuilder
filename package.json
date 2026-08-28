@@ -17,7 +17,8 @@
     "draw:build": "node scripts/draw-build.mjs",
     "draw:sync": "node scripts/draw-sync.mjs",
     "draw:fb": "node scripts/draw-fb-scan.mjs",
-    "draw:voom": "node scripts/draw-voom.mjs"
+    "draw:voom": "node scripts/draw-voom.mjs",
+    "draw:notify": "node scripts/draw-notify.mjs"
   },
   "dependencies": {
     "react": "^19.2.7",

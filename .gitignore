@@ -35,3 +35,7 @@ data/draw/.fb-profile/
 
 # draw:fb --dump 的貼文全文（暫存產物，不進版控）
 data/draw/.fb-dump/
+
+# 抽選 TG 通知：funbox-bot config 的本機指標＋已通知狀態（都不進版控）
+data/draw/notify.local.json
+data/draw/.notify-state.json

@@ -62,6 +62,12 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   只讀不寫：印出「品項×lin.ee」配對並標 🆕（正本沒有的 code），補檔照 draw:fb 的 SOP。
   涵蓋限制：homeId 反查不到（@LINE-ID 版 SSR 不帶貼文、getPosts API 未登入拿不到），
   `voom.tsv` 只能人工擴充；「頁面有回但解析不到貼文」是 VOOM 改版警訊，不是沒新貼文
+- **TG 通知**：`scripts/draw-notify.mjs`——站上多了新的「店×品項×券」就發一則到戰鬥陀螺補貨群
+  （與 funbox-bot 專案共用 bot 與群組；token/chat_id 的唯一來源是 funbox-bot 的 config.json，
+  本репо只放 gitignored 指標檔 `data/draw/notify.local.json`）。狀態檔 `.notify-state.json` 記
+  已通知集合、每次只發差集；狀態檔不存在＝第一次跑會**靜默播種不發**（防整站轟群）。
+  指標檔不存在＝這台機器沒接，印一行就過。由 sync 排程在部署驗活成功後呼叫——
+  **通知的一定是已上線的內容**，不然群裡的人點進來看不到
 - **指令**：`npm run draw:build`（重建 data.js＋把內容雜湊寫回 index.html 的 `?v=`）、
   `npm run draw:sync`（比對上游，`-- --write` 才改檔）。兩者都**不串在 `npm run build`**：
   `data.js` 是已 commit 的產物，資料要換批才重跑
