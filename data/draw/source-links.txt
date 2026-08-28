@@ -1598,6 +1598,8 @@ BX-51 旋風發射器 黑綠 - 原價$250
 https://lin.ee/WxXWXvZ
 BX-57 3V3對戰收納盒黑(不含陀螺) - 原價$250
 https://lin.ee/u3f7OTL
+UX-21 惡魔幽冥改造組 - 原價$895（8/29 10:00才開始）
+https://lin.ee/xXRH1Gc
 BXG-01烈焰飛鳳 - 原價$350
 https://lin.ee/U0PgSDH
 BXG-04 銀牙烈虎S - 原價$350
@@ -1972,8 +1974,12 @@ https://lin.ee/WVbuaxc
 @2026-08-28~2026-08-29
 BX-00 蒼龍神劍（8/29 11:00才開始）
 https://liff.line.me/1654883387-DxN9w07M/c/01M1420JH2EHJRZ5TAVEDDYMMR
+BX-10 極限衝擊戰鬥盤
+https://liff.line.me/1654883387-DxN9w07M/c/01M10YNVW9MRH81XW6EET2BES1
 BX-18 旋風發射器（8/29 11:00才開始）
 https://liff.line.me/1654883387-DxN9w07M/c/01M13ZBXW6Y4D56SXV11AFWT4F
+BX-25 戰鬥陀螺X專業收納包
+https://liff.line.me/1654883387-DxN9w07M/c/01M10YDS10DSSBRCE2S8WFEAKB
 BX-30 改造型握把（8/29 11:00才開始）
 https://liff.line.me/1654883387-DxN9w07M/c/01M13ZFSGS9C4J8SXACQ4KJST3
 UX-20 榮耀武神（8/29 11:00才開始）
@@ -1982,10 +1988,6 @@ UX-21 惡魔冥界改造組（8/29 11:00才開始）
 https://liff.line.me/1654883387-DxN9w07M/c/01M1425CMVWXC99AC8ZFBYGJDQ
 CX-13 龍王閃擊（8/29 11:00才開始）
 https://liff.line.me/1654883387-DxN9w07M/c/01M13ZKBC42881P35GPBMT8WRR
-BX-10 極限衝擊戰鬥盤
-https://liff.line.me/1654883387-DxN9w07M/c/01M10YNVW9MRH81XW6EET2BES1
-BX-25 專業收納包
-https://liff.line.me/1654883387-DxN9w07M/c/01M10YDS10DSSBRCE2S8WFEAKB
 BX-26 獨角刺心
 https://liff.line.me/1654883387-DxN9w07M/c/01M11090WHK9DR8QDR9SZYKFE3
 BX-40 發射器（酒紅）
