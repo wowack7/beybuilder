@@ -1,5 +1,7 @@
-# 各店 LINE VOOM 帳號頁（人工盤點用；2026-08-26 已追蹤 11/21 家）
-# 欄位: 店名<TAB>VOOM 帳號頁
+# 各店 LINE VOOM 帳號頁——draw:voom 的掃描名單（`npm run draw:voom`）。
+# 欄位: 店名<TAB>VOOM 帳號頁（linevoom.line.me/user/_d… 的 homeId 形式）
+# 只能人工擴充：homeId 反查不到（@LINE-ID 版頁面 SSR 不帶貼文），
+# 要加店就在 LINE app 開該店 VOOM →分享→複製連結，貼進來（店名須與 source-links.txt 一致）
 天母三越	https://linevoom.line.me/user/_dXYFKzVX-ldfgeUOor_McfFTE_yJP7d54nPjxpQ
 天母SOGO	https://linevoom.line.me/user/_db3MM1gifrvefmBbBLPWOhPAw0aPUL9K3IvLDTk
 信義A8	https://linevoom.line.me/user/_dfItqTWWpJgcZPNYg_b3_xlBeXDhlwTDTicnfSU

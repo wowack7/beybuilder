@@ -56,6 +56,12 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   （含 FB 登入 cookie，已 gitignore），逐一看待查店家的粉專，抓「抽選／抽籤／購買券」等字樣、
   日期與 `lin.ee` 連結。第一次跑會開視窗要你手動登入，之後可無頭。
   **只讀不寫**：印出線索，補不補進正本由人決定。純函式 `extractLeads` 有測試覆蓋
+- **`npm run draw:voom`**（`scripts/draw-voom.mjs`）：掃 `voom.tsv` 裡各店的 LINE VOOM 帳號頁——
+  未登入純 HTTP 就吃得到（貼文埋在 SSR 的 `__NEXT_DATA__`），不需要 Playwright、雲端也能跑，
+  是 draw:fb 的輕量姊妹作。各店券連結常比上游早半天發在 VOOM（2026-08-28 實測收到 3 家隔日券）。
+  只讀不寫：印出「品項×lin.ee」配對並標 🆕（正本沒有的 code），補檔照 draw:fb 的 SOP。
+  涵蓋限制：homeId 反查不到（@LINE-ID 版 SSR 不帶貼文、getPosts API 未登入拿不到），
+  `voom.tsv` 只能人工擴充；「頁面有回但解析不到貼文」是 VOOM 改版警訊，不是沒新貼文
 - **指令**：`npm run draw:build`（重建 data.js＋把內容雜湊寫回 index.html 的 `?v=`）、
   `npm run draw:sync`（比對上游，`-- --write` 才改檔）。兩者都**不串在 `npm run build`**：
   `data.js` 是已 commit 的產物，資料要換批才重跑
