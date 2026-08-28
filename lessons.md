@@ -108,3 +108,11 @@
 - 擋下來的機制：`fetch-data.mjs` 在寫檔前檢查 blades／ratchets／bits 三類的階級涵蓋率，整類全空就 throw（`--allow-missing-tiers` 供「來源站真的移除評級」時放行）。統計行也加印四類涵蓋率。
 - 通則（與 L12 同源，值得單獨記）：**外部來源的「欄位存在」和「欄位有值」都不是保證，而 `?? ''` / `|| ''` 這種友善預設會把「欄位不見了」變成「這欄本來就空」**。凡是缺了就會讓整段畫面消失的欄位，都要在管線出口設涵蓋率不變式——不是印一行 log，是 fail。
 - 通則二（診斷訊息的設計）：不變式擋下來時，錯誤訊息要**印出能自己斷案的證據**，而不是只說「壞了」。這次三輪就收斂，靠的是訊息一次比一次具體：欄名 → 索引＋非空計數 → 兩張表全欄 dump。每一輪都省掉一次「猜錯方向再改一次」。
+
+## L14 排程任務的 shell 拿到的是舊版 Node（2026-08-28）
+
+- tags: env, scheduled-task, node, nvm
+- 坑：`sync-draw-upstream` 排程跑 `node scripts/draw-sync.mjs` 直接死在 `ReferenceError: fetch is not defined`。原因是非互動 shell 沒載 nvm，`which node` 落在 `/usr/local/bin/node`＝**v16.13.2**（無全域 `fetch`），而互動終端是 nvm 的 v24。
+- 症狀樣貌：手動在終端跑一切正常，排程／hook／CI 這類非互動情境才炸，且錯誤看起來像「腳本壞了」而不是「Node 版本不對」。
+- 解（當次）：`export PATH="$HOME/.nvm/versions/node/v24.15.0/bin:$PATH"` 後再跑。長久解是在 `scripts/*.mjs` 或 package.json 加 `engines` 檢查，或排程指令前置固定 PATH。
+- 通則：**排程／hook 的 shell 不等於你的終端**。任何靠 nvm/pyenv/rbenv 之類版本管理器的工具，在非互動情境都要顯式指定路徑，別假設 `node` 是哪一版。
