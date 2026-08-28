@@ -219,28 +219,26 @@ BX-00 暴風天馬3-70RA
 https://lin.ee/nSOeYkA
 BX-18 X旋風發射器
 https://lin.ee/XCtoTCI
-BX-25戰鬥陀螺X專業收納包
+BX-20 極限衝擊戰鬥盤
+https://lin.ee/vSe8VFg
+BX-25 戰鬥陀螺X專業收納包
 https://lin.ee/QJqyXbp
-BX-26獨角刺心
+BX-26 獨角刺心
 https://lin.ee/v4aAGKC
 BX-33 皓戰猛虎
 https://lin.ee/uo66qno
 BX-35 隨機強化組Vol.04
 https://lin.ee/obbbKzJ
-BX40 發射器(酒紅)
+BX-40 發射器(酒紅)
 https://lin.ee/rqH0XFp
+BX-45 武士斬魂
+https://lin.ee/UqORJK4
 BX-50 天堂日輪 隨機強化組
 https://lin.ee/Te7QRo4
 BX-51 旋風發射器 黑綠
 https://lin.ee/V2jxYup
 BX-57 3V3對戰收納盒 黑
 https://lin.ee/UBtxomr
-BXG-01 烈焰飛鳳S
-https://lin.ee/6iNIAUp
-BXG-04 銀牙烈虎S
-https://lin.ee/W9mY5EK
-CX-18 腕龍鞭打 隨機強化組
-https://lin.ee/tjSzfdE
 UX-02 惡魔戰錘
 https://lin.ee/UJhq8SR
 UX-03 魔導神杖
@@ -249,10 +247,12 @@ UX-11 衝擊龍神 豪華組
 https://lin.ee/Q0B7lsC
 UX-19 子彈獅鷲H
 https://lin.ee/QWQtKEc
-BX-10 極限衝擊戰鬥盤
-https://lin.ee/vSe8VFg
-BX-45 武士斬魂
-https://lin.ee/UqORJK4
+CX-18 腕龍鞭打 隨機強化組
+https://lin.ee/tjSzfdE
+BXG-01 烈焰飛鳳S
+https://lin.ee/6iNIAUp
+BXG-04 銀牙烈虎S
+https://lin.ee/W9mY5EK
 
 [南港潤泰]
 @2026-08-28~2026-08-29
@@ -297,52 +297,52 @@ https://lin.ee/ZVKVm1g
 
 [南港LaLaport]
 @2026-08-28~2026-08-29
-UX-21 惡魔冥界改造組
-https://lin.ee/wxDyuiT
-BX-57 3V3對戰收納盒 黑
-https://lin.ee/T4epzhr
-BX-25 戰鬥陀螺X專業收納包
-https://lin.ee/5S33T6A
+BX-00 暴風天馬3-70RA
+https://lin.ee/7meLFUn
 BX-10 極限衝擊戰鬥盤
 https://lin.ee/5OhxHJr
-BX-45 武士魂斬
-https://lin.ee/okwRin0
-BX-37 雙重極限衝擊戰鬥盤 豪華組
-https://lin.ee/xCP9NsQ
-UX-20榮耀武神LF
-https://lin.ee/qHTOOuh
-UX-19子彈獅鷲H
-https://lin.ee/YeKJb8H
-UX-11衝擊龍神豪華組
-https://lin.ee/6x5RoXJ
-UX-03魔導神杖
-https://lin.ee/SKB9Mzm
-UX-02惡魔戰錘
-https://lin.ee/T0GDMsh
-BXG-04銀牙獵虎S
-https://lin.ee/wElOvyv
-CX-18腕龍鞭打隨機強化組
-https://lin.ee/R3Uf7Ys
-BXG-01烈焰飛鳳S
-https://lin.ee/91G8cDn
-BX-51炫風發射器 黑綠
-https://lin.ee/ub34Vey
-BX-40發射器（酒紅）
-https://lin.ee/pCeQbWz
-BX-35隨機強化組Vol.04
-https://lin.ee/QtIsgeh
-BX-50天堂日輪隨機強化組
-https://lin.ee/uZ52zTl
-BX-33皓戰猛虎
-https://lin.ee/XjDe5ma
 BX-18 X炫風發射器
 https://lin.ee/53RYxU7
-BX-26獨角刺心
+BX-25 戰鬥陀螺X專業收納包
+https://lin.ee/5S33T6A
+BX-26 獨角刺心
 https://lin.ee/TOIAF5e
-BX-00暴風天馬3-70RA
-https://lin.ee/7meLFUn
-BX-32寬型極限衝擊戰鬥盤
+BX-32 寬型極限衝擊戰鬥盤
 https://lin.ee/vtPi2tx
+BX-33 皓戰猛虎
+https://lin.ee/XjDe5ma
+BX-35 隨機強化組Vol.04
+https://lin.ee/QtIsgeh
+BX-37 雙重極限衝擊戰鬥盤 豪華組
+https://lin.ee/xCP9NsQ
+BX-40 發射器（酒紅）
+https://lin.ee/pCeQbWz
+BX-45 武士魂斬
+https://lin.ee/okwRin0
+BX-50 天堂日輪隨機強化組
+https://lin.ee/uZ52zTl
+BX-51 炫風發射器 黑綠
+https://lin.ee/ub34Vey
+BX-57 3V3對戰收納盒 黑
+https://lin.ee/T4epzhr
+UX-02 惡魔戰錘
+https://lin.ee/T0GDMsh
+UX-03 魔導神杖
+https://lin.ee/SKB9Mzm
+UX-11 衝擊龍神豪華組
+https://lin.ee/6x5RoXJ
+UX-19 子彈獅鷲H
+https://lin.ee/YeKJb8H
+UX-20 榮耀武神LF
+https://lin.ee/qHTOOuh
+UX-21 惡魔冥界改造組
+https://lin.ee/wxDyuiT
+CX-18 腕龍鞭打隨機強化組
+https://lin.ee/R3Uf7Ys
+BXG-01 烈焰飛鳳S
+https://lin.ee/91G8cDn
+BXG-04 銀牙獵虎S
+https://lin.ee/wElOvyv
 
 [北車地下街]
 @2026-08-28~2026-08-29
@@ -569,15 +569,79 @@ BXG-04 銀牙烈虎S
 https://lin.ee/XeIJeWC
 
 [淡水禮萊]
-@待公布
+@2026-08-28~2026-08-29
+BX-10 極限衝擊戰鬥盤
+https://lin.ee/QpMHTmE
+BX-25 戰鬥陀螺X專業收納包
+https://lin.ee/rpbuthp
+BX-40 發射器(酒紅)
+https://lin.ee/sD4myR
+BX-51 旋風發射器 黑綠
+https://lin.ee/OAc3mIX
+BX-57 3V3對戰收納盒 黑
+https://lin.ee/S5by05z
+UX-02 惡魔戰錘
+https://lin.ee/tt3JwKY
+UX-11 衝擊龍神 豪華組
+https://lin.ee/WOIyQGp
+CX-18 腕龍鞭打 隨機強化組
+https://lin.ee/YRMdB78
 
 [比漾廣場]
-@待公布
+@2026-08-28~2026-08-29
+BX-10 極限衝擊戰鬥盤
+https://lin.ee/7UyojyK
+BX-18 X旋風發射器
+https://lin.ee/zgEQ89e
+BX-25 戰鬥陀螺X專業收納包
+https://lin.ee/yT22UFH
+BX-26 獨角刺心
+https://lin.ee/Nm4CM17
+BX-33 皓戰猛虎
+https://lin.ee/n9ZpUIN
+BX-40 發射器(酒紅)(左迴旋)
+https://lin.ee/SJvwalr
+BX-45 武士魂斬
+https://lin.ee/VJ0S3ZW
+BX-51 旋風發射器 黑綠
+https://lin.ee/UOi10z8
+BX-57 3V3對戰收納盒 黑
+https://lin.ee/plZxdYa
+BXG-01 烈焰飛鳳S
+https://lin.ee/PE3rp5q
+BXG-04 銀牙烈虎S
+https://lin.ee/vpWYBNP
 
 ### 桃園市
 
 [中壢大江]
-@待公布
+@2026-08-28~2026-08-29
+BX-10 極限衝擊戰鬥盤
+https://lin.ee/X3V6TIq
+BX-18 X旋風發射器
+https://lin.ee/6SuMVwo
+BX-25 戰鬥陀螺X專業收納包
+https://lin.ee/rvYT35b
+BX-26 獨角刺心
+https://lin.ee/tjgcao3
+BX-30 X發射器改造型握把（黑紅）
+https://lin.ee/w8eDenX
+BX-32 寬型極限戰鬥盤
+https://lin.ee/OiTBBXc
+BX-37 雙重極限衝擊戰鬥盤 豪華組
+https://lin.ee/6x2cdD31
+BX-40 發射器（左迴旋）
+https://lin.ee/R0OUf8x
+BX-45 武士魂斬
+https://lin.ee/PwFibxe
+BX-51 炫風發射器（黑綠）
+https://lin.ee/x5svE3D
+BX-57 3V3對戰收納盒 黑
+https://lin.ee/RcEVMVc
+UX-20 榮耀武神
+https://lin.ee/nua1iCT
+CX-13 龍王閃擊
+https://lin.ee/nvd275v
 
 [桃園站前三越]
 @2026-08-28~2026-08-29
@@ -596,40 +660,40 @@ https://lin.ee/W7a5GSM
 
 [桃園環球A8]
 @2026-08-28~2026-08-29
-UX-19 子彈獅鷲H
-https://lin.ee/tM0mVd4
-BXG-04 銀牙烈虎S
-https://lin.ee/TmsRpyR
-BXG-01 烈焰飛鳳S
-https://lin.ee/8x5KSVsE
-BX-00 暴風天馬3-70RA
+BX-00 暴風天馬
 https://lin.ee/8ER1QuO
-BX-35 隨機強化組Vol.04
-https://lin.ee/nBQY3g3
-BX-33 皓戰猛虎
-https://lin.ee/ZYF4GxZ
-BX-26 獨角刺心
-https://lin.ee/nothX47
-BX-51 旋風發射器 黑綠
-https://lin.ee/x955Fpp1
-BX-18 X旋風發射器
-https://lin.ee/VDqoOxe
-BX-50 天堂日輪 隨機強化組
-https://lin.ee/6aFQv6D
-UX-20 榮耀武神LF
-https://lin.ee/re25qAN
-BX-40 發射器(酒紅)
-https://lin.ee/Z8Wd4DP
-CX-18 腕龍鞭打 隨機強化組
-https://lin.ee/TbNPa1U
-UX-02 惡魔戰錘
-https://lin.ee/zE7aNua
-BX-57 3V3對戰收納盒 黑
-https://lin.ee/OfwqexV
-BX-25 戰鬥陀螺X專業收納包
-https://lin.ee/zQCD7oi
 BX-10 極限衝擊戰鬥盤
 https://lin.ee/pkIvt4V
+BX-18 右迴旋發射器
+https://lin.ee/VDqoOxe
+BX-25 專業收納包（不含陀螺）
+https://lin.ee/zQCD7oi
+BX-26 獨角刺心
+https://lin.ee/nothX47
+BX-33 皓戰猛虎
+https://lin.ee/ZYF4GxZ
+BX-35 隨機強化組vol.4
+https://lin.ee/nBQY3g3
+BX-40 左迴旋發射器 酒紅
+https://lin.ee/Z8Wd4DP
+BX-50 天堂日輪 強化組
+https://lin.ee/6aFQv6D
+BX-51 旋風發射器 黑綠
+https://lin.ee/x955Fpp1
+BX-57 3V3 對戰收納盒 黑色版（不含陀螺）
+https://lin.ee/OfwqexV
+UX-02 惡魔戰錘
+https://lin.ee/zE7aNua
+UX-19 子彈獅鷲
+https://lin.ee/tM0mVd4
+UX-20 榮耀武神
+https://lin.ee/re25qAN
+CX-18 腕龍鞭打 隨機強化組
+https://lin.ee/TbNPa1U
+BXG-01 烈焰飛鳳
+https://lin.ee/8x5KSVsE
+BXG-04 銀牙烈虎
+https://lin.ee/TmsRpyR
 
 [桃園台茂]
 @2026-08-28~2026-08-29
@@ -661,50 +725,134 @@ BXG-04 銀牙烈虎S
 https://lin.ee/RFm6sJz
 
 [中壢SOGO]
-@待公布
+@2026-08-28~2026-08-29
+BX-10 極限衝擊戰鬥盤
+https://lin.ee/7CZLOoe
+BX-18 X旋風發射器
+https://lin.ee/sq88iNR
+BX-25 戰鬥陀螺X專業收納包
+https://lin.ee/8pTwVTg
+BX-26 獨角刺心
+https://lin.ee/TPoHJzZ
+BX-40 發射器(酒紅)
+https://lin.ee/s3kHvFSI
+BX-45 武士魂斬
+https://lin.ee/WHmSYoE
+BX-51 旋風發射器 黑綠
+https://lin.ee/pxwo4Wl
+BX-57 3V3對戰收納盒 黑
+https://lin.ee/yvmPkRc
+UX-03 魔導神杖
+https://lin.ee/PwZT5TJ
+UX-11 衝擊龍神 豪華組
+https://lin.ee/rPLgZay
+CX-18 腕龍鞭打 隨機強化組
+https://lin.ee/s8QwyPx
+BXG-01 烈焰飛鳳S
+https://lin.ee/vblHE1h
+BXG-04 銀牙烈虎S
+https://lin.ee/5LvgjZB
 
 [桃園環球A19]
-@2026-08-28~2026-08-30
-BXG-01 烈焰飛鳳S
-https://lin.ee/Wva6PwV
-BXG-04 銀牙烈虎S
-https://lin.ee/RCIsfoA
+@2026-08-28~2026-08-29
+BX-00 暴風天馬3-70RA
+https://lin.ee/YKAQcXz
+BX-10 極限衝擊戰鬥盤
+https://lin.ee/R8cbDnC
 BX-18 X旋風發射器
 https://lin.ee/vnCEMVI
-BX-32寬型極限衝擊戰鬥盤
-https://lin.ee/oqk3P9aT
+BX-25 戰鬥陀螺X專業收納包
+https://lin.ee/O937eti
 BX-26 獨角刺心
 https://lin.ee/VdbJAwU
+BX-32 寬型極限衝擊戰鬥盤
+https://lin.ee/oqk3P9aT
 BX-33 皓戰猛虎
 https://lin.ee/5jb9ka9
 BX-35 隨機強化組Vol.04
 https://lin.ee/PHFLgAV
-BX-00 暴風天馬3-70RA
-https://lin.ee/YKAQcXz
-UX-20 榮耀武神LF
-https://lin.ee/qMm25ZE
-BX-50 天堂日輪 隨機強化組
-https://lin.ee/Zo4TFwx
-BX-10 極限衝擊戰鬥盤
-https://lin.ee/R8cbDnC
-BX-25 戰鬥陀螺X專業收納包
-https://lin.ee/O937eti
 BX-40 發射器(酒紅)
 https://lin.ee/ZPzg9Hj
+BX-50 天堂日輪 隨機強化組
+https://lin.ee/Zo4TFwx
 BX-51 旋風發射器 黑綠
 https://lin.ee/SDPeyGc
 BX-57 3V3對戰收納盒(黑)
 https://lin.ee/RB9WSG9
 UX-19 子彈獅鷲H
 https://lin.ee/VISc8gJ
+UX-20 榮耀武神LF
+https://lin.ee/qMm25ZE
+BXG-01 烈焰飛鳳S
+https://lin.ee/Wva6PwV
+BXG-04 銀牙烈虎S
+https://lin.ee/RCIsfoA
 
 [桃園遠東]
-@待公布
+@2026-08-14~2026-08-15
+BX-00 暴風天馬3-70RA
+https://lin.ee/7VYhs0N
+BX-26 獨角刺心
+https://lin.ee/uq2XXR0
+BX-33 皓戰猛虎
+https://lin.ee/OqMjhIC
+BX-35 隨機強化組Vol.04
+https://lin.ee/XD3mcUF
+BX-40 發射器(酒紅)
+https://lin.ee/75spb8S
+BX-50 天堂日輪 隨機強化組
+https://lin.ee/w4y3SdE
+BX-51 旋風發射器 黑綠
+https://lin.ee/SriDUj2J
+UX-20 榮耀武神LF
+https://lin.ee/8eYEV4N
+BXG-04 銀牙烈虎S
+https://lin.ee/7JTEIl5
 
 ### 新竹市
 
 [新竹巨城]
-@待公布
+@2026-08-28~2026-08-29
+BX-00 暴風天馬
+https://lin.ee/t1g6zk6
+BX-10 極限衝擊戰鬥盤
+https://lin.ee/WtaQwFTE
+BX-18 X旋風發射器
+https://lin.ee/OjgYGX7
+BX-25 戰鬥陀螺X專業收納包
+https://lin.ee/pGhtbj1
+BX-26 獨角刺心
+https://lin.ee/slQLWLc
+BX-33 皓戰猛虎
+https://lin.ee/XOdYV0E
+BX-35 隨機強化組 Vol.04
+https://lin.ee/wOpQsrO
+BX-37 雙重極限衝擊戰鬥盤 豪華組
+https://lin.ee/XCdmLYs
+BX-40 左迴旋發射器 黑色
+https://lin.ee/5WP8Y62
+BX-45 武士魂斬
+https://lin.ee/ORhkwUS
+BX-50 隨機強化包Vol.11
+https://lin.ee/yoD8WA9
+BX-51 旋風發射器 黑綠
+https://lin.ee/73eW58gT
+BX-57 3V3對戰收納盒 黑色版
+https://lin.ee/8QfUab8
+UX-02 惡魔戰錘
+https://lin.ee/YWsU75z
+UX-11 衝擊龍神
+https://lin.ee/5ZVovc6
+UX-19 子彈獅鷲
+https://lin.ee/vMy7rrD
+UX-20 榮耀武神
+https://lin.ee/826H1QK
+CX-18 腕龍鞭打
+https://lin.ee/OeFxdaE
+BXG-01 烈焰飛鳳S
+https://lin.ee/xyGm0Kq
+BXG-04 銀牙烈虎S
+https://lin.ee/rusrq1D
 
 [新竹遠東]
 @2026-08-28~2026-08-29
@@ -823,7 +971,13 @@ https://lin.ee/sih46Kr
 ### 苗栗縣
 
 [苗栗尚順]
-@待公布
+@2026-08-28
+BX-10 極限衝擊戰鬥盤
+https://lin.ee/7ywJfSN
+BX-25 專業收納包
+https://lin.ee/SGrSo04
+BX-57 3V3對戰收納盒黑
+https://lin.ee/tMbYyuo
 
 ### 台中市
 
@@ -956,55 +1110,55 @@ https://lin.ee/yuMDan0
 
 [台中遠雄]
 @2026-08-28~2026-08-29
-BX-33 皓戰猛虎
-https://lin.ee/RG4dkti
-BX-35 隨機強化組Vol.04
-https://lin.ee/VaINb8A
-UX-11 衝擊龍神 豪華組
-https://lin.ee/8pYZmDq
-BX-40 發射器(酒紅)
-https://lin.ee/ZG3EwaM
-BXG-04 銀牙烈虎S
-https://lin.ee/z8s9CiI
-BX-51 旋風發射器 黑綠
-https://lin.ee/TbvDJYY
+BX-00 暴風天馬3-70RA
+https://lin.ee/6XLQoss
 BX-18 X旋風發射器
 https://lin.ee/YOoVlBw
 BX-26 獨角刺心
 https://lin.ee/8JuI4Lk
-BX-00 暴風天馬3-70RA
-https://lin.ee/6XLQoss
-BXG-01 烈焰飛鳳S
-https://lin.ee/xIPV0r2
+BX-33 皓戰猛虎
+https://lin.ee/RG4dkti
+BX-35 隨機強化組Vol.04
+https://lin.ee/VaINb8A
+BX-40 發射器(酒紅)
+https://lin.ee/ZG3EwaM
 BX-50 天堂日輪 隨機強化組
 https://lin.ee/RSea3dk
+BX-51 旋風發射器 黑綠
+https://lin.ee/TbvDJYY
+UX-11 衝擊龍神 豪華組
+https://lin.ee/8pYZmDq
+BXG-01 烈焰飛鳳S
+https://lin.ee/xIPV0r2
+BXG-04 銀牙烈虎S
+https://lin.ee/z8s9CiI
 
 [文心秀泰]
 @2026-08-28~2026-08-29
+BX-00 暴風天馬3-70RA
+https://lin.ee/YCkSnxT
+BX-10 極限衝擊戰鬥盤
+https://lin.ee/rEZFKfG
+BX-18 X旋風發射器
+https://lin.ee/pTo7Drq
+BX-25 戰鬥陀螺X專業收納包
+https://lin.ee/9bQd93j
 BX-26 獨角刺心
 https://lin.ee/zpHV14P
 BX-33 皓戰猛虎
 https://lin.ee/ow30B8I
-BX-40 發射器(酒紅)
-https://lin.ee/7jhYc9J
-BX-00 暴風天馬3-70RA
-https://lin.ee/YCkSnxT
-UX-20 榮耀武神LF
-https://lin.ee/xKtpC92
 BX-35 隨機強化組Vol.04
 https://lin.ee/wQmF3i9e
-BX-25 戰鬥陀螺X專業收納包
-https://lin.ee/9bQd93j
+BX-40 發射器(酒紅)
+https://lin.ee/7jhYc9J
 BX-57 3V3對戰收納盒 黑
 https://lin.ee/PQIxWUM
-BXG-01 烈焰飛鳳S
-https://lin.ee/pVcRYFJ
-BX-18 X旋風發射器
-https://lin.ee/pTo7Drq
 UX-02 惡魔戰錘
 https://lin.ee/R8vn6brE
-BX-10 極限衝擊戰鬥盤
-https://lin.ee/rEZFKfG
+UX-20 榮耀武神LF
+https://lin.ee/xKtpC92
+BXG-01 烈焰飛鳳S
+https://lin.ee/pVcRYFJ
 
 [新光三越台中]
 @2026-08-28~2026-08-29
@@ -1063,7 +1217,33 @@ BXG-04 銀牙烈虎S
 https://lin.ee/9hgwLla
 
 [漢神洲際]
-@待公布
+@2026-08-28~2026-08-29
+BX-10 極限衝擊戰鬥盤
+https://lin.ee/pML7mDS
+BX-18 X旋風發射器
+https://lin.ee/71j3Dhf
+BX-25 戰鬥陀螺X專業收納包
+https://lin.ee/YiKh8NE
+BX-26 獨角刺心
+https://lin.ee/pCRcIct
+BX-33 皓戰猛虎
+https://lin.ee/pcQuN28
+BX-35 隨機強化組Vol.04
+https://lin.ee/wJ8UMGf
+BX-37 雙重極限衝擊戰鬥盤 豪華組
+https://lin.ee/Tr959Rs
+BX-45 武士魂斬
+https://lin.ee/oZ1NScz
+BX-57 3V3對戰收納盒 黑
+https://lin.ee/XzcUvEej
+UX-02 惡魔戰錘
+https://lin.ee/Uz7PVDD
+CX-18 腕龍鞭打 隨機強化組
+https://lin.ee/nyEr8Cb
+BXG-01 烈焰飛鳳S
+https://lin.ee/woyeluh
+BXG-04 銀牙烈虎S
+https://lin.ee/vco89Vju
 
 [廣三SOGO]
 @2026-08-28~2026-08-29
@@ -1200,24 +1380,24 @@ https://lin.ee/xElEriuv
 
 [嘉義耐斯]
 @2026-08-28~2026-08-29
-CX-18腕龍鞭打隨機強化組
-https://lin.ee/pU3TXFP
-UX-02 惡魔戰錘
-https://lin.ee/VnwLVeH
-BX-45 武士魂斬
-https://lin.ee/sGKRCsX
-UX-19 子彈獅鷲H
-https://lin.ee/6uOqmJc
-BX-40 發射器（酒紅）
-https://lin.ee/RsFEd0E
-BX-51 旋風發射器 黑綠
-https://lin.ee/skHKrc9
 BX-10 極限衝擊戰鬥盤
 https://lin.ee/nXHXIcM
 BX-25 戰鬥陀螺X專業收納包
 https://lin.ee/Q3TBgcF
+BX-40 發射器（酒紅）
+https://lin.ee/RsFEd0E
+BX-45 武士魂斬
+https://lin.ee/sGKRCsX
+BX-51 旋風發射器 黑綠
+https://lin.ee/skHKrc9
 BX-57 3V3對戰收納盒 黑
 https://lin.ee/y4QXFn5
+UX-02 惡魔戰錘
+https://lin.ee/VnwLVeH
+UX-19 子彈獅鷲H
+https://lin.ee/6uOqmJc
+CX-18 腕龍鞭打 隨機強化組
+https://lin.ee/pU3TXFP
 
 [嘉義三越]
 @2026-08-28~2026-08-29
@@ -1506,10 +1686,10 @@ BX-10 極限衝擊戰鬥盤
 https://lin.ee/SVE0Tey
 BX-25 戰鬥陀螺X專業收納包
 https://lin.ee/ST2lt3s
-BX-51旋風發射器 黑綠
-https://lin.ee/r1TYrJJ
 BX-45 武士魂斬
 https://lin.ee/SRUOYVC
+BX-51 旋風發射器 黑綠
+https://lin.ee/r1TYrJJ
 BX-57 3V3對戰收納盒 黑
 https://lin.ee/utuhGy2
 
@@ -1524,14 +1704,14 @@ https://lin.ee/9CnBTJZ
 
 [高雄大遠百]
 @2026-08-28~2026-08-29
-BX-45 武士魂斬
-https://lin.ee/YQlvTpD
-BX-25 戰鬥陀螺X專業收納包
-https://lin.ee/u13SL4J
-BX-57 3V3對戰收納盒 黑
-https://lin.ee/tUtWFNA
 BX-10 極限衝擊戰鬥盤
 https://lin.ee/SSHiqnA
+BX-25 戰鬥陀螺X專業收納包
+https://lin.ee/u13SL4J
+BX-45 武士魂斬
+https://lin.ee/YQlvTpD
+BX-57 3V3對戰收納盒（新款）
+https://lin.ee/tUtWFNA
 
 [來玩聚鳳山]
 @2026-08-28~2026-08-29
@@ -1579,7 +1759,15 @@ BX-57 3V3對戰收納盒 黑
 https://lin.ee/s6BrZTU
 
 [來玩聚新屏]
-@待公布
+@2026-08-28~2026-08-29
+BX-10 極限衝擊戰鬥盤
+https://lin.ee/9iDe58z
+BX-25 戰鬥陀螺X專業收納包(不附陀螺及配件)
+https://lin.ee/NvBoeda
+BX-51 旋風發射器 黑綠
+https://lin.ee/prC2j1D
+BX-57 3V3對戰收納盒 黑
+https://lin.ee/q0CQ32X
 
 ### 宜蘭縣
 
