@@ -16,7 +16,7 @@
 //
 // 只讀不寫：印出線索（貼文時間、關鍵字、品項×lin.ee 配對、哪些 code 正本還沒有），
 // 補不補進正本由人決定（照 draw:fb 的 SOP：解析短址→mapping.tsv→source-links.txt）。
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { extractLeads } from './draw-fb-scan.mjs';
