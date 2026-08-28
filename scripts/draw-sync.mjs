@@ -272,7 +272,27 @@ for (const s of picked) {
 const batchMark = [...markTally.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
 const isDateMark = (mk) => /^@\d{4}-\d{2}-\d{2}/.test(mk);
 
-const byStore = new Map(picked.map((s) => [matchStore(s.store) ?? s.store, s]));
+// 作廢短址（data/draw/link_drops.tsv）：上游列出、但店家後來換掉的購買券。
+// 同批取聯集的關係，光在正本改連結會被上游那條併回來、變成同品項兩條——這裡是唯一的拒收點。
+const dropped = new Set(
+  readFileSync(join(root, `${DATA}/link_drops.tsv`), 'utf8')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'))
+    .map((l) => l.split('\t')[0].trim())
+    .filter(Boolean),
+);
+const codeOf = (u) => String(u).match(/^https:\/\/lin\.ee\/([A-Za-z0-9]+)$/)?.[1] ?? '';
+const byStore = new Map(
+  picked.map((s) => [
+    matchStore(s.store) ?? s.store,
+    { ...s, items: s.items.filter(([, u]) => !dropped.has(codeOf(u))) },
+  ]),
+);
+{
+  const hit = picked.flatMap((s) => s.items).filter(([, u]) => dropped.has(codeOf(u)));
+  if (hit.length) console.log(`拒收作廢短址 ${hit.length} 筆: ${hit.map(([, u]) => codeOf(u)).join(', ')}`);
+}
 const out = [];
 const changed = [];
 const inherited = [];
