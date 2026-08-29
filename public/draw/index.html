@@ -296,6 +296,29 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
   cursor: pointer;
 }
 
+/* 條件記憶 chips：把目前複選存成一組、一鍵套回（篩選語意→紫）。
+   chip 主體套用、尾端 ✕ 刪除——巢狀按鈕不合法，用 wrap 併成一顆藥丸 */
+.preset-row { display: flex; flex-wrap: wrap; gap: 0.35rem; padding: 0.55rem 0.75rem 0; }
+.preset-row[hidden] { display: none; }
+.preset-wrap { display: inline-flex; border-radius: 999px; overflow: hidden; background: var(--color-tag-soft); }
+.preset-apply {
+  padding: 0.32rem 0.15rem 0.32rem 0.7rem;
+  font: inherit; font-size: 0.78rem; font-weight: 700;
+  color: var(--color-tag-ink); background: transparent; border: 0; cursor: pointer;
+}
+.preset-del {
+  padding: 0.32rem 0.55rem 0.32rem 0.35rem;
+  font: inherit; font-size: 0.78rem;
+  color: var(--color-tag-ink); opacity: 0.65; background: transparent; border: 0; cursor: pointer;
+}
+.preset-save {
+  padding: 0.32rem 0.7rem;
+  font: inherit; font-size: 0.78rem; font-weight: 700;
+  color: var(--color-tag-ink); background: transparent;
+  border: 1px dashed color-mix(in oklab, var(--color-tag-ink) 45%, transparent);
+  border-radius: 999px; cursor: pointer;
+}
+
 main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 
 .store { margin-bottom: 1.1rem; }
@@ -507,6 +530,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       <input class="search" id="search" type="search" placeholder="搜尋品項（例：旋風、獅鷲、收納）" aria-label="搜尋品項">
       <button class="icon-btn panel-close" id="panelClose" type="button" aria-label="關閉">✕</button>
     </div>
+    <div class="preset-row" id="presetRow" hidden></div>
     <div class="panel-body">
       <section class="group" id="cityGroup">
         <h2 class="group-head" id="cityHead"></h2>
@@ -1967,11 +1991,25 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     renderClearDone();
   }
 
+  function filterActive() { return !!(state.q || state.i.length || state.c.length || state.s.length); }
+
+  /** 目前篩選看得到、且已標成已抽的網址（清除鈕的作用範圍） */
+  function visibleDoneUrls() {
+    var urls = [];
+    DATA.items.forEach(function (it) {
+      if (done[it.u] && matches(it) && urls.indexOf(it.u) === -1) urls.push(it.u);
+    });
+    return urls;
+  }
+
   function renderClearDone() {
     var btn = document.getElementById('clearDone');
     var n = doneCount();
     btn.hidden = n === 0;
-    btn.textContent = '已抽 ' + n + ' · 清除';
+    if (btn.hidden) return;
+    // 開著篩選時只清看得到的。範圍要寫在字面上，不然使用者以為清了全部
+    var v = filterActive() ? visibleDoneUrls().length : n;
+    btn.textContent = filterActive() && v < n ? '已抽 ' + v + '/' + n + ' · 清除顯示中' : '已抽 ' + n + ' · 清除';
   }
 
   // DATA.stores 已依「到活動區域最近」排序，渲染與篩選都吃這個順序
@@ -2344,6 +2382,73 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     document.getElementById('filterBtn').classList.toggle('is-on', on.length > 0);
   }
 
+  // --- 條件記憶（至多三組）----------------------------------------------
+  // 搶券日就是在「雙北＋熱品」「常跑的店」之間切來切去，每次重勾很煩。
+  // 存 localStorage（單機便利性；分享仍走網址參數）；標籤由條件自動生成，不做命名輸入——
+  // 手機打字是摩擦。已存過一模一樣的組合就不再出現「存目前」。
+  var PRESET_KEY = 'funbox:presets:v1';
+  var PRESET_MAX = 3;
+  function loadPresets() {
+    try {
+      var v = JSON.parse(localStorage.getItem(PRESET_KEY) || '[]');
+      return Array.isArray(v) ? v.slice(0, PRESET_MAX) : [];
+    } catch (err) { return []; }
+  }
+  function savePresets(list) {
+    try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch (err) { /* 無痕模式 */ }
+  }
+  function presetLabel(p) {
+    var parts = [].concat(p.c, p.s, p.i);
+    if (p.q) parts.push('「' + p.q + '」');
+    var head = parts.slice(0, 2).join('・');
+    return parts.length > 2 ? head + ' 等' + parts.length + '項' : head || '（空）';
+  }
+  function sameFilter(p) {
+    return p.c.join() === state.c.join() && p.s.join() === state.s.join() &&
+      p.i.join() === state.i.join() && (p.q || '') === (state.q || '');
+  }
+  function renderPresets() {
+    var row = document.getElementById('presetRow');
+    var presets = loadPresets();
+    var canSave = filterActive() && presets.length < PRESET_MAX && !presets.some(sameFilter);
+    row.hidden = presets.length === 0 && !canSave;
+    row.textContent = '';
+    presets.forEach(function (p, idx) {
+      var wrap = el('span', 'preset-wrap');
+      var apply = el('button', 'preset-apply', presetLabel(p));
+      apply.type = 'button';
+      apply.addEventListener('click', function () {
+        state.c = p.c.slice(); state.s = p.s.slice(); state.i = p.i.slice(); state.q = p.q || '';
+        searchInput.value = state.q;
+        trackFilter('preset', presetLabel(p));
+        update();
+      });
+      var del = el('button', 'preset-del', '✕');
+      del.type = 'button';
+      del.setAttribute('aria-label', '刪除「' + presetLabel(p) + '」這組條件');
+      del.addEventListener('click', function () {
+        var list = loadPresets();
+        list.splice(idx, 1);
+        savePresets(list);
+        renderPresets();
+      });
+      wrap.appendChild(apply);
+      wrap.appendChild(del);
+      row.appendChild(wrap);
+    });
+    if (canSave) {
+      var save = el('button', 'preset-save', '＋存目前條件');
+      save.type = 'button';
+      save.addEventListener('click', function () {
+        var list = loadPresets();
+        list.push({ c: state.c.slice(), s: state.s.slice(), i: state.i.slice(), q: state.q || '' });
+        savePresets(list);
+        renderPresets();
+      });
+      row.appendChild(save);
+    }
+  }
+
   // 面板／彈窗開關
   var panel = document.getElementById('filterPanel');
   var filterBtn = document.getElementById('filterBtn');
@@ -2447,12 +2552,19 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     renderList();
     renderClearDone();
     renderFilterSummary();
+    renderPresets();
     syncUrl();
   }
 
   document.getElementById('clearDone').addEventListener('click', function () {
-    if (!confirm('清除 ' + doneCount() + ' 筆已抽紀錄？')) return;
-    done = {};
+    var scoped = filterActive();
+    var urls = scoped ? visibleDoneUrls() : Object.keys(done);
+    if (!urls.length) return;
+    var msg = scoped && urls.length < doneCount()
+      ? '只清除目前篩選中的 ' + urls.length + ' 筆已抽紀錄？（其他 ' + (doneCount() - urls.length) + ' 筆保留）'
+      : '清除 ' + urls.length + ' 筆已抽紀錄？';
+    if (!confirm(msg)) return;
+    urls.forEach(function (u) { delete done[u]; });
     saveDone();
     renderList();
     renderClearDone();
@@ -2475,6 +2587,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     renderList();
     renderItemChips();
     renderFilterSummary();   // 數量與「正在搜什麼」都寫在篩選那行，打字時要跟著動
+    renderPresets();         // 「存目前條件」的可存狀態跟搜尋字有關
     syncUrl();
     // 打字每個字都送會變雜訊，停手 1.2 秒才記一次「他在找什麼」
     clearTimeout(searchTimer);
