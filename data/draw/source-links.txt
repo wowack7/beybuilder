@@ -56,14 +56,14 @@ UX-02 惡魔戰錘
 https://lin.ee/7pFR6OL
 UX-20 榮耀女武神
 https://lin.ee/wBvFN2J
+UX-21 惡魔幽冥改造組（8/29 11:00才開始）
+https://lin.ee/UKM6TKK
 CX-18 腕龍鞭打隨機強化組
 https://lin.ee/OnkeSxw
 BXG-01 烈焰飛鳳S
 https://lin.ee/uiraH5M
 BXG-04 銀牙烈虎S
 https://lin.ee/yAnYvar
-UX-21 惡魔冥界改造組（8/29 11:00才開始）
-https://lin.ee/UKM6TKK
 
 [美麗華]
 @2026-08-28~2026-08-29
@@ -197,7 +197,7 @@ UX-02 惡魔戰鎚
 https://lin.ee/pbZhX9A
 UX-19 子彈獅鷲H
 https://lin.ee/5JE24Ce
-UX-21 惡魔冥界改造組（8/29 11:00才開始）
+UX-21 惡魔冥界改造組
 https://lin.ee/Xqa4sFy
 
 [信義A8]
@@ -220,10 +220,10 @@ UX-02 惡魔戰錘
 https://lin.ee/o9jTJmJ
 UX-11 衝擊龍神 豪華組
 https://lin.ee/OiJG4ER
-CX-18 腕龍鞭打 隨機強化組
-https://lin.ee/PRItKmN
 UX-21 惡魔冥界改造組（8/29 11:00才開始）
 https://lin.ee/q97O5u7
+CX-18 腕龍鞭打 隨機強化組
+https://lin.ee/PRItKmN
 
 [三越南西]
 @2026-08-28~2026-08-29
@@ -1334,6 +1334,8 @@ UX-02 惡魔戰錘
 https://lin.ee/o8Fl1ZP
 UX-19 子彈獅鷲H
 https://lin.ee/S1Hshg7
+UX-21 戰鬥陀螺（8/29 10:30才開始）
+https://lin.ee/Xo7D2Lr
 
 ### 彰化縣
 
@@ -1470,6 +1472,8 @@ UX-11 衝擊龍神
 https://lin.ee/zx9seKT
 UX-19 子彈獅鷲
 https://lin.ee/RdWwrdUn
+UX-21 惡魔冥界改造組（8/29 11:00才開始）
+https://lin.ee/yjWrZ5V
 CX-18 婉龍鞭打 隨機強化組
 https://lin.ee/uIAKrOm
 
@@ -1483,6 +1487,8 @@ BX-25 戰鬥陀螺X專業收納包
 https://lin.ee/WmKxFLXY
 BX-57 3V3對戰收納盒 黑
 https://lin.ee/vIJCgVo
+UX-21 惡魔 冥界改造組（8/29 11:00才開始）
+https://lin.ee/Z4UqYWp
 
 [台南南紡]
 @2026-08-28~2026-08-29
@@ -1514,6 +1520,8 @@ UX-02 惡魔戰錘
 https://lin.ee/Zt7J2Pn
 UX-19 子彈獅鷲H
 https://lin.ee/pcVXTlD
+UX-21 惡魔冥界改造組 $895（8/29 11:00才開始）
+https://lin.ee/YNOqqPO
 CX-18 腕龍鞭打 隨機強化組
 https://lin.ee/oBvdgWL
 BXG-01 烈焰飛鳳S
@@ -1539,6 +1547,8 @@ UX-19 子彈獅鷲
 https://lin.ee/7lVBHjH
 UX-20 榮耀武神
 https://lin.ee/t5Q7JZ4
+UX-21 惡魔 冥界改造組（8/29 11:00才開始）
+https://lin.ee/w9EtprO
 BXG-04 銀牙烈虎
 https://lin.ee/5o6OXHo
 
