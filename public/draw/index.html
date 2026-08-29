@@ -2397,12 +2397,13 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   function savePresets(list) {
     try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch (err) { /* 無痕模式 */ }
   }
-  function presetLabel(p) {
+  function autoLabel(p) {
     var parts = [].concat(p.c, p.s, p.i);
     if (p.q) parts.push('「' + p.q + '」');
     var head = parts.slice(0, 2).join('・');
     return parts.length > 2 ? head + ' 等' + parts.length + '項' : head || '（空）';
   }
+  function presetLabel(p) { return p.name || autoLabel(p); }
   function sameFilter(p) {
     return p.c.join() === state.c.join() && p.s.join() === state.s.join() &&
       p.i.join() === state.i.join() && (p.q || '') === (state.q || '');
@@ -2440,8 +2441,15 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       var save = el('button', 'preset-save', '＋存目前條件');
       save.type = 'button';
       save.addEventListener('click', function () {
+        var p = { c: state.c.slice(), s: state.s.slice(), i: state.i.slice(), q: state.q || '' };
+        // 命名是可選的：prompt 預填自動標籤，直接確定＝用自動的；取消＝整個不存。
+        // 用原生 prompt 而非自製輸入框：這頁的 confirm 也走原生，且 LINE 內建瀏覽器都支援
+        var name = prompt('幫這組條件取個名（可直接確定用自動標籤）', autoLabel(p));
+        if (name === null) return;
+        name = name.trim();
+        if (name && name !== autoLabel(p)) p.name = name.slice(0, 20);
         var list = loadPresets();
-        list.push({ c: state.c.slice(), s: state.s.slice(), i: state.i.slice(), q: state.q || '' });
+        list.push(p);
         savePresets(list);
         renderPresets();
       });
