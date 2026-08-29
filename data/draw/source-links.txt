@@ -95,8 +95,6 @@ UX-19 子彈獅鷲 H
 https://lin.ee/uDrqsH5
 UX-21 惡魔冥界改造組
 https://lin.ee/Suuh0WP
-CX-00 新世紀福音戰士改造組（8/29 11:00才開始）
-https://liff.line.me/1654883387-DxN9w07M/c/01M15NBQ4JQ5GTBHRG0W8V3MWH
 CX-13 龍王閃擊BK 1-50 I
 https://lin.ee/WuY9vYd
 CX-18 腕龍鞭打 5-70 Nr
@@ -105,6 +103,8 @@ BXG-01 烈焰飛鳳S 3-80 T
 https://lin.ee/oRVQpRZ
 BXG-04 銀牙烈虎S 4-80 P
 https://lin.ee/tJBIH2W
+CX-00 新世紀福音戰士改造組（8/29 11:00才開始）
+https://liff.line.me/1654883387-DxN9w07M/c/01M15NBQ4JQ5GTBHRG0W8V3MWH
 
 [高島屋]
 @2026-08-28~2026-08-29
@@ -261,14 +261,14 @@ UX-11 衝擊龍神 豪華組
 https://lin.ee/Q0B7lsC
 UX-19 子彈獅鷲H
 https://lin.ee/QWQtKEc
+UX-21 惡魔冥界改造組
+https://lin.ee/xAesOXg
 CX-18 腕龍鞭打 隨機強化組
 https://lin.ee/tjSzfdE
 BXG-01 烈焰飛鳳S
 https://lin.ee/6iNIAUp
 BXG-04 銀牙烈虎S
 https://lin.ee/W9mY5EK
-UX-21 惡魔冥界改造組（8/29 11:00才開始）
-https://lin.ee/xAesOXg
 
 [南港潤泰]
 @2026-08-28~2026-08-29
@@ -776,6 +776,8 @@ UX-03 魔導神杖
 https://lin.ee/PwZT5TJ
 UX-11 衝擊龍神 豪華組
 https://lin.ee/rPLgZay
+UX-21惡魔冥界改造組
+https://lin.ee/p2JKdr5
 CX-18 腕龍鞭打 隨機強化組
 https://lin.ee/s8QwyPx
 BXG-01 烈焰飛鳳S
@@ -842,6 +844,8 @@ UX-11 衝擊龍神 豪華組
 https://lin.ee/PyYikOh
 UX-19 子彈獅鷲H
 https://lin.ee/ttdRdRj
+UX-21 惡魔冥界改造組
+https://lin.ee/qESRK9p
 CX-18 腕龍鞭打 隨機強化組
 https://lin.ee/vlX7J45
 BXG-01 烈焰飛鳳S
@@ -1133,6 +1137,8 @@ https://lin.ee/pmfKR4L
 UX-19 子彈獅鷲H
 https://lin.ee/OtVbNFm
 UX-21 惡魔冥界改造組（8/29 10:30才開始）
+https://lin.ee/SCEhlbK
+UX-21 惡魔冥界改造組（8/29 10:30才開始）
 https://lin.ee/6Z90yyL
 
 [台中遠百]
@@ -1308,6 +1314,8 @@ BX-57 3V3對戰收納盒 黑
 https://lin.ee/XzcUvEej
 UX-02 惡魔戰錘
 https://lin.ee/Uz7PVDD
+UX-21 惡魔冥界改造組
+https://lin.ee/7eoOr2V
 CX-18 腕龍鞭打 隨機強化組
 https://lin.ee/nyEr8Cb
 BXG-01 烈焰飛鳳S
@@ -1884,6 +1892,8 @@ BX-51 旋風發射器 黑綠
 https://lin.ee/prC2j1D
 BX-57 3V3對戰收納盒 黑
 https://lin.ee/q0CQ32X
+UX-21 惡魔冥界改造組 售價895元
+https://lin.ee/sEM6hwR
 
 ### 宜蘭縣
 
