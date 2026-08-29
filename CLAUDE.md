@@ -96,6 +96,11 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   不是價格那種雜訊。`normalizeItemName` 只把含日期／時刻／「開始」「開賣」的括號段接回標準名，
   `（原價$850）`、`（不含陀螺）`、`（黑）` 一律不留。2026-08-28 踩過：一致化上線當天
   27 筆 UX-21 的開賣時間被整批洗掉，`draw-items.test.mjs` 拿真實正本比對，再犯就紅燈
+- **新品項排上面**：`data/draw/item_seen.tsv` 記每條券連結第一次進正本的時間（帳本，
+  初始由 git 歷史回填），`draw-build` 自動維護：沒見過的網址以 build 當下時間補進帳本、
+  跟著 commit。每家店內品項依「第一次出現時間新→舊」排（分組線 g 不打散、同時間保持原序，
+  `orderStoreItems` 在 draw-items.mjs）。理由：正本與 sync 都是新資料 append 在後，
+  不排的話當天熱門新品永遠沉在每家店最底下
 - **作廢短址**：`data/draw/link_drops.tsv` 是**唯一能讓 sync 拒收某條上游連結的地方**。
   因為同批取聯集，光在正本把連結改掉，下一輪 `draw:sync --write` 會把上游那條併回來、
   同一品項變兩條。判定門檻寫在該檔頭部（要店家自己貼文給了不同短址，且新券的 ULID

@@ -61,3 +61,17 @@ export function normalizeItemName(name, map) {
   const notes = String(name).match(TIME_NOTE_RE) ?? [];
   return map.get(tag) + notes.join('');
 }
+
+/**
+ * 店內品項排序：新進的排上面。同一家店的品項依（分組線 g 不打散 → 第一次出現時間新→舊 →
+ * 原始順序）排序——正本與上游都是「新資料 append 在後」，不排的話當天的熱門新品
+ * （像 UX-21）永遠沉在每家店的最底下。時間一樣（同一輪 sync 進來）就保持原順序。
+ * @param {{g: number, u: string, r?: string}[]} storeItems 同一家店的品項（原始順序；帳本鍵用正本原始網址 r，沒有才退 u）
+ * @param {Map<string, string>} seenAt 網址 → 'YYYY-MM-DD HH:MM'
+ */
+export function orderStoreItems(storeItems, seenAt) {
+  return storeItems
+    .map((it, idx) => ({ it, idx, ts: seenAt.get(it.r ?? it.u) ?? '' }))
+    .sort((a, b) => a.it.g - b.it.g || (a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0) || a.idx - b.idx)
+    .map((x) => x.it);
+}

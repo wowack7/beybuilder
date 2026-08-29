@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalizeItemName, parseItemNames, tagOf } from './draw-items.mjs';
+import { normalizeItemName, orderStoreItems, parseItemNames, tagOf } from './draw-items.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -122,5 +122,39 @@ describe('item_names.tsv 正本', () => {
 
   it('標準品名本身不能夾帶價格', () => {
     for (const [, std] of rows) expect(std).not.toMatch(/\d+\s*元|原價|\$\d|價格/);
+  });
+});
+
+describe('orderStoreItems', () => {
+  const seen = new Map([
+    ['u/old1', '2026-08-27 20:00'],
+    ['u/old2', '2026-08-27 20:00'],
+    ['u/new1', '2026-08-28 23:55'],
+  ]);
+
+  it('新進的排上面，同時間保持原順序', () => {
+    const items = [
+      { g: 1, u: 'u/old1' },
+      { g: 1, u: 'u/old2' },
+      { g: 1, u: 'u/new1' },
+    ];
+    expect(orderStoreItems(items, seen).map((i) => i.u)).toEqual(['u/new1', 'u/old1', 'u/old2']);
+  });
+
+  it('分組線（g）不被打散：組間維持、組內各自新的在前', () => {
+    const items = [
+      { g: 1, u: 'u/old1' },
+      { g: 2, u: 'u/old2' },
+      { g: 2, u: 'u/new1' },
+    ];
+    expect(orderStoreItems(items, seen).map((i) => i.u)).toEqual(['u/old1', 'u/new1', 'u/old2']);
+  });
+
+  it('帳本沒有的網址（不該發生，防禦）排在最後', () => {
+    const items = [
+      { g: 1, u: 'u/ghost' },
+      { g: 1, u: 'u/old1' },
+    ];
+    expect(orderStoreItems(items, seen).map((i) => i.u)).toEqual(['u/old1', 'u/ghost']);
   });
 });
