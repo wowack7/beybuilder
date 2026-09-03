@@ -39,37 +39,59 @@ const UA =
  * @returns {{createdTime: number, text: string}[]}
  */
 export function parseVoomPosts(html) {
-  const m = html.match(/__NEXT_DATA__[^>]*>(\{[\s\S]*?\})<\/script>/);
-  if (!m) return [];
-  let data;
-  try {
-    data = JSON.parse(m[1]);
-  } catch {
-    return [];
-  }
-  const found = (function walk(o) {
-    if (Array.isArray(o)) {
-      for (const v of o) {
-        const r = walk(v);
-        if (r) return r;
-      }
-      return null;
-    }
-    if (o && typeof o === 'object') {
-      if (Array.isArray(o.posts) && o.posts.length) return o.posts;
-      for (const v of Object.values(o)) {
-        const r = walk(v);
-        if (r) return r;
-      }
-    }
-    return null;
-  })(data.props?.pageProps ?? {});
+  const found = findInPageProps(html, (o) => (Array.isArray(o.posts) && o.posts.length ? o.posts : null));
   return (found ?? [])
     .map((p) => ({
       createdTime: p?.postInfo?.createdTime ?? 0,
       text: p?.contents?.text ?? '',
     }))
     .filter((p) => p.createdTime > 0);
+}
+
+/**
+ * 帳號的公開貼文數（pages[0].socialHomeInfo.basicHomeInfo.postCount）。
+ * 拿來把「帳號沒有公開貼文」跟「SSR 空手而回／改版」分開：前者頁面有回首頁資訊但 postCount 0、
+ * 根本沒有 posts 陣列（2026-09-03 板橋大遠百、南港LaLaport 把舊貼文刪光就是這樣）；
+ * 後者 pages 是 [null]、連 socialHomeInfo 都沒有（@LINE-ID 版頁面），回 null 讓呼叫端當警訊。
+ * @param {string} html
+ * @returns {number | null}
+ */
+export function parseVoomPostCount(html) {
+  const n = findInPageProps(html, (o) => {
+    const c = o.socialHomeInfo?.basicHomeInfo?.postCount;
+    return typeof c === 'number' ? c : null;
+  });
+  return n ?? null;
+}
+
+/** 從 __NEXT_DATA__ 的 pageProps 深處遞迴找第一個讓 pick 回非 null 的物件；頁面沒有 NEXT_DATA 或爛 JSON → null */
+function findInPageProps(html, pick) {
+  const m = html.match(/__NEXT_DATA__[^>]*>(\{[\s\S]*?\})<\/script>/);
+  if (!m) return null;
+  let data;
+  try {
+    data = JSON.parse(m[1]);
+  } catch {
+    return null;
+  }
+  return (function walk(o) {
+    if (Array.isArray(o)) {
+      for (const v of o) {
+        const r = walk(v);
+        if (r !== null) return r;
+      }
+      return null;
+    }
+    if (o && typeof o === 'object') {
+      const hit = pick(o);
+      if (hit !== null) return hit;
+      for (const v of Object.values(o)) {
+        const r = walk(v);
+        if (r !== null) return r;
+      }
+    }
+    return null;
+  })(data.props?.pageProps ?? {});
 }
 
 /**
@@ -145,19 +167,29 @@ async function main() {
   }
   const fresh = [];
   const broken = [];
+  const silent = [];
   for (const [name, url] of stores) {
     let posts;
+    let postCount;
     try {
       const res = await fetch(url, { headers: { 'User-Agent': UA } });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      posts = parseVoomPosts(await res.text());
+      const html = await res.text();
+      posts = parseVoomPosts(html);
+      postCount = parseVoomPostCount(html);
     } catch (e) {
       broken.push(name);
       console.log(`  ${name}: 抓不到（${e.message}）`);
       continue;
     }
     if (!posts.length) {
-      // 頁面活著但挖不出貼文＝LINE 改版的警訊，不能悄悄當成「沒新貼文」
+      if (postCount === 0) {
+        // 帳號活著、SSR 有回首頁資訊，只是一篇公開貼文都沒有（店家把舊貼文刪光）——這家本批得靠上游或 FB
+        silent.push(name);
+        console.log(`  ${name}: 帳號目前沒有公開貼文（postCount 0）`);
+        continue;
+      }
+      // 頁面活著但挖不出貼文、連貼文數都拿不到＝LINE 改版的警訊，不能悄悄當成「沒新貼文」
       broken.push(name);
       console.log(`  ${name}: 頁面有回但解析不到貼文（VOOM 改版？）`);
       continue;
@@ -183,6 +215,7 @@ async function main() {
   const newCount = fresh.length;
   console.log(newCount ? `有新線索的店: ${fresh.join('、')}` : '時間窗內沒有帶抽選線索的新貼文');
   if (dump) console.log(`貼文全文已寫到 ${DATA}/.voom-dump/（一店一檔）`);
+  if (silent.length) console.log(`ℹ 帳號無公開貼文（去上游／FB 粉專查）: ${silent.join('、')}`);
   if (broken.length) console.log(`⚠ 抓不到/解析失敗: ${broken.join('、')}`);
   console.log('🆕 的 code 尚未在正本：查證屬本批後照 draw:fb 的 SOP 補進 source-links.txt 與 mapping.tsv');
 }

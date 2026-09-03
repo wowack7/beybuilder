@@ -9,6 +9,7 @@
  *   npm run draw:fb -- --all   # 看官方表上全部有粉專的店
  *   npm run draw:fb -- --headed --limit=5   # 看得到瀏覽器在做什麼、只掃 5 家（--limit 要用等號）
  *   npm run draw:fb -- --dump               # 另外把每家的貼文全文寫到 data/draw/.fb-dump/
+ *   npm run draw:fb -- --all --dump --parallel=3   # 3 個分頁同時爬（全站 66 家約 6–7 分鐘）
  *
  * --dump 的用途：預設那份摘要只截前 8000 字、也不展開「顯示更多」，
  * 各店的「品名＋逐項抽選連結」清單通常正好落在被截掉的那段。要把品項補進正本，
@@ -33,6 +34,9 @@ const args = process.argv.slice(2);
 const all = args.includes('--all');
 const headed = args.includes('--headed');
 const dump = args.includes('--dump');
+// 同時開幾個分頁爬（同一個登入 profile）。66 家單線要 19 分鐘，排程 session 的 Bash 上限 10 分鐘會被砍；
+// 3 線約 6–7 分鐘。別開太多，FB 會把突發流量當異常
+const parallel = Math.max(1, Number(args.find((a) => a.startsWith('--parallel='))?.split('=')[1] ?? 1) || 1);
 const DUMP_DIR = join(root, DATA, '.fb-dump');
 const limit = Number(args.find((a) => a.startsWith('--limit='))?.split('=')[1] ?? 0) || Infinity;
 
@@ -119,13 +123,12 @@ async function main() {
   }
   const firstRun = !existsSync(PROFILE);
   if (firstRun) mkdirSync(PROFILE, { recursive: true });
-  if (dump) {
-    // 每次重建：留著上一輪的檔會讓「舊批的品項清單」被當成這次新公布的
-    rmSync(DUMP_DIR, { recursive: true, force: true });
-    mkdirSync(DUMP_DIR, { recursive: true });
-  }
 
   console.log(`要掃 ${list.length} 家；設定檔 ${DATA}/.fb-profile${firstRun ? '（第一次，需要登入）' : ''}`);
+  if (existsSync(join(PROFILE, 'SingletonLock'))) {
+    console.error(`⚠️  ${DATA}/.fb-profile 正被另一支 Chrome 使用（SingletonLock 存在）——可能是另一輪 draw:fb 還在跑。等它結束再試，不要 kill 使用者的 Chrome。`);
+    process.exit(2);
+  }
   const ctx = await chromium.launchPersistentContext(PROFILE, {
     channel: 'chrome',            // 用你機器上的 Chrome，不是 Playwright 自帶的
     headless: !headed && !firstRun,
@@ -133,6 +136,13 @@ async function main() {
     locale: 'zh-TW',
   });
   const page = ctx.pages()[0] ?? (await ctx.newPage());
+  if (dump) {
+    // 每次重建：留著上一輪的檔會讓「舊批的品項清單」被當成這次新公布的。
+    // 一定要在瀏覽器成功開起來之後才清：profile 被另一支掃描佔用時 launch 會失敗，
+    // 先清會把那一支正在寫的 dump 整個抹掉（2026-09-03 踩過）
+    rmSync(DUMP_DIR, { recursive: true, force: true });
+    mkdirSync(DUMP_DIR, { recursive: true });
+  }
 
   if (firstRun) {
     await page.goto('https://www.facebook.com/');
@@ -142,8 +152,8 @@ async function main() {
   }
 
   const results = [];
-  for (const [i, t] of list.entries()) {
-    process.stdout.write(`\r  ${i + 1}/${list.length} ${t.store}          `);
+  let done = 0;
+  const scanOne = async (page, t, i) => {
     try {
       await page.goto(t.fb, { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForTimeout(2500);
@@ -167,8 +177,22 @@ async function main() {
     } catch (err) {
       results.push({ ...t, error: String(err).split('\n')[0], found: false });
     }
+    done += 1;
+    process.stdout.write(`\r  ${done}/${list.length} ${t.store}          `);
     await page.waitForTimeout(1500 + Math.floor(2000 * ((i * 7919) % 100) / 100)); // 節流，別狂打
-  }
+  };
+  // N 個 worker 各開一個分頁，從同一條佇列領店家；結果順序不重要（最後照 list 順序整理）
+  const queue = list.map((t, i) => [t, i]);
+  const workers = Array.from({ length: Math.min(parallel, list.length) }, async (_, w) => {
+    const pg = w === 0 ? page : await ctx.newPage();
+    for (;;) {
+      const next = queue.shift();
+      if (!next) break;
+      await scanOne(pg, next[0], next[1]);
+    }
+  });
+  await Promise.all(workers);
+  results.sort((a, b) => list.indexOf(list.find((t) => t.store === a.store)) - list.indexOf(list.find((t) => t.store === b.store)));
   await ctx.close();
   console.log('\n');
 

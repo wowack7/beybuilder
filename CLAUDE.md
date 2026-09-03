@@ -61,7 +61,10 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   是 draw:fb 的輕量姊妹作。各店券連結常比上游早半天發在 VOOM（2026-08-28 實測收到 3 家隔日券）。
   只讀不寫：印出「品項×lin.ee」配對並標 🆕（正本沒有的 code），補檔照 draw:fb 的 SOP。
   涵蓋限制：homeId 反查不到（@LINE-ID 版 SSR 不帶貼文、getPosts API 未登入拿不到），
-  `voom.tsv` 只能人工擴充；「頁面有回但解析不到貼文」是 VOOM 改版警訊，不是沒新貼文
+  `voom.tsv` 只能人工擴充；「頁面有回但解析不到貼文」是 VOOM 改版警訊，不是沒新貼文。
+  另一種是「帳號目前沒有公開貼文（postCount 0）」——帳號活著、SSR 有回首頁資訊，只是店家把
+  舊貼文刪光了（2026-09-03 板橋大遠百、南港LaLaport），這家本批得靠上游或 FB 粉專，不是警訊；
+  兩者用 `parseVoomPostCount` 分開（@LINE-ID 頁 pages=[null] 連貼文數都沒有 → null → 警訊）
 - **TG 通知**：`scripts/draw-notify.mjs`——站上多了新的「店×品項×券」就發一則到戰鬥陀螺補貨群
   （與 funbox-bot 專案共用 bot 與群組；token/chat_id 的唯一來源是 funbox-bot 的 config.json，
   本репо只放 gitignored 指標檔 `data/draw/notify.local.json`）。狀態檔 `.notify-state.json` 記
