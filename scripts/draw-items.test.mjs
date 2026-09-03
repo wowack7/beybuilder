@@ -93,9 +93,18 @@ describe('真實正本：一致化不得吃掉開賣時間', () => {
     return /^https?:\/\//.test((L[i + 1] ?? '').trim());
   }).map((l) => l.trim());
 
+  // 換批期間正本可能暫時一筆帶註記的品名都沒有（舊批清成 @待公布、新批還沒有晚開賣的品項）。
+  // 這時不能讓測試因「沒樣本」紅燈，也不能讓它變成沒牙——退回固定樣本，沿用 2026-08-28 踩坑當天的真實寫法。
+  const FALLBACK_NOTED = [
+    'UX-21 惡魔冥界改造組（8/29 11:00才開始）',
+    'BX-00 蒼龍神劍（8/29 11:00才開始）',
+    'CX-13 龍王閃擊 (9/5 10:30開賣)',
+  ];
+
   it('每個帶時間註記的品名，一致化後註記還在', () => {
     const noteRe = /[（(][^）)]*(?:才開始|開賣)[^）)]*[）)]/;
-    const withNote = names.filter((n) => noteRe.test(n));
+    const inSource = names.filter((n) => noteRe.test(n));
+    const withNote = inSource.length ? inSource : FALLBACK_NOTED;
     expect(withNote.length).toBeGreaterThan(0);
     const lost = withNote.filter((n) => {
       const out = normalizeItemName(n, map) ?? n;
