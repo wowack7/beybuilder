@@ -338,9 +338,12 @@ while (i < lines.length) {
   if (added.length || dropped.length)
     changed.push({ store, added: added.length, gone: dropped.length, kept: keep.length });
 
+  // 同一批次裡正本已經有的連結，品名以正本為準：上游偶爾把型號打錯（新店誠品把 BXG-01 烈焰飛鳳
+  // 寫成 BX-00），人工在正本改對之後，下一輪 sync 不能再用上游原文洗回去。新連結才用上游的品名。
+  const prevName = sameRound ? new Map(prev.map(([n, u]) => [u, n])) : new Map();
   out.push(`[${store}]`);
   if (mark) out.push(mark);
-  for (const [n, u] of up.items) out.push(n, u);
+  for (const [n, u] of up.items) out.push(prevName.get(u) ?? n, u);
   for (const [n, u] of keep) out.push(n, u);
   out.push('');
   byStore.delete(store);
