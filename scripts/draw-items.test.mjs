@@ -72,6 +72,34 @@ describe('normalizeItemName', () => {
   });
 });
 
+describe('無型號品項：用原文全名當鍵', () => {
+  // 2026-09-03 踩過：新店誠品把孩之寶聯名整系列寫成純中文「孩之寶系列（依照賣場實際款式為主）」，
+  // tagOf 抽不出型號（開頭不是英數）→ 舊版 normalizeItemName 在查表前就 return null，
+  // 於是 build 印「請補進 item_names.tsv」但補了完全無效。全名鍵是這類品項唯一的入口。
+  const map = parseItemNames([
+    ['BXG', 'BXG系列 孩之寶聯名款'],
+    ['孩之寶系列（依照賣場實際款式為主）', 'BXG系列 孩之寶聯名款'],
+  ]);
+
+  it('tagOf 抽不出型號時，用原文全名查到標準品名', () => {
+    expect(normalizeItemName('孩之寶系列（依照賣場實際款式為主）', map))
+      .toBe('BXG系列 孩之寶聯名款');
+  });
+
+  it('全名鍵仍保留開賣時間註記', () => {
+    expect(normalizeItemName('孩之寶系列（依照賣場實際款式為主）（9/5 10:00才開始）', map))
+      .toBe('BXG系列 孩之寶聯名款（9/5 10:00才開始）');
+  });
+
+  it('全名也不在表裡才回 null', () => {
+    expect(normalizeItemName('某某限定組合包', map)).toBeNull();
+  });
+
+  it('有型號且型號在表裡時，型號優先（不被全名鍵影響）', () => {
+    expect(normalizeItemName('BXG系列 孩之寶聯名款 $350', map)).toBe('BXG系列 孩之寶聯名款');
+  });
+});
+
 describe('開賣時間註記', () => {
   const map = parseItemNames([['UX-21', 'UX-21 惡魔冥界改造組']]);
 
@@ -137,8 +165,23 @@ describe('item_names.tsv 正本', () => {
     expect(() => parseItemNames(rows)).not.toThrow();
   });
 
-  it('標準品名的型號前綴要跟鍵一致', () => {
-    for (const [tag, std] of rows) expect(tagOf(std)).toBe(tag.trim().toUpperCase());
+  // 兩種鍵各有各的不變式：型號鍵要求標準品名的型號前綴跟鍵一字不差；
+  // 全名鍵（純中文原文，tagOf 抽不出型號）本來就不可能前綴相等，
+  // 改為要求它指向的標準品名必須落在某個已收錄的型號鍵上，避免全名鍵指到沒人管的名字。
+  it('型號鍵：標準品名的型號前綴要跟鍵一致', () => {
+    for (const [tag, std] of rows) {
+      const key = tag.trim().toUpperCase();
+      if (tagOf(key) === null) continue; // 全名鍵，下一個 it 檢查
+      expect(tagOf(std)).toBe(key);
+    }
+  });
+
+  it('全名鍵：標準品名要落在已收錄的型號鍵上', () => {
+    const modelKeys = new Set(
+      rows.map(([t]) => t.trim().toUpperCase()).filter((k) => tagOf(k) !== null),
+    );
+    const fullNameKeys = rows.filter(([t]) => tagOf(t.trim().toUpperCase()) === null);
+    for (const [, std] of fullNameKeys) expect(modelKeys).toContain(tagOf(std));
   });
 
   it('標準品名本身不能夾帶價格', () => {

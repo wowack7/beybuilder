@@ -58,17 +58,37 @@ export function parseItemNames(rows) {
 const TIME_NOTE_RE = /[（(][^）)]*(?:才開始|開始|開賣|\d{1,2}:\d{2}|\d{1,2}\/\d{1,2})[^）)]*[）)]/g;
 
 /**
- * 各店原文 → 標準品名（保留開賣時間註記）。型號不在表裡就回傳 null，
+ * 找出這個原文該用 item_names.tsv 的哪個鍵：先型號，再退原文全名。
+ * 為什麼要有全名鍵：有些品項整個沒有型號（新店誠品的「孩之寶系列（依照賣場實際款式為主）」
+ * 是整系列款、開頭就是中文），tagOf 一定回 null，只靠型號鍵永遠進不了表——
+ * 而 build 的提示又叫人「補一列進 item_names.tsv」，補了卻無效。
+ * 全名鍵先試原文、再試去掉開賣時間註記後的版本，讓同一列同時吃得到
+ * 「孩之寶系列（…）」與「孩之寶系列（…）（9/5 10:00才開始）」。
+ * @param {string} name
+ * @param {Map<string, string>} map
+ * @returns {string|null}
+ */
+function keyOf(name, map) {
+  const tag = tagOf(name);
+  if (tag && map.has(tag)) return tag;
+  const raw = String(name).trim().toUpperCase();
+  if (map.has(raw)) return raw;
+  const stripped = String(name).replace(TIME_NOTE_RE, '').trim().toUpperCase();
+  return map.has(stripped) ? stripped : null;
+}
+
+/**
+ * 各店原文 → 標準品名（保留開賣時間註記）。型號與原文全名都不在表裡就回傳 null，
  * 由呼叫端決定沿用原文並回報。
  * @param {string} name
  * @param {Map<string, string>} map
  * @returns {string|null}
  */
 export function normalizeItemName(name, map) {
-  const tag = tagOf(name);
-  if (!tag || !map.has(tag)) return null;
+  const key = keyOf(name, map);
+  if (!key) return null;
   const notes = String(name).match(TIME_NOTE_RE) ?? [];
-  return map.get(tag) + notes.join('');
+  return map.get(key) + notes.join('');
 }
 
 /**

@@ -132,7 +132,16 @@ const items = rawItems.map((i) => ({ ...i, n: normalizeItemName(i.n, stdNames) ?
 const renamed = rawItems.filter((i, idx) => i.n !== items[idx].n).length;
 const unlisted = [...new Set(rawItems.filter((i) => !normalizeItemName(i.n, stdNames)).map((i) => tagOf(i.n) ?? i.n))];
 console.log(`品名一致化: ${renamed}/${items.length} 筆換成標準品名`);
-console.log(`未收錄型號: ${unlisted.length}${unlisted.length ? ' → ' + unlisted.join(', ') + '（沿用原文，請補進 data/draw/item_names.tsv）' : ''}`);
+// 提示要分兩種鍵：有型號的補型號列，整個沒型號的（印出來就是中文原文）只能補原文全名列——
+// 舊版一律說「請補進」，對無型號品項補型號列是補不進去的（2026-09-03 踩過）
+console.log(
+  `未收錄型號: ${unlisted.length}` +
+    (unlisted.length
+      ? ' → ' +
+        unlisted.join(', ') +
+        '（沿用原文，請補進 data/draw/item_names.tsv；抽不出型號的品項用原文全名當鍵）'
+      : ''),
+);
 
 // --- 新品項排上面 ---
 // data/draw/item_seen.tsv 是「每條券連結第一次進正本的時間」帳本，build 自動維護：
