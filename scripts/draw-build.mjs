@@ -151,16 +151,6 @@ const seenAt = new Map(readTsv(`${DATA}/item_seen.tsv`).map(([u, t]) => [u, t]))
   }
   console.log(`新品項帳本: 本次新進 ${unseen.length} 筆`);
 }
-{
-  // 依店重排（店的先後不動，動的是每家店內的順序）
-  const byStore = new Map();
-  for (const i of items) {
-    if (!byStore.has(i.s)) byStore.set(i.s, []);
-    byStore.get(i.s).push(i);
-  }
-  items.length = 0;
-  for (const group of byStore.values()) items.push(...orderStoreItems(group, seenAt));
-}
 
 // 驗證：筆數、同店重複、liff 覆蓋率
 // 跨店重複是合法的：同一場抽選可被兩家店同時列出（例：忠孝SOGO／北車地下街 共用 oDYlc3w）
@@ -232,9 +222,40 @@ for (const p of products) {
   const tier = p.tier ?? '';
   if (!(tag in tierByTag) || tierRank(tier) < tierRank(tierByTag[tag])) tierByTag[tag] = tier;
 }
+// 品名鍵（BX-00 蒼龍神劍）：products.json 沒有這種鍵，改用「刃名」去對——同名戰刃（含重塗／特別版）取最高階。
+// 對不到刃名就退回純型號（BX-00 那些聯名款），再對不到＝配件。
+const tierByBlade = {};
+for (const p of products) {
+  const blade = String(p.name ?? '').match(/^([\u4e00-\u9fff]+)/)?.[1];
+  if (!blade) continue;
+  const tier = p.tier ?? '';
+  if (!(blade in tierByBlade) || tierRank(tier) < tierRank(tierByBlade[blade])) tierByBlade[blade] = tier;
+}
+const tierForTag = (t) => {
+  if (t in tierByTag) return tierByTag[t];
+  const [model, blade] = t.split(' ');
+  if (blade && blade in tierByBlade) return tierByBlade[blade];
+  return model in tierByTag ? tierByTag[model] : undefined;
+};
 // 只夾帶這批清單用得到的型號：data.js 是 LINE 內建瀏覽器要秒開的檔案
 const usedTags = [...new Set(items.map((i) => tagOf(i.n)).filter(Boolean))];
-const tiers = Object.fromEntries(usedTags.filter((t) => t in tierByTag).map((t) => [t, tierByTag[t]]));
+const tiers = Object.fromEntries(usedTags.filter((t) => tierForTag(t) !== undefined).map((t) => [t, tierForTag(t)]));
+{
+  // 依店重排（店的先後不動，動的是每家店內的順序）：先看首次出現時間（新的在上），
+  // 同一時間進來的再依天梯——整批同時上線時強的在前、未評級陀螺其次、配件殿後
+  const rankOf = (it) => {
+    const t = tagOf(it.n);
+    if (!t || !(t in tiers)) return TIER_ORDER.length + 1; // 配件
+    return tiers[t] ? tierRank(tiers[t]) : TIER_ORDER.length; // 未評級陀螺
+  };
+  const byStore = new Map();
+  for (const i of items) {
+    if (!byStore.has(i.s)) byStore.set(i.s, []);
+    byStore.get(i.s).push(i);
+  }
+  items.length = 0;
+  for (const group of byStore.values()) items.push(...orderStoreItems(group, seenAt, rankOf));
+}
 const rated = usedTags.filter((t) => tiers[t]);
 console.log(
   `型號 ${usedTags.length} 種：有階級 ${rated.length}` +

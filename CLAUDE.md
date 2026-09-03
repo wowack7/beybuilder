@@ -98,8 +98,9 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   27 筆 UX-21 的開賣時間被整批洗掉，`draw-items.test.mjs` 拿真實正本比對，再犯就紅燈
 - **新品項排上面**：`data/draw/item_seen.tsv` 記每條券連結第一次進正本的時間（帳本，
   初始由 git 歷史回填），`draw-build` 自動維護：沒見過的網址以 build 當下時間補進帳本、
-  跟著 commit。每家店內品項依「第一次出現時間新→舊」排（分組線 g 不打散、同時間保持原序，
-  `orderStoreItems` 在 draw-items.mjs）。理由：正本與 sync 都是新資料 append 在後，
+  跟著 commit。每家店內品項依「第一次出現時間新→舊」排，**同一時間進來的再依天梯**
+  （整批同時上線時強的在前、配件殿後；分組線 g 不打散、同時間同階保持原序，
+  `orderStoreItems(items, seenAt, rankOf)` 在 draw-items.mjs，rankOf 由 build 端用 `tiers` 算）。理由：正本與 sync 都是新資料 append 在後，
   不排的話當天熱門新品永遠沉在每家店最底下
 - **作廢短址**：`data/draw/link_drops.tsv` 是**唯一能讓 sync 拒收某條上游連結的地方**。
   因為同批取聯集，光在正本把連結改掉，下一輪 `draw:sync --write` 會把上游那條併回來、
@@ -135,7 +136,9 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   一度縣市／店家用綠、品項用紫，等於同一個綠既表示「正在篩選」又表示「這裡可以點去抽」
 - 列上的按鈕字是**「抽籤」**（說明彈窗那句「點『抽籤』…」引用的是它，改名要一起改）；
   篩選比對：搜尋吃品名，品項只認型號編號（名字要靠搜尋），型號由品名前綴自動抓
-  （`BX-51`／`BXG`）。三個維度都可複選（OR），空＝全部，網址 `?c=台北市,新北市&s=&i=&q=`
+  （`BX-51`／`BXG`）。**00 是多顆共用的特別版型號**（BX-00 同時有暴風天馬與蒼龍神劍），
+  鍵加掛品名成 `BX-00 蒼龍神劍`／`BX-00 暴風天馬`（tagOf 取型號後第一段中文；
+  階級用刃名對 products.json，對不到退回純型號）。三個維度都可複選（OR），空＝全部，網址 `?c=台北市,新北市&s=&i=&q=`
   可分享，舊的單值連結 split 後是一元陣列照樣相容
 - **品項依天梯排序**：有階級的照 `X>S+>…>E`，其次是未評級的陀螺，發射器／收納盒等非陀螺配件殿後。
   型號→階級由 `draw-build.mjs` 從 `src/data/products.json` 併進 `data.js` 的 `tiers`

@@ -16,7 +16,19 @@ describe('tagOf', () => {
 
   it('不把後綴數字吃進型號', () => {
     expect(tagOf('BX-35-04')).toBe('BX-35');
-    expect(tagOf('BX-00 暴風天馬3-70RA')).toBe('BX-00');
+    expect(tagOf('BX-35 隨機強化組Vol.04')).toBe('BX-35');
+  });
+
+  it('BX-00 是多顆共用的特別版型號，鍵要加掛品名才分得開', () => {
+    expect(tagOf('BX-00 蒼龍神劍3-60F V2')).toBe('BX-00 蒼龍神劍');
+    expect(tagOf('BX-00 蒼龍神劍 3-60F Ver.2')).toBe('BX-00 蒼龍神劍');
+    expect(tagOf('BX-00蒼龍神劍')).toBe('BX-00 蒼龍神劍');
+    expect(tagOf('BX-00 暴風天馬3-70RA')).toBe('BX-00 暴風天馬');
+    expect(tagOf('BX-00 暴風天馬')).toBe('BX-00 暴風天馬');
+    // 只有 00 這樣做：一般型號一號一品，鍵仍是純型號
+    expect(tagOf('BX-45 武士魂斬')).toBe('BX-45');
+    // 品名抓不到（只有型號）就退回純型號
+    expect(tagOf('BX-00')).toBe('BX-00');
   });
 
   it('抓不到編號就退成純字母，完全抓不到就 null', () => {
@@ -157,6 +169,17 @@ describe('orderStoreItems', () => {
       { g: 2, u: 'u/new1' },
     ];
     expect(orderStoreItems(items, seen).map((i) => i.u)).toEqual(['u/old1', 'u/new1', 'u/old2']);
+  });
+
+  it('同一時間進來的品項，依 rankOf（天梯）排；時間仍是第一鍵', () => {
+    const rank = (it) => ({ 'u/old1': 5, 'u/old2': 1, 'u/new1': 9 })[it.u];
+    const items = [
+      { g: 1, u: 'u/old1' },
+      { g: 1, u: 'u/old2' },
+      { g: 1, u: 'u/new1' },
+    ];
+    // new1 最新所以最前（即使天梯最差）；old1/old2 同時間，old2 天梯較好排前
+    expect(orderStoreItems(items, seen, rank).map((i) => i.u)).toEqual(['u/new1', 'u/old2', 'u/old1']);
   });
 
   it('帳本沒有的網址（不該發生，防禦）排在最後', () => {

@@ -10,7 +10,16 @@
  */
 export function tagOf(name) {
   const m = String(name).match(/^([A-Za-z]+)[-\s]?(\d{1,3})(?![0-9])/);
-  if (m) return (m[1] + '-' + m[2]).toUpperCase();
+  if (m) {
+    const tag = (m[1] + '-' + m[2]).toUpperCase();
+    // 00 是「特別版／限定」共用的型號：BX-00 同時有暴風天馬與蒼龍神劍，光看型號分不開，
+    // 篩選籤與階級都會混成一顆。鍵加掛品名（型號後第一段中文），抓不到品名就退回純型號。
+    if (m[2] === '00') {
+      const blade = String(name).slice(m[0].length).match(/^\s*([\u4e00-\u9fff]+)/);
+      if (blade) return `${tag} ${blade[1]}`;
+    }
+    return tag;
+  }
   const f = String(name).match(/^([A-Za-z]+)/);
   return f ? f[1].toUpperCase() : null;
 }
@@ -69,9 +78,13 @@ export function normalizeItemName(name, map) {
  * @param {{g: number, u: string, r?: string}[]} storeItems 同一家店的品項（原始順序；帳本鍵用正本原始網址 r，沒有才退 u）
  * @param {Map<string, string>} seenAt 網址 → 'YYYY-MM-DD HH:MM'
  */
-export function orderStoreItems(storeItems, seenAt) {
+/**
+ * @param rankOf 同一時間進來的品項再依這個排（小的在前）——build 端傳天梯階級，
+ *   讓整批同時上線時強的在前、配件殿後，而不是照上游原順序。沒傳＝只看時間與原序。
+ */
+export function orderStoreItems(storeItems, seenAt, rankOf = () => 0) {
   return storeItems
-    .map((it, idx) => ({ it, idx, ts: seenAt.get(it.r ?? it.u) ?? '' }))
-    .sort((a, b) => a.it.g - b.it.g || (a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0) || a.idx - b.idx)
+    .map((it, idx) => ({ it, idx, ts: seenAt.get(it.r ?? it.u) ?? '', rk: rankOf(it) }))
+    .sort((a, b) => a.it.g - b.it.g || (a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0) || a.rk - b.rk || a.idx - b.idx)
     .map((x) => x.it);
 }
