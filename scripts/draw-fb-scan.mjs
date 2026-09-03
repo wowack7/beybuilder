@@ -56,18 +56,19 @@ export function extractLeads(text) {
  * 不展開的話 innerText 只到「…顯示更多」為止，品名一個都拿不到。
  */
 async function readFullPosts(page) {
+  // 在頁內一次點完：一頁有幾百顆 role=button，逐顆用 Playwright 讀 innerText 是幾百次 round-trip，
+  // 實測一家要 30 秒以上；改成 evaluate 一趟做完，整家壓到十幾秒
   for (let round = 0; round < 3; round++) {
-    const buttons = await page.$$('div[role="button"]');
-    let clicked = 0;
-    for (const b of buttons) {
-      const label = (await b.innerText().catch(() => '')).trim();
-      if (label === '顯示更多' || label === '查看更多' || label === 'See more') {
-        await b.click({ timeout: 2000 }).catch(() => {}); // 展不開就算了，別讓整支掛掉
-        clicked++;
+    const clicked = await page.evaluate(() => {
+      const wanted = new Set(['顯示更多', '查看更多', 'See more']);
+      let n = 0;
+      for (const b of document.querySelectorAll('div[role="button"]')) {
+        if (wanted.has((b.innerText || '').trim())) { b.click(); n++; }
       }
-    }
+      return n;
+    });
     if (!clicked) break;
-    await page.waitForTimeout(1200);
+    await page.waitForTimeout(1000);
   }
   const text = await page.evaluate(() => document.body.innerText);
   // FB 會把外連包成 l.facebook.com/l.php?u=<encoded>，所以連 href 一起收、解碼後再撈短址
@@ -150,7 +151,7 @@ async function main() {
       await page.waitForTimeout(1500);
       if (dump) {
         // --dump 要看到品項清單，所以多捲幾頁、展開「顯示更多」，全文落檔
-        for (let s = 0; s < 3; s++) { await page.mouse.wheel(0, 1800); await page.waitForTimeout(1000); }
+        for (let s = 0; s < 2; s++) { await page.mouse.wheel(0, 1800); await page.waitForTimeout(800); }
         const full = await readFullPosts(page);
         const loginWall = /登入|Log in to Facebook/.test(full.text) && full.text.length < 1200;
         writeFileSync(
