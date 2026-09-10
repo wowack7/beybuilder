@@ -1239,7 +1239,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       return m.p && inCity(m) && (!state.s.length || state.s.indexOf(m.n) !== -1);
     });
     // 整修中的店沒有品項，在清單裡等於不存在。不寫這一行，住附近的人會以為只是還沒公布、天天回來刷。
-    var closed = DATA.stores.filter(function (m) { return m.x && inCity(m); });
+    // 只在明確選了它的縣市時才寫：沒選縣市（全部）或選別縣市的店時，這行跟使用者無關（用戶 2026-09-10）
+    var closed = DATA.stores.filter(function (m) { return m.x && state.c.indexOf(m.c) !== -1; });
     if (list.length === 0 && closed.length === 0) return;
 
     var sec = el('section', 'pending');
