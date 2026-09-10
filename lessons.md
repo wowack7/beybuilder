@@ -116,3 +116,13 @@
 - 症狀樣貌：手動在終端跑一切正常，排程／hook／CI 這類非互動情境才炸，且錯誤看起來像「腳本壞了」而不是「Node 版本不對」。
 - 解（當次）：`export PATH="$HOME/.nvm/versions/node/v24.15.0/bin:$PATH"` 後再跑。長久解是在 `scripts/*.mjs` 或 package.json 加 `engines` 檢查，或排程指令前置固定 PATH。
 - 通則：**排程／hook 的 shell 不等於你的終端**。任何靠 nvm/pyenv/rbenv 之類版本管理器的工具，在非互動情境都要顯式指定路徑，別假設 `node` 是哪一版。
+
+## L15 「回到這頁」不一定有 pageshow——LINE 開 liff 連結可能沒卸載原頁（2026-09-11）
+
+- tags: draw, line, webview, pageshow, bfcache
+- 坑：`/draw/` 全力抽選模式第一版只在 `pageshow` 重畫來藏剛抽的那筆，理由是「點抽籤是同分頁跳走，回來一定有 pageshow（首次載入、整頁重載、bfcache 都會觸發）」。ad hoc Playwright 腳本（repo 未收）用 `goBack()` 測也全綠。上線當天用戶實機回報：開啟模式、點抽籤、回到畫面，已抽的還在。
+- 推測原因（未實機逐項確認）：LINE 內建瀏覽器點 `liff.line.me` 時可能是另開一層 LIFF 視窗疊在上面，原頁沒被卸載，關掉 LIFF 回來時沒有 `pageshow`。桌機模擬的 `goBack()` 永遠會觸發 pageshow，所以測不出來。
+- 解：點擊後自己排計時器重畫，不依賴任何「回來」事件；頁面被蓋住（`visibilitychange` hidden）時立刻重畫。ad hoc Playwright 腳本（repo 未收）在 capture 階段 `preventDefault` 擋導航模擬「頁面沒離開」：舊版 FAIL、新版 PASS。
+- 二次坑（修法抗辯抓到）：①延遲一開始設 700ms——頁面還看得見時收掉那列，下一列補到手指下，連線慢時不耐煩再點一下就點到別家的券（實測 750ms 再點同座標會標到下一筆），改 2 秒，並讓「被蓋住的當下」先藏；②回前景重讀 localStorage 時，讀失敗（無痕／擋 site data）回傳空值會把記憶體裡剛抽的洗掉、連模式都關掉——讀失敗要回 null、呼叫端沿用記憶體。
+- 三次坑（第二輪抗辯）：2 秒照樣中——同分頁**慢速導航**時 `visibilitychange`／`pagehide` 都不發（要等新文件 commit 才 unload，只有 `beforeunload`），計時器仍在看得見時收列。連兩輪都是「調延遲」＝方法錯，改成用 `beforeunload` 辨識「正在跳走」並把收合延到 10 秒；計時器只剩「頁面沒離開、被 LIFF 蓋住」這條路在用（那時沒人看得到清單在動）。
+- 通則：**在 LINE／App 內建 WebView 裡，不要把「使用者回到這頁」綁在單一生命週期事件上**。狀態變化發生在自己頁面的點擊當下，就在當下（或延遲後）處理；回前景事件只當補強。會讓清單在手指下位移的重畫，要挑使用者看不到的時機做。

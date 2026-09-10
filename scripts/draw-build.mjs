@@ -10,6 +10,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isLinkLine } from './draw-links.mjs';
 import { normalizeItemName, orderStoreItems, parseItemNames, tagOf } from './draw-items.mjs';
+import { applyCityOrder, attachStartTimes, parseCityOrder } from './draw-stores.mjs';
 import { TIER_ORDER } from '../src/lib/transform.ts';
 import { GA_ID } from '../src/lib/analytics.ts';
 import { DRAW_PATH, SITE_URL } from '../src/lib/site.ts';
@@ -178,7 +179,7 @@ if (items.length !== urlLines) throw new Error(`正本有 ${urlLines} 行網址�
 if (dupes.length > 0) throw new Error('同一店家有重複 URL');
 
 // 店家清單＋距離排序（含尚未公布、目前沒有品項的店）
-const stores = declared.map(({ n, c }) => {
+let stores = declared.map(({ n, c }) => {
   const co = coords.get(n);
   // 體感調整（data/draw/stores.tsv 第 6 欄）：捷運直達的拉近、要轉線的推遠；夾在 0 以上避免變負數
   const d = co ? Math.max(0, Math.min(...anchors.map((a) => km(a, co))) + co.bias) : null;
@@ -194,6 +195,12 @@ stores.sort((a, b) => {
   if (b._d === null) return -1;
   return a._d - b._d;
 });
+// 人工表：縣市內指定先後（store_order.tsv）＋晚開始時間（start_times.tsv），對不到店名就 throw
+stores = attachStartTimes(
+  applyCityOrder(stores, parseCityOrder(readTsv(`${DATA}/store_order.tsv`))),
+  readTsv(`${DATA}/start_times.tsv`),
+);
+console.log(`晚開始: ${stores.filter((s) => s.t).map((s) => `${s.n} ${s.t}`).join(', ') || '無'}`);
 const noCoords = stores.filter((s) => s._d === null);
 console.log(`無座標店家: ${noCoords.length}${noCoords.length ? ' → ' + noCoords.map((s) => s.n).join(', ') : ''}`);
 const noRound = stores.filter((s) => !s.rs && !s.p && !s.x);
@@ -211,7 +218,7 @@ const byRound = {};
 const roundKey = (s) => (s.x ? '整修中' : s.p ? '待公布' : s.rs ?? '(無)');
 for (const s of stores) byRound[roundKey(s)] = (byRound[roundKey(s)] || 0) + 1;
 console.log('批次分佈: ' + Object.entries(byRound).map(([k, v]) => `${k} ${v}家`).join(' / '));
-console.log('最近三家: ' + stores.slice(0, 3).map((s) => `${s.n} ${s._d}km`).join(' / '));
+console.log('排序前三家: ' + stores.slice(0, 3).map((s) => `${s.n} ${s._d}km`).join(' / '));
 
 // --- 型號 → 天梯階級（頁面上的商品籤依此排序：強的在前、配件殿後） ---
 // 鍵的算法必須與 index.html 的 tagOf() 一致（那邊吃品名、這邊吃 products.json 的型號）。
