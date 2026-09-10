@@ -14,7 +14,7 @@ BX-00 蒼龍神劍V2（$350）
 https://lin.ee/yxZblNk
 BX-26 獨角刺心（$295）
 https://lin.ee/Pxw2I5hu
-CX-00 福音戰士改造組（$1,395）
+CX-00 新世紀福音戰士改造組（$1,395）
 https://lin.ee/rFVhsbI
 CX-13 龍王閃擊（$495）
 https://lin.ee/rU3f6Ng
@@ -300,7 +300,7 @@ CX-13 龍王閃擊（$495）
 https://lin.ee/WZcKHxw
 BXG-01 烈焰飛鳳S（$350）
 https://lin.ee/NoxUMlh
-BGX-04 銀牙烈虎S（$350）
+BXG-04 銀牙烈虎S（$350）
 https://lin.ee/TOclMv8
 
 [享平方]
@@ -368,7 +368,7 @@ https://lin.ee/8lrmbQT
 
 [麗寶一期]
 @2026-09-11~2026-09-12
-BX-00 新福音戰士（改造組）（$350）
+CX-00 新世紀福音戰士改造組（$350）
 https://lin.ee/nFb30Ey
 BX-00 蒼龍神劍（$350）
 https://lin.ee/UVyu6GN
