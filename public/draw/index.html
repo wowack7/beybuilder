@@ -908,6 +908,9 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   var cityCounts = {};
   DATA.items.forEach(function (it) { cityCounts[it.c] = (cityCounts[it.c] || 0) + 1; });
   DATA.stores.forEach(function (m) { if (!(m.c in cityCounts)) cityCounts[m.c] = 0; });
+  // 篩選可選的店：整修中的這批不可能公布，其餘（含待公布、還沒有品項的店）都要列——
+  // 換批期間大部分店都沒品項，只列有品項的店就沒辦法先把常去的店存成條件，等公布再一鍵套回
+  function isOpen(s) { return !storeMeta[s].x; }
 
   var TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
 
@@ -1040,7 +1043,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       label.appendChild(el('span', 'opt-tag', o.value));
       if (o.badge !== undefined)
         label.appendChild(el('span', 'opt-tier' + (o.badge ? '' : ' none'), o.badge || '—'));
-      label.appendChild(el('span', 'opt-n', String(o.count)));
+      label.appendChild(el('span', 'opt-n', o.count ? String(o.count) : '待公布'));
       panel.appendChild(label);
     });
   }
@@ -1049,8 +1052,10 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     renderPicker({
       key: 'city',
       label: '縣市',
-      // 沒有品項的縣市不列：選了也是空清單，只是佔位子
-      options: cityOrder.filter(function (c) { return cityCounts[c]; })
+      // 只有整修中店家的縣市不列；還沒公布的照列（理由見 isOpen）
+      options: cityOrder.filter(function (c) {
+        return storeOrder.some(function (s) { return isOpen(s) && storeMeta[s].c === c; });
+      })
         .map(function (c) { return { value: c, count: cityCounts[c] }; }),
       selected: state.c,
       onClear: function () {
@@ -1070,9 +1075,9 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       },
     });
 
-    // 店家只列出目前縣市底下、且真的有品項的店，依距離近→遠
+    // 店家列出目前縣市底下、非整修中的店（含還沒公布的，理由見 isOpen），依距離近→遠
     var shown = storeOrder.filter(function (s) {
-      return storeCounts[s] && (!state.c.length || state.c.indexOf(storeMeta[s].c) !== -1);
+      return isOpen(s) && (!state.c.length || state.c.indexOf(storeMeta[s].c) !== -1);
     });
     renderPicker({
       key: 'store',
@@ -1142,7 +1147,13 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     // 有下任何篩選卻篩不到東西才提示；沒篩選時的空清單交給下面的「尚未公布」名單說明
     var filtering = !!(state.q || state.i.length || state.c.length || state.s.length);
     if (visible.length === 0) {
-      if (filtering) main.appendChild(el('p', 'empty', '沒有符合的品項，換個關鍵字或型號試試。'));
+      if (filtering) {
+        // 選的店全都還沒公布：不是條件下錯，別叫人換關鍵字
+        var allPending = state.s.length && state.s.every(function (s) { return !storeCounts[s]; });
+        main.appendChild(el('p', 'empty', allPending
+          ? '選的店還沒公布新一批，公布後會自動出現在這裡。'
+          : '沒有符合的品項，換個關鍵字或型號試試。'));
+      }
       if (!state.q) renderPending();
       return;
     }
@@ -1224,7 +1235,9 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   function renderPending() {
     var main = document.getElementById('list');
     var inCity = function (m) { return !state.c.length || state.c.indexOf(m.c) !== -1; };
-    var list = DATA.stores.filter(function (m) { return m.p && inCity(m); });
+    var list = DATA.stores.filter(function (m) {
+      return m.p && inCity(m) && (!state.s.length || state.s.indexOf(m.n) !== -1);
+    });
     // 整修中的店沒有品項，在清單裡等於不存在。不寫這一行，住附近的人會以為只是還沒公布、天天回來刷。
     var closed = DATA.stores.filter(function (m) { return m.x && inCity(m); });
     if (list.length === 0 && closed.length === 0) return;
