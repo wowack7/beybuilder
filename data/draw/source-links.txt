@@ -60,62 +60,38 @@ https://lin.ee/xO0pNXN
 @待公布
 
 [忠孝SOGO]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍（$350）
-https://lin.ee/ZxPrRKL
-BX-18 X旋風發射器 【右迴旋】（$250）
-https://lin.ee/rYCfiRS
+https://lin.ee/Q3x58xY
 BX-37 雙重極限衝擊戰鬥盤 豪華組（$2,750）
-https://lin.ee/z17m9mM1
-BX-45 武士魂斬（$325）
-https://lin.ee/785PX2p
-BX-51 旋風發射器 黑綠（$250）
-https://lin.ee/tldmGpM
-UX-02 惡魔戰錘（$395）
-https://lin.ee/wSof0Vt
-UX-20 榮耀武神（$595）
-https://lin.ee/89pxHTa
-UX-21 惡魔幽冥改造組（$895）
-https://lin.ee/ryTwnfS
-CX-13 龍王閃擊（$495）
-https://lin.ee/X0ssk1w
+https://lin.ee/6myV5gy
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/Teeti1U
 
 [三越站前]
-@2026-09-04~2026-09-05
-BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/YPG2HJk
-UX-20 榮耀武神（$595）
-https://lin.ee/vYDc43J
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/pyNpoPN
-CX-13 龍王閃擊（$495）
-https://lin.ee/OVePkZs
+@2026-09-11~2026-09-12
+CX-00 新世紀福音戰士改造組
+https://lin.ee/wNVQFEw
 
 [天母SOGO]
-@2026-09-04
-BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/RcSDDix
-UX-20 榮耀武神LF（$595）
-https://lin.ee/tFot4Guw
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/pJjYgWw
-CX-13 龍王閃擊（$495）
-https://lin.ee/txDNS4N
+@2026-09-11~2026-09-12
+BX-00 蒼龍神劍3-60F V2
+https://lin.ee/y4j0PVB
+CX-13 龍王閃擊
+https://lin.ee/sW8NexE
+CX-00 新世紀福音戰士改造組
+https://lin.ee/uq6jtZa
 
 [信義A8]
-@2026-09-04~2026-09-05
-BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/tXdvUyb
-BX-37 雙重極限衝擊戰鬥盤 豪華組（$2,750）
-https://lin.ee/ogsBWHC7
-UX-20 榮耀武神LF（$595）
-https://lin.ee/Tw4w7OtZ
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/O57EuiK
-CX-12 鳳凰閃焰（$350）
-https://lin.ee/TlCMsiu
-CX-13 龍王閃擊（$495）
-https://lin.ee/RnPWYrN
+@2026-09-11~2026-09-12
+CX-12 鳳凰閃焰
+https://lin.ee/qtETM0Z
+CX-13 龍王閃擊
+https://lin.ee/8ui3pQS
+BX-00 蒼龍神劍3-60F V2
+https://lin.ee/NsYCTEy
+CX-00 新世紀福音戰士改造組
+https://lin.ee/U0irnFS
 
 [三越南西]
 @2026-09-04~2026-09-05
@@ -141,27 +117,21 @@ BXG-04 銀牙烈虎S（$350）
 https://lin.ee/XJIS7rA
 
 [南港潤泰]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
+BX-00 暴風天馬3-70RA（$595）
+https://lin.ee/79aYEfH
 BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/7JT3H0I
+https://lin.ee/V2XrEqY
 BX-26 獨角刺心（$295）
-https://lin.ee/N8zhtwT
-BX-33 皓戰猛虎（$295）
-https://lin.ee/yxOXnmz
-BX-50 天堂日輪 隨機強化組（$350）
-https://lin.ee/ymToMDv
-UX-02 惡魔戰鎚（$395）
-https://lin.ee/pm0qB4X
-UX-19 子彈獅鷲H（$550）
-https://lin.ee/YtvvOG9
-UX-20 榮耀武神LF（$595）
-https://lin.ee/p6sOG89
+https://lin.ee/xrvbsaJ
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/9ORwvJh
 CX-13 龍王閃擊（$495）
-https://lin.ee/QGvGCW5
+https://lin.ee/x5H1ZjY
 BXG-01 烈焰飛鳳S（$350）
-https://lin.ee/8SN35Rs
+https://lin.ee/PtEatZV
 BXG-04 銀牙烈虎S（$350）
-https://lin.ee/OeEFp2B
+https://lin.ee/8FfX2UL
 
 [南港LaLaport]
 @2026-09-04~2026-09-05
@@ -181,50 +151,32 @@ BXG-04 銀牙獵虎S
 https://lin.ee/Okt0n5w
 
 [北車地下街]
-@2026-09-04~2026-09-05
-BX-00 暴風天馬（$350）
-https://lin.ee/sFJRqbL
-BX-10 極限衝擊戰鬥盤（$850）
-https://lin.ee/sVMalX9j
-BX-18 發射器（$250）
-https://lin.ee/qo0YNUu
-BX-26 獨角刺心（$295）
-https://lin.ee/uReFQuK
+@2026-09-11~2026-09-12
+BX-00 暴風天馬3-70RA（$595）
+https://lin.ee/ZDvzc3y
 BX-33 皓戰猛虎（$295）
-https://lin.ee/WjfQVWWP
-BX-51 黑綠旋風拉線發射器（$250）
-https://lin.ee/6uMADK5
-UX-02 惡魔戰錘（$395）
-https://lin.ee/5PW6o5y
-UX-20 榮耀戰神（$595）
-https://lin.ee/rgYFBku
+https://lin.ee/qQ1H5jp
 UX-21 惡魔幽冥改造組（$895）
-https://lin.ee/z9mO3Wy
+https://lin.ee/YUyfSal
+CX-13 龍王閃擊（$495）
+https://lin.ee/65obJEn
 BXG-01 烈焰飛鳳S（$350）
-https://lin.ee/XK5mj0F
+https://lin.ee/n3AkNVM
 
 ### 新北市
 
 [板橋遠東]
-@2026-09-04~2026-09-05
-BX-00 暴風天馬3-70RA（$350）
-https://lin.ee/Pka1ku2
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍V2（$350）
-https://lin.ee/uVpfV2j
-BX-33 皓戰猛虎（$295）
-https://lin.ee/XRRYfC9
-UX-11 衝擊龍神 豪華組（$550）
-https://lin.ee/z6TXHvM
+https://lin.ee/p6Hm7YO
 UX-20 榮耀武神LF（$595）
-https://lin.ee/U85OY6B
+https://lin.ee/yKmsW9Y
 UX-21 惡魔冥界改造組（$895）
-https://lin.ee/W4YWfXL
-CX-13 龍王閃擊（$495）
-https://lin.ee/yfX1zfA
-BXG-01 烈焰飛鳳S（$350）
-https://lin.ee/zAUGc8K
+https://lin.ee/Q7Ubro4
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/vAF5QKG
 BXG-04 銀牙烈虎S（$350）
-https://lin.ee/yMjKKC4
+https://lin.ee/7Qp0lON
 
 [板橋大遠百]
 @2026-09-04~2026-09-05
@@ -243,96 +195,76 @@ https://lin.ee/ZE8QxU6
 @整修中
 
 [中和環球]
-@2026-09-04~2026-09-05
-BX-00 蒼龍神劍 3-60F Ver.2
-https://lin.ee/pULgSQU
-BX-37 雙重極限衝擊戰鬥盤 豪華組
-https://lin.ee/P76FHtL
-UX-20 榮耀武神LF
-https://lin.ee/5wsJbDa
-UX-21 惡魔幽冥改造組
-https://lin.ee/slJensL
+@2026-09-11~2026-09-12
+新世紀福音戰士戰鬥陀螺套組
+https://lin.ee/z0EgAy8
+UX-21 惡魔幽冥
+https://lin.ee/qro4Qkz
+BX-00 蒼龍神劍V2
+https://lin.ee/Sgnos11
 CX-13 龍王閃擊
-https://lin.ee/7jDjBfK
+https://lin.ee/UdigxI5
+BX-37雙重極限衝擊戰鬥盤
+https://lin.ee/vmGyKot
 
 [新店誠品]
-@2026-09-04
-BXG-01 烈焰飛鳳S（$350）
-https://lin.ee/ZImHXO1
-BX-00 蒼龍神劍 3-60F Ver.2（$350）
-https://lin.ee/yWF0nkm
-BX-37 雙重極限衝擊戰鬥盤豪華組（$2,750）
-https://lin.ee/oiAxd9G
-BX-45 武士魂斬（$325）
-https://lin.ee/YcPOIlw
-UX-21 惡魔幽冥改造組（$895）
-https://lin.ee/p589taI
-CX-12 鳳凰閃焰 Z9-80WW（$350）
-https://lin.ee/QSrsrke
-CX-13 龍王閃擊 BK1-50I（$495）
-https://lin.ee/xJjqiUa
-孩之寶系列（依照賣場實際款式為主）
-https://lin.ee/ZTOaK7Q
+@2026-09-11~2026-09-12
+BX-37 雙重極限衝擊戰鬥盤豪華組
+https://lin.ee/RyYyWOo
+CX-12 鳳凰閃焰 Z9-80WW
+https://lin.ee/vk3CI4g
+BX-00 蒼龍神劍 3-60F
+https://lin.ee/r1IXPQE
+新世紀福音戰士 戰鬥陀螺限定套組
+https://lin.ee/51lxU5K
 
 [汐止遠雄]
-@2026-09-04~2026-09-05
-BX-00 暴風天馬3-70R（$350）
-https://lin.ee/PGX5Uk9
+@2026-09-11~2026-09-12
+BX-00 暴風天馬3-70R（$595）
+https://lin.ee/n6US1jV
 BX-00 蒼龍神劍（$350）
-https://lin.ee/TUTxeDL
+https://lin.ee/7PHWVG7
 BX-26 獨角刺心（$295）
-https://lin.ee/nfZ9huC
-BX-45 武士魂斬（$325）
-https://lin.ee/oNFsjPf
-BX-50 天堂日輪 隨機強化組（$350）
-https://lin.ee/9nllAXf
-UX-20 榮耀武神LF（$595）
-https://lin.ee/pP9d1Px
+https://lin.ee/V7BEn2I
 UX-21 惡魔冥界改造組（$895）
-https://lin.ee/wd23sQ4
+https://lin.ee/8552VhL
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/UHqMK5X
 CX-13 龍王閃擊（$495）
-https://lin.ee/ykm8MFh
-BXG-01 烈燄飛鳳S（$350）
-https://lin.ee/sus7G3a
-BXG-04 銀牙烈虎S（$350）
-https://lin.ee/QD9kqwf
+https://lin.ee/UizxRku
+BXG-01 烈燄飛鳳s（$350）
+https://lin.ee/NNAyTM8
+BXG-04 銀牙烈虎s（$350）
+https://lin.ee/58XYS5A
 
 [樹林秀泰]
-@2026-09-04~2026-09-05
-BX-00 暴風天馬（$350）
-https://lin.ee/5wyZSJ5
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍V2（$350）
-https://lin.ee/pVFQ7jG
+https://lin.ee/Xt0QmgW
 BX-10 極限衝擊戰鬥盤（$850）
-https://lin.ee/vSA7Zxu5
+https://lin.ee/7dP5Pk3
 BX-18 X旋風發射器（$250）
-https://lin.ee/vuaxC68d
+https://lin.ee/xhwBf0s
 BX-25 專業收納包（$850）
-https://lin.ee/saH4yrT
+https://lin.ee/yXRRW40w
 BX-26 獨角刺心（$295）
-https://lin.ee/TJZp8s4
-BX-30 X發射器改造型握把(黑紅)（$195）
-https://lin.ee/6HZKxMr
-BX-32 寬型極限衝擊戰鬥盤（$1,250）
-https://lin.ee/8fWeyhW
-BX-40 左迴旋發射器(酒紅)（$250）
-https://lin.ee/si7qji9
+https://lin.ee/6IxcVjO
+BX-30 發射器握把（黑紅）（$195）
+https://lin.ee/pIw60ms
 BX-45 武士魂斬（$325）
-https://lin.ee/UtwAzrjf
-BX-51 旋風發射器 黑綠（$250）
-https://lin.ee/PLfF01V
+https://lin.ee/Z89mhvp
 BX-57 3v3對戰收納盒（$250）
-https://lin.ee/nar6FMu
-UX-20 榮耀武神（$595）
-https://lin.ee/n5cDwZA
+https://lin.ee/Wk7yvdq
 UX-21 惡魔冥界改造組（$895）
-https://lin.ee/wzgWKRj
+https://lin.ee/PiB81Tc
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/8jSgYwK
 CX-13 龍王閃擊（$495）
-https://lin.ee/59VBJso
+https://lin.ee/SbX2k2Vo
 BXG-01 烈焰飛鳳（$350）
-https://lin.ee/TkeJqInx
-BXG-04 銀牙烈虎（$350）
-https://lin.ee/VayWbgb
+https://lin.ee/sdv83vb
+BXG-04 銀牙烈虎S（$350）
+https://lin.ee/RQW6Llo
 
 [淡水禮萊]
 @2026-09-04~2026-09-05
@@ -384,31 +316,29 @@ BXG-04 銀牙烈虎s（$350）
 https://lin.ee/YeQUSWK
 
 [桃園站前三越]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
+BX-00 暴風天馬3-70RA（$595）
+https://lin.ee/x6yzH8p
+BX-00 蒼龍神劍3-60F V2（$350）
+https://lin.ee/VixMUsb
 BX-26 獨角刺心（$295）
-https://lin.ee/qEcNM9w
-BX-33 皓戰猛虎（$295）
-https://lin.ee/wmiuE0n
-BX-35 隨機強化組Vol.04（$295）
-https://lin.ee/THnVN62k
+https://lin.ee/QXxp4qV
+BX-50 天堂日輪隨機強化組（$350）
+https://lin.ee/qUn33fe
 UX-02 惡魔戰錘（$395）
-https://lin.ee/vhFWT494
-UX-11 衝擊龍神 豪華組（$550）
-https://lin.ee/OizZgb2
-UX-15 鮫鯊狂鱗改造組（$795）
-https://lin.ee/WlCghWy
-UX-19 子彈獅鷲H（$550）
-https://lin.ee/yCscH9nD
+https://lin.ee/RcMEFmW
+UX-20 榮耀武神LF（$595）
+https://lin.ee/9l323EP
 UX-21 惡魔冥界改造組（$895）
-https://lin.ee/xI92MJV
+https://lin.ee/RyT9nk9
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/nQmhrsZ
 CX-13 龍王閃擊（$495）
-https://lin.ee/s1gxucV
-CX-18 腕龍鞭打 隨機強化組（$350）
-https://lin.ee/N6Iy9Or
+https://lin.ee/NpUNAS1
 BXG-01 烈焰飛鳳S（$350）
-https://lin.ee/rv8By2l
+https://lin.ee/taF4Bk6
 BXG-04 銀牙烈虎S（$350）
-https://lin.ee/5t8EJHI
+https://lin.ee/VJRYDec
 
 [桃園環球A8]
 @2026-09-04~2026-09-05
@@ -529,15 +459,11 @@ BXG-04 銀牙烈虎S $350
 https://lin.ee/RVMevOZ
 
 [新竹遠東]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/PuaKA54
-UX-20 榮耀武神LF（$595）
-https://lin.ee/ReA7kmv
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/PuWtTsF
-CX-13 龍王閃擊（$495）
-https://lin.ee/uJJrE9X
+https://lin.ee/ppQFtam
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/nwUL9bje
 
 ### 新竹縣
 
@@ -647,31 +573,11 @@ BXG-01 烈焰飛鳳S（$350）
 https://lin.ee/wTHj8I2
 
 [台中港三井]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/T45MJ8f
-BX-10 極限衝擊戰鬥盤（$850）
-https://lin.ee/5wXjFF9
-BX-18 X旋風發射器（$250）
-https://lin.ee/yKL0pwG
-BX-25 戰鬥陀螺X專業收納包（$850）
-https://lin.ee/tVP1tAG
-BX-30 X發射器改造型握把 (黑紅)（$195）
-https://lin.ee/77EHwdT
-BX-40 發射器(酒紅)（$250）
-https://lin.ee/8C3KTYn
-BX-51 旋風發射器 黑綠（$250）
-https://lin.ee/ztU0NOd
-BX-57 3V3對戰收納盒 黑（$250）
-https://lin.ee/7A2qdwJ
-UX-02 惡魔戰錘（$395）
-https://lin.ee/99LNJYx
-UX-20 榮耀武神LF（$595）
-https://lin.ee/ypginpV
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/tKcUgat
+https://lin.ee/9mQ9dqB
 CX-13 龍王閃擊（$495）
-https://lin.ee/WhqVa84
+https://lin.ee/7WCLpWq
 
 [台中遠百]
 @2026-09-04~2026-09-05
@@ -786,29 +692,23 @@ BXG-04 銀牙烈虎S（$350）
 https://lin.ee/7JlHQc9
 
 [廣三SOGO]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/RhOq9MT
-BX-26 獨角刺心（$295）
-https://lin.ee/vwLhYfb
-BX-35 隨機強化組Vol.04（$295）
-https://lin.ee/9ECer6h
-UX-11 衝擊龍神豪華組（$550）
-https://lin.ee/91eNlQH
+https://lin.ee/PEh5xzw
 UX-19 子彈獅鷲（$550）
-https://lin.ee/XybrZ2g
-UX-20 榮耀武神LF（$595）
-https://lin.ee/94by55q
+https://lin.ee/7v6B5V9
 UX-21 惡魔冥界改造組（$895）
-https://lin.ee/7FEy4nT
+https://lin.ee/TFhnOX3
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/8aMGnIR
 CX-13 龍王閃擊（$495）
-https://lin.ee/Te56iHk
-CX-18 腕龍鞭打 隨機強化組（$350）
-https://lin.ee/nXDPrFf
+https://lin.ee/WTpWADL
+CX-18 腕龍鞭打 隨機強化組（$350／限購2組）
+https://lin.ee/5IAT8EZ
 BXG-01 烈焰飛鳳S（$350）
-https://lin.ee/PqJKUQu
+https://lin.ee/x8AeEnS
 BXG-04 銀牙烈虎S（$350）
-https://lin.ee/NOzqhRa
+https://lin.ee/8lrmbQT
 
 [麗寶一期]
 @2026-09-04~2026-09-05
@@ -867,28 +767,26 @@ BXG-04 銀牙烈虎S（$350）
 https://lin.ee/rD7kipo
 
 [來玩聚員林]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/ZKX159K
-UX-20 榮耀武神LF（$595）
-https://lin.ee/vuLmnJJ
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/tIEVifl
+https://lin.ee/qt2mNAf
+UX-21 惡魔翼界改造組（$895）
+https://lin.ee/WnOwOyV
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/YA2pGeD
 CX-13 龍王閃擊（$495）
-https://lin.ee/vJLGMpQ
+https://lin.ee/WgFn0sO
 
 ### 雲林縣
 
 [來玩聚斗六]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/RRZW8v7
-UX-20 榮耀武神LF（$595）
-https://lin.ee/ujJuXj0
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/N9ztcQs
+https://lin.ee/YxTVT2G
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/QXcuze1
 CX-13 龍王閃擊（$495）
-https://lin.ee/ny8t5uU
+https://lin.ee/qucHkZ1
 
 ### 嘉義市
 
@@ -904,26 +802,20 @@ CX-13 龍王閃擊
 https://lin.ee/SC8U4s2
 
 [嘉義三越]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/TSZ5FQE
-UX-20 榮耀武神LF（$595）
-https://lin.ee/U2KWNuL
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/8BJX2yK
-CX-13 龍王閃擊（$495）
-https://lin.ee/qqqDOUZ
+https://lin.ee/Olyo4pX
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/N4zI9Ue
 
 [嘉義遠東]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍（$350）
-https://lin.ee/NoSbfkR
-UX-20 榮耀武神（$595）
-https://lin.ee/o3NsYxR
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/pIJWrfq
+https://lin.ee/Qls6R6V
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/WeYu7JB
 CX-13 龍王閃擊（$495）
-https://lin.ee/oM6CRPO
+https://lin.ee/pVfZbJ6
 
 ### 台南市
 
@@ -1063,23 +955,15 @@ CX-13 龍王閃擊（$495）
 https://lin.ee/P9fVJdE
 
 [高雄大立]
-@2026-09-04~2026-09-05
-BX-10 極限衝擊戰鬥盤（$850）
-https://lin.ee/ZUnAWhg
-BX-18 旋風發射器（$250）
-https://lin.ee/VBUblsr
-BX-25 戰鬥陀螺專業收納包（$850）
-https://lin.ee/tQ335Ei
-BX-30 發射器改造型握把(黑紅)（$195）
-https://lin.ee/Prwl6sA
-BX-57 3v3對戰收納盒 黑（$250）
-https://lin.ee/UrKx6l6
-UX-20 榮耀武神（$595）
-https://lin.ee/PNfiHFIP
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/XugP5r2
+@2026-09-11~2026-09-12
+BX-00 蒼龍神劍3-60F V2（$350）
+https://lin.ee/zMvVOQx
+UX-02 惡魔戰錘（$395）
+https://lin.ee/7GO4j7c
+CX-00 新世福音戰士改造組（$1,395）
+https://lin.ee/wRBZy0v
 CX-13 龍王閃擊（$495）
-https://lin.ee/pzaSLnl
+https://lin.ee/YaqfU9G
 
 [大魯閣新光]
 @2026-09-04~2026-09-05
@@ -1159,15 +1043,11 @@ https://lin.ee/RktIzwz
 ### 屏東縣
 
 [屏東太平洋]
-@2026-09-04~2026-09-05
+@2026-09-11~2026-09-12
 BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/shYffrl
-UX-20 榮耀武神LF（$595）
-https://lin.ee/Q3wsLGe
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/s0rB9dT
-CX-13 龍王閃擊（$495）
-https://lin.ee/qqtB3oA
+https://lin.ee/VYNow4o
+UX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/8F28eaV
 
 [屏東環球]
 @2026-09-04~2026-09-05
@@ -1192,31 +1072,27 @@ https://lin.ee/sokqhfz
 ### 宜蘭縣
 
 [宜蘭新月]
-@2026-09-04
+@2026-09-11
+BX-00 暴風天馬3-70RA（$595）
+https://lin.ee/wlr7HAE
 BX-00 蒼龍神劍3-60F V2（$350）
-https://lin.ee/zBADrxA
-BX-00 暴風天馬3-70RA（$350）
-https://lin.ee/q22Xnoi
+https://lin.ee/8l5ZgOi
 BX-26 獨角刺心（$295）
-https://lin.ee/PhWqcc0
+https://lin.ee/9POeXce
 BX-33 皓戰猛虎（$295）
-https://lin.ee/Vp4aUiB
+https://lin.ee/RxSpLhl
 BX-50 天堂日輪 隨機強化組（$350）
-https://lin.ee/7UbdwSO
+https://lin.ee/yp0yDSz
 UX-19 子彈獅鷲H（$550）
-https://lin.ee/UVlBzJmk
+https://lin.ee/9EuCF5n
 UX-20 榮耀武神LF（$595）
-https://lin.ee/r4EoEPI
-UX-21 惡魔冥界改造組（$895）
-https://lin.ee/WfiQkkY
-CX-13 龍王閃擊（$495）
-https://lin.ee/TvWlXi0
-CX-18 腕龍鞭打 隨機強化組（$350）
-https://lin.ee/o2QZhWI
+https://lin.ee/SG6VTOM
+CX-00 新世紀福音戰士改造組（$1,395）
+https://lin.ee/plxRmQO
 BXG-01 烈焰飛鳳S（$350）
-https://lin.ee/r9MQCqb
+https://lin.ee/ZpmUeY2
 BXG-04 銀牙烈虎S（$350）
-https://lin.ee/90DcANj
+https://lin.ee/xg2AtHJ
 
 ### 台東縣
 
