@@ -80,7 +80,8 @@ function dedupeByDest(items) {
 
 // --- 解析店家與品項 ---
 const blocks = [...html.matchAll(
-  /<div class="draw-store" data-draw-city="([^"]+)">([\s\S]*?)(?=<div class="draw-store" data-draw-city="|<div class="draw-city-group"|<\/body>)/g
+  // city 後面可能還有別的屬性（2026-09-10 上游加了 data-draw-start-time，舊正則整批抓到 0 家）
+  /<div class="draw-store" data-draw-city="([^"]+)"[^>]*>([\s\S]*?)(?=<div class="draw-store" data-draw-city="|<div class="draw-city-group"|<\/body>)/g
 )];
 const stores = blocks.map(([, city, blk]) => ({
   city,
