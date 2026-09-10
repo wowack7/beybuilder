@@ -43,6 +43,10 @@
   --color-warn: oklch(62% 0.15 65);
   --color-warn-soft: oklch(96% 0.05 80);
   --color-warn-ink: oklch(42% 0.12 60);
+  /* 黃＝全力抽選模式（⚡）專用；跟橘（說明／警示）差 30° 色相，並排也分得開 */
+  --color-bolt: oklch(86% 0.17 95);
+  --color-bolt-soft: oklch(95% 0.07 100);
+  --color-bolt-ink: oklch(48% 0.11 80);
   --radius-card: 14px;
   --space-gutter: clamp(0.75rem, 3vw, 1.5rem);
   --text-base: 0.9375rem;
@@ -67,6 +71,9 @@
     --color-warn: oklch(72% 0.14 70);
     --color-warn-soft: oklch(28% 0.045 70);
     --color-warn-ink: oklch(85% 0.11 75);
+    --color-bolt: oklch(86% 0.17 95);
+    --color-bolt-soft: oklch(34% 0.07 95);
+    --color-bolt-ink: oklch(80% 0.16 92);
   }
 }
 * { box-sizing: border-box; margin: 0; }
@@ -116,6 +123,10 @@ h1 em { font-style: normal; color: var(--color-accent-ink); }
 /* 篩選一律紫、動作（抽籤鈕）一律綠：兩種顏色＝兩種語意，不互相冒充 */
 #filterBtn[aria-expanded="true"],
 #filterBtn.is-on { color: var(--color-tag-ink); background: var(--color-tag-soft); }
+/* 全力抽選模式：開著就整顆閃電塗黃，一眼看得出「清單現在少了已抽的」 */
+#focusBtn svg { stroke-linejoin: round; stroke-width: 1.7; }
+#focusBtn[aria-pressed="true"] { color: var(--color-bolt-ink); background: var(--color-bolt-soft); }
+#focusBtn[aria-pressed="true"] svg { fill: var(--color-bolt); }
 
 /* 面板收起來時，這行是「清單為何變短」的唯一線索；沒篩選就整行不存在 */
 /* 這一列是兩個獨立的按鈕：主體＝再去改篩選，✕＝清除。
@@ -446,6 +457,21 @@ main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 .labs-hint { margin-top: 0.45rem; font-size: 0.74rem; font-weight: 700; color: var(--color-warn-ink); }
 .labs-hint b { font-weight: 800; }
 
+/* 說明彈窗裡的功能提示：不是「開始前要做的事」，用分隔線跟兩個步驟分開 */
+.tip { margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--color-line); }
+.tip-title { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; font-weight: 800; }
+.tip-bolt {
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: grid;
+  place-items: center;
+  background: var(--color-bolt-soft);
+  border-radius: 999px;
+}
+.tip-bolt svg { width: 0.95rem; height: 0.95rem; fill: var(--color-bolt); stroke: var(--color-bolt-ink); stroke-width: 1.7; stroke-linejoin: round; }
+.tip .step-why b { font-weight: 800; color: var(--color-bolt-ink); }
+
 .modal-ok {
   display: block;
   width: 100%;
@@ -512,6 +538,9 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     </button>
     <button class="icon-btn" id="filterBtn" type="button" aria-label="搜尋與篩選" aria-expanded="false">
       <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.8 12.8 L17 17"/></svg>
+    </button>
+    <button class="icon-btn" id="focusBtn" type="button" aria-label="全力抽選模式（隱藏已抽）" aria-pressed="false">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11.5 2 L4.5 11.2 H9.6 L8.5 18 L15.5 8.6 H10.4 Z"/></svg>
     </button>
     <span class="meta" id="meta"></span>
     <button class="clear-done" id="clearDone" type="button" hidden></button>
@@ -580,6 +609,14 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
         </div>
       </li>
     </ol>
+
+    <section class="tip" aria-labelledby="focusTipTitle">
+      <p class="tip-title" id="focusTipTitle">
+        <span class="tip-bolt" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M11.5 2 L4.5 11.2 H9.6 L8.5 18 L15.5 8.6 H10.4 Z"/></svg></span>
+        全力抽選模式
+      </p>
+      <p class="step-why">點右上角的閃電，變<b>黃色</b>就是開啟：點過「抽籤」的品項會自動藏起來，畫面只留還沒抽的，不用一路往下找。再點一次關閉，全部顯示回來。</p>
+    </section>
 
     <button class="modal-ok" id="howtoOk" type="button">知道了</button>
   </div>
@@ -1098,6 +1135,25 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
 
   function doneCount() { return Object.keys(done).length; }
 
+  // 全力抽選模式（⚡）：已抽的直接不畫，清單只剩還沒抽的——搶券時不用每次回來都往下找「下一個」。
+  // 存 localStorage：點「抽籤」是同分頁跳走，回來時可能整頁重載，模式不能跟著消失。
+  // 不進網址：這是個人的抽券進度，分享出去不該把別人的清單也藏掉
+  var FOCUS_KEY = 'funbox:focus:v1';
+  var focusMode = loadFocus();
+
+  function loadFocus() {
+    try { return localStorage.getItem(FOCUS_KEY) === '1'; } catch (err) { return false; }
+  }
+
+  function saveFocus() {
+    try {
+      if (focusMode) localStorage.setItem(FOCUS_KEY, '1');
+      else localStorage.removeItem(FOCUS_KEY);
+    } catch (err) {
+      /* 無痕模式：降級為本次瀏覽有效 */
+    }
+  }
+
   function markDone(url, node) {
     if (done[url]) return;
     done[url] = 1;
@@ -1125,7 +1181,10 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     if (btn.hidden) return;
     // 開著篩選時只清看得到的。範圍要寫在字面上，不然使用者以為清了全部
     var v = filterActive() ? visibleDoneUrls().length : n;
-    btn.textContent = filterActive() && v < n ? '已抽 ' + v + '/' + n + ' · 清除顯示中' : '已抽 ' + n + ' · 清除';
+    // 全力模式下已抽的根本沒顯示，「顯示中」會是錯的，改講篩選範圍
+    btn.textContent = filterActive() && v < n
+      ? '已抽 ' + v + '/' + n + ' · 清除' + (focusMode ? '篩選中' : '顯示中')
+      : '已抽 ' + n + ' · 清除';
   }
 
   // DATA.stores 已依「到活動區域最近」排序，渲染與篩選都吃這個順序
@@ -1372,7 +1431,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   function renderList() {
     var main = document.getElementById('list');
     main.textContent = '';
-    var visible = DATA.items.filter(matches);
+    var matched = DATA.items.filter(matches);
+    var visible = focusMode ? matched.filter(function (it) { return !done[it.u]; }) : matched;
     // 「現在看得到幾項」跟著篩選走，所以寫在篩選那行（見 renderFilterSummary）；
     // 站頭只留跟篩選無關的兩件事：公布進度與資料更新時間
     visibleCount = visible.length;
@@ -1380,7 +1440,10 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     // 有下任何篩選卻篩不到東西才提示；沒篩選時的空清單交給下面的「尚未公布」名單說明
     var filtering = !!(state.q || state.i.length || state.c.length || state.s.length);
     if (visible.length === 0) {
-      if (filtering) {
+      if (matched.length) {
+        // 有品項、只是全被全力模式藏起來：不是條件下錯，要講怎麼看回來
+        main.appendChild(el('p', 'empty', '這裡的都抽過了。關掉右上的閃電，就能看回已抽的品項。'));
+      } else if (filtering) {
         // 選的店全都還沒公布：不是條件下錯，別叫人換關鍵字
         var allPending = state.s.length && state.s.every(function (s) { return !storeCounts[s]; });
         main.appendChild(el('p', 'empty', allPending
@@ -1500,6 +1563,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   }
 
   var visibleCount = DATA.items.length;
+  // 全力模式下清單只剩沒抽的，數字要講明是「未抽」，不然像是品項變少了
+  function countLabel() { return (focusMode ? '未抽 ' : '') + visibleCount + ' 項'; }
 
   // 面板收起來時，這行是「清單為何變短」的唯一線索。沒在篩選就整行不存在，
   // 站頭只剩標題與 meta——這頁的主角是清單。
@@ -1514,12 +1579,12 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     if (!bar.hidden) {
       var main = document.getElementById('afOpen');
       main.textContent = '';
-      main.appendChild(el('span', 'n', '篩選中 ' + visibleCount + ' 項'));
+      main.appendChild(el('span', 'n', '篩選中 ' + countLabel()));
       main.appendChild(el('span', 'what', on.join(' · ')));
     }
     // 沒篩選時總項數改寫在 meta（不然閒置畫面就看不到「總共列了幾項」）
     document.getElementById('meta').textContent =
-      (on.length ? '' : visibleCount + ' 項 · ') +
+      (on.length ? '' : countLabel() + ' · ') +
       '已公布 ' + publishedCount() + '/' + activeStoreCount() + ' 家 · 更新 ' + DATA.updated;
     document.getElementById('filterBtn').classList.toggle('is-on', on.length > 0);
   }
@@ -1716,14 +1781,32 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     if (!confirm(msg)) return;
     urls.forEach(function (u) { delete done[u]; });
     saveDone();
-    renderList();
-    renderClearDone();
+    refreshList();
   });
 
-  window.addEventListener('pageshow', function () {
-    done = loadDone();
+  /** 已抽集合或全力模式變動後重畫：全力模式下清單長度會變，項數也要跟著改 */
+  function refreshList() {
     renderList();
     renderClearDone();
+    renderFilterSummary();
+  }
+
+  var focusBtn = document.getElementById('focusBtn');
+  function renderFocus() { focusBtn.setAttribute('aria-pressed', focusMode ? 'true' : 'false'); }
+  focusBtn.addEventListener('click', function () {
+    focusMode = !focusMode;
+    saveFocus();
+    trackFilter('focus', focusMode ? 'on' : 'off');
+    renderFocus();
+    refreshList();
+  });
+
+  // 點「抽籤」是同分頁跳走，全力模式下剛抽的那筆在這裡才藏起來（bfcache 回來也會觸發）
+  window.addEventListener('pageshow', function () {
+    done = loadDone();
+    focusMode = loadFocus();
+    renderFocus();
+    refreshList();
   });
 
   var searchInput = document.getElementById('search');
@@ -1736,6 +1819,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     state.q = searchInput.value.trim();
     renderList();
     renderItemChips();
+    renderClearDone();       // 清除鈕的範圍跟著篩選走，搜尋字也算
     renderFilterSummary();   // 數量與「正在搜什麼」都寫在篩選那行，打字時要跟著動
     renderPresets();         // 「存目前條件」的可存狀態跟搜尋字有關
     syncUrl();
@@ -1747,6 +1831,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   });
 
   initHowto();
+  renderFocus();
   update();
   initGa();
 })();
