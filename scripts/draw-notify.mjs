@@ -46,13 +46,19 @@ export function diffNewItems(seenKeys, items) {
  * 組 TG 訊息（HTML，與 funbox-bot 同格式）。依店分組；店太多就截斷成摘要，
  * 訊息永遠帶站連結——細節讓人到站上看，群裡只要「有新的、在哪幾家」。
  */
-export function formatNotify(newItems, { maxStores = 12 } = {}) {
+export function formatNotify(newItems, { maxStores = 12, storesOnly = false } = {}) {
   const byStore = new Map();
   for (const i of newItems) {
     if (!byStore.has(i.s)) byStore.set(i.s, []);
     byStore.get(i.s).push(i.n);
   }
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  if (storesOnly)
+    return [
+      `🎯 抽選目錄更新 +${newItems.length} 筆（${byStore.size} 家）`,
+      `新公布：${esc([...byStore.keys()].join('、'))}`,
+      SITE,
+    ].join('\n');
   const lines = [`🎯 抽選目錄更新 +${newItems.length} 筆`];
   const stores = [...byStore.entries()];
   for (const [store, names] of stores.slice(0, maxStores))
@@ -61,6 +67,12 @@ export function formatNotify(newItems, { maxStores = 12 } = {}) {
   lines.push(SITE);
   return lines.join('\n');
 }
+
+// 2026-09-11 批：開抽前各店陸續公布、一輪就幾十筆，群裡只要知道「哪幾家公布了」；
+// 11:00 之後才進來的零星補公布才列品項（用戶 2026-09-10）。以發送當下判斷——
+// 通知一律在 sync 部署驗活後立刻發，發送時間≈爬進來的時間。過了切點就恢復原格式。
+const ITEMS_FROM = new Date('2026-09-11T11:00:00+08:00');
+export const isStoresOnly = (now = new Date()) => now < ITEMS_FROM;
 
 async function tgSend(cfgPath, text) {
   const cfg = JSON.parse(readFileSync(cfgPath, 'utf8'));
@@ -101,7 +113,7 @@ async function main() {
     console.log('沒有新品項，不發通知');
     return;
   }
-  const msg = formatNotify(fresh);
+  const msg = formatNotify(fresh, { storesOnly: isStoresOnly() });
   if (dry) {
     console.log('--dry，僅預覽：\n' + msg);
     return;

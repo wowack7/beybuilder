@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { diffNewItems, formatNotify, keyOf, parseDataJs } from './draw-notify.mjs';
+import { diffNewItems, formatNotify, isStoresOnly, keyOf, parseDataJs } from './draw-notify.mjs';
 
 describe('parseDataJs', () => {
   test('吃得下 data.js 的 window 賦值形式', () => {
@@ -37,5 +37,30 @@ describe('formatNotify', () => {
     const msg = formatNotify(many, { maxStores: 12 });
     expect(msg).toContain('…另有 8 家');
     expect(msg.split('\n')).toHaveLength(1 + 12 + 1 + 1); // 標題+12店+摘要+連結
+  });
+
+  test('storesOnly：只列店名（去重、照出現順序），不列品項', () => {
+    const msg = formatNotify(
+      [
+        { s: '信義A13', n: 'UX-21 惡魔冥界改造組', u: 'u1' },
+        { s: '美麗華', n: 'UX-19 子彈獅鷲H', u: 'u2' },
+        { s: '信義A13', n: 'BX-10 極限衝擊戰鬥盤', u: 'u3' },
+        { s: 'A&B', n: '品', u: 'u4' },
+      ],
+      { storesOnly: true },
+    );
+    expect(msg).toContain('+4 筆（3 家）');
+    expect(msg).toContain('新公布：信義A13、美麗華、A&amp;B');
+    expect(msg).not.toContain('UX-21');
+    expect(msg).not.toContain('【');
+    expect(msg).toContain('https://beybuilder.5-seven.dog/draw/');
+  });
+});
+
+describe('isStoresOnly', () => {
+  test('2026-09-11 11:00（台北）之前只報店名，11:00 起列品項', () => {
+    expect(isStoresOnly(new Date('2026-09-11T10:59:59+08:00'))).toBe(true);
+    expect(isStoresOnly(new Date('2026-09-11T11:00:00+08:00'))).toBe(false);
+    expect(isStoresOnly(new Date('2026-09-12T09:00:00+08:00'))).toBe(false);
   });
 });
