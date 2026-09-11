@@ -87,9 +87,12 @@ const stores = blocks.map(([, city, blk]) => ({
   city,
   store: blk.match(/draw-store-name">([^<]+)</)?.[1] ?? '',
   periods: [...blk.matchAll(/draw-start">([^<]*)</g)].map((m) => m[1]),
+  // 兩種版型都接：舊版品名後面跟 <a class="draw-link" href>；2026-09-11 起連結改掛在整列的
+  // data-draw-href、排在品名前面（舊正則整批抓到 0 筆）
   items: dedupeByDest([...blk.matchAll(
-    new RegExp(String.raw`draw-product">([^<]+)<\/div><a class="draw-link" href="(${LINK_SRC})[^"]*"`, 'g'),
-  )].map((m) => [m[1], normLink(m[2])])),
+    new RegExp(String.raw`draw-product">([^<]+)<\/div><a class="draw-link" href="(${LINK_SRC})[^"]*"` +
+      String.raw`|data-draw-href="(${LINK_SRC})[^"]*"[^>]*><div class="draw-product">([^<]+)<`, 'g'),
+  )].map((m) => [m[1] ?? m[4], normLink(m[2] ?? m[3])])),
   // 診斷用：抓到 0 筆時要分得出「上游還沒放連結」還是「連結長得跟正則不一樣」
   productCount: [...blk.matchAll(/draw-product">/g)].length,
   hrefs: [...blk.matchAll(/href="(https?:\/\/[^"]+)"/g)].map((m) => m[1]),
