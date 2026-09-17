@@ -5,12 +5,12 @@
 
 [信義A13]
 @2026-09-18~2026-09-19
-CX-00 迪卡狂怒 FT3-60T
-https://lin.ee/5hnrhfF
-UX-03 魔導神杖
-https://lin.ee/st7PKoI
 BX-37 雙重極限衝擊戰鬥盤 豪華組
 https://lin.ee/NBflFpT
+UX-03 魔導神杖
+https://lin.ee/st7PKoI
+CX-00 迪卡狂怒 FT3-60T
+https://lin.ee/5hnrhfF
 
 [天母三越]
 @待公布
@@ -76,7 +76,19 @@ BX-00 暴風天馬3-70RA
 https://lin.ee/VDvQUCg
 
 [南港LaLaport]
-@待公布
+@2026-09-18~2026-09-19
+BX-00 蒼龍神劍3-60F V2
+https://lin.ee/oXsof2F
+BX-37 雙重極限衝擊戰鬥盤 豪華組
+https://lin.ee/ZfvYsWT
+UX-03 魔導神杖
+https://lin.ee/WvMF6x3
+CX-00 新世紀福音戰士陀螺套組
+https://lin.ee/yrNv6E8
+CX-00 迪卡狂怒 FT3-60T
+https://lin.ee/u3E1dlU
+BXG-04 銀牙烈虎S
+https://lin.ee/W6j7aH5
 
 [北車地下街]
 @2026-09-18~2026-09-19
@@ -102,14 +114,14 @@ https://lin.ee/SoiTIk0
 
 [板橋大遠百]
 @2026-09-18~2026-09-19
-CX-12 鳳凰閃焰
-https://lin.ee/Vgc1u0M
 蒼龍神劍3-60F V2
 https://lin.ee/yp47UCf
 UX-03 魔導神杖
 https://lin.ee/U2hE9eB
 CX-00 迪卡狂怒 FT3-60T
 https://lin.ee/Q2usF7Y
+CX-12 鳳凰閃焰
+https://lin.ee/Vgc1u0M
 
 [宏匯]
 @整修中
@@ -451,7 +463,11 @@ CX-00 迪卡狂怒 FT3-60T
 https://lin.ee/Y0DLElsu
 
 [高雄大遠百]
-@待公布
+@2026-09-18~2026-09-19
+UX-03 魔導神杖
+https://lin.ee/zBShCKPR
+CX-00 迪卡狂怒 FT3-60T
+https://lin.ee/rA8731l
 
 [來玩聚鳳山]
 @2026-09-18~2026-09-19
