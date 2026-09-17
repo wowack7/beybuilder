@@ -14,16 +14,16 @@ https://lin.ee/5hnrhfF
 
 [天母三越]
 @2026-09-18~2026-09-19
-BXG-04 銀牙烈虎S
-https://lin.ee/vsXielf
 BX-00 蒼龍神劍V2
 https://lin.ee/PzT3ecL
-CX-13 龍王閃擊
-https://lin.ee/PynNzeo
 UX-03 魔導神杖
 https://lin.ee/vuWaB0z
 CX-00 迪卡狂怒
 https://lin.ee/zPLblyG
+CX-13 龍王閃擊
+https://lin.ee/PynNzeo
+BXG-04 銀牙烈虎S
+https://lin.ee/vsXielf
 
 [美麗華]
 @待公布
@@ -410,7 +410,9 @@ https://lin.ee/6F1aaio
 @待公布
 
 [台南三井]
-@待公布
+@2026-09-18~2026-09-19
+CX-00 迪卡狂怒
+https://lin.ee/QOenjHO
 
 [來玩聚新仁]
 @待公布
