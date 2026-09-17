@@ -176,6 +176,11 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   「已結束／MM/DD 開始／進行中／待公布」；公布進度只在站頭的更新時間旁寫成
   `已公布 16/73 家`，橫幅只留「還是上一批、連結點得開但抽不到」這種真警告。
   **有品項卻沒標日期會讓該店不屬於任何批次、從彙總靜默消失**，故 `draw-build` 直接 throw（見 lessons L12）
+- **換批清場 `npm run draw:expire`**（`scripts/draw-expire.mjs`，`-- --write` 才改檔）：把結束日已過的店
+  整塊清成 `@待公布`。`draw:sync` 是增量合併、只換上游這批有列的店，上游還沒公布的店會留著上一批
+  連結——點得開卻抽不到，頁面只能掛「已結束」＋紅色橫幅。**換批時 sync 之後、build 之前要跑這支**
+  （抽選當天不算過期，判定與 index.html 的 `statusOf()` 對齊）。店家重新公布時 sync／voom 會把
+  `@待公布` 換回 `@日期`，不必回頭復原
 
 ## SEO
 
