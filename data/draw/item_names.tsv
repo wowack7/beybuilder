@@ -84,3 +84,6 @@ CX-00 新世紀福音戰士陀螺套組	CX-00 新世紀福音戰士陀螺套組
 CX-07	CX-07 天馬爆擊 ATr
 # CX-00 迪卡狂怒：主刃帶 F，配置 T3-60T，合起來 FT3-60T（products.json BXG-70 的 source 欄即此字串）
 CX-00 迪卡狂怒	CX-00 迪卡狂怒 FT3-60T
+# CX-19：主刃帶 T（products.json blade 欄 T／裂甲），配置 Q5-50GN，合起來 TQ5-50GN（用戶 2026-09-22 確認）
+# 品名取 products.json 的 name「鱷魚碾壓」；兩家店原文寫「鱷魚裂甲」，靠這列一致化
+CX-19	CX-19 鱷魚碾壓 TQ5-50GN
