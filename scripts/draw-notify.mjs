@@ -68,11 +68,23 @@ export function formatNotify(newItems, { maxStores = 12, storesOnly = false } = 
   return lines.join('\n');
 }
 
-// 2026-09-11 批：開抽前各店陸續公布、一輪就幾十筆，群裡只要知道「哪幾家公布了」；
-// 11:00 之後才進來的零星補公布才列品項（用戶 2026-09-10）。以發送當下判斷——
-// 通知一律在 sync 部署驗活後立刻發，發送時間≈爬進來的時間。過了切點就恢復原格式。
-const ITEMS_FROM = new Date('2026-09-11T11:00:00+08:00');
-export const isStoresOnly = (now = new Date()) => now < ITEMS_FROM;
+// 開抽前各店陸續公布、一輪就幾十筆，群裡只要知道「哪幾家公布了」；開抽後才進來的
+// 零星補公布才列品項（用戶 2026-09-10 定、2026-09-23 確認每批都適用——原本寫死 9/11 一批，
+// 之後的批次全退回列品項）。切點＝該店批次開始日 11:00，晚開始的店（start_times.tsv → t）用它自己的時間。
+// 以發送當下判斷：通知一律在 sync 部署驗活後立刻發，發送時間≈爬進來的時間。
+const DEFAULT_START = '11:00';
+const batchStartOf = (meta) =>
+  meta?.rs ? new Date(`${meta.rs}T${meta.t ?? DEFAULT_START}:00+08:00`) : null;
+
+/** 新品項全是「還沒開抽」的店 → 只報店名；有任一家已開抽或查不到開始日 → 列品項 */
+export function isStoresOnly(freshItems, stores, now = new Date()) {
+  if (!freshItems.length) return false;
+  const byName = new Map(stores.map((m) => [m.n, m]));
+  return freshItems.every((i) => {
+    const start = batchStartOf(byName.get(i.s));
+    return start !== null && now < start;
+  });
+}
 
 async function tgSend(cfgPath, text) {
   const cfg = JSON.parse(readFileSync(cfgPath, 'utf8'));
@@ -113,7 +125,7 @@ async function main() {
     console.log('沒有新品項，不發通知');
     return;
   }
-  const msg = formatNotify(fresh, { storesOnly: isStoresOnly() });
+  const msg = formatNotify(fresh, { storesOnly: isStoresOnly(fresh, data.stores ?? []) });
   if (dry) {
     console.log('--dry，僅預覽：\n' + msg);
     return;

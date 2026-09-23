@@ -67,10 +67,13 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   兩者用 `parseVoomPostCount` 分開（@LINE-ID 頁 pages=[null] 連貼文數都沒有 → null → 警訊）
 - **TG 通知**：`scripts/draw-notify.mjs`——站上多了新的「店×品項×券」就發一則到戰鬥陀螺補貨群
   （與 funbox-bot 專案共用 bot 與群組；token/chat_id 的唯一來源是 funbox-bot 的 config.json，
-  本репо只放 gitignored 指標檔 `data/draw/notify.local.json`）。狀態檔 `.notify-state.json` 記
+  本 repo 只放 gitignored 指標檔 `data/draw/notify.local.json`）。狀態檔 `.notify-state.json` 記
   已通知集合、每次只發差集；狀態檔不存在＝第一次跑會**靜默播種不發**（防整站轟群）。
   指標檔不存在＝這台機器沒接，印一行就過。由 sync 排程在部署驗活成功後呼叫——
-  **通知的一定是已上線的內容**，不然群裡的人點進來看不到
+  **通知的一定是已上線的內容**，不然群裡的人點進來看不到。
+  **開抽前只報店名**：新品項全屬「還沒開抽」的店（批次開始日 11:00 前；晚開始的店看
+  start_times.tsv 的時間）→ 訊息只列哪幾家新公布；開抽後的零星補公布才列品項（用戶 2026-09-10 定、
+  09-23 確認每批適用——原本寫死 9/11 一批，之後全退回列品項）
 - **指令**：`npm run draw:build`（重建 data.js＋把內容雜湊寫回 index.html 的 `?v=`）、
   `npm run draw:sync`（比對上游，`-- --write` 才改檔）。兩者都**不串在 `npm run build`**：
   `data.js` 是已 commit 的產物，資料要換批才重跑

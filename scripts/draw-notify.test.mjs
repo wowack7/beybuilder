@@ -58,9 +58,33 @@ describe('formatNotify', () => {
 });
 
 describe('isStoresOnly', () => {
-  test('2026-09-11 11:00（台北）之前只報店名，11:00 起列品項', () => {
-    expect(isStoresOnly(new Date('2026-09-11T10:59:59+08:00'))).toBe(true);
-    expect(isStoresOnly(new Date('2026-09-11T11:00:00+08:00'))).toBe(false);
-    expect(isStoresOnly(new Date('2026-09-12T09:00:00+08:00'))).toBe(false);
+  const stores = [
+    { n: '信義A13', rs: '2026-09-24', re: '2026-09-25' },
+    { n: '北車地下街', rs: '2026-09-24', re: '2026-09-25', t: '12:00' },
+    { n: '美麗華', rs: '2026-09-17', re: '2026-09-18' },
+  ];
+  const at = (s) => new Date(s);
+  const a13 = [{ s: '信義A13', n: 'UX-14', u: 'u1' }];
+
+  test('批次開始日 11:00（台北）之前只報店名，11:00 起列品項——每批都適用，不綁死日期', () => {
+    expect(isStoresOnly(a13, stores, at('2026-09-23T21:00:00+08:00'))).toBe(true);
+    expect(isStoresOnly(a13, stores, at('2026-09-24T10:59:59+08:00'))).toBe(true);
+    expect(isStoresOnly(a13, stores, at('2026-09-24T11:00:00+08:00'))).toBe(false);
+  });
+
+  test('晚開始的店（t）以它自己的時間為切點', () => {
+    const late = [{ s: '北車地下街', n: 'X', u: 'u2' }];
+    expect(isStoresOnly(late, stores, at('2026-09-24T11:30:00+08:00'))).toBe(true);
+    expect(isStoresOnly(late, stores, at('2026-09-24T12:00:00+08:00'))).toBe(false);
+  });
+
+  test('新品項裡有任一家已開抽（零星補公布）→ 列品項', () => {
+    const mixed = [...a13, { s: '美麗華', n: 'Y', u: 'u3' }];
+    expect(isStoresOnly(mixed, stores, at('2026-09-23T21:00:00+08:00'))).toBe(false);
+  });
+
+  test('查不到店或沒有開始日 → 保守列品項', () => {
+    expect(isStoresOnly([{ s: '不存在', n: 'Z', u: 'u4' }], stores, at('2026-09-23T21:00:00+08:00'))).toBe(false);
+    expect(isStoresOnly([], stores, at('2026-09-23T21:00:00+08:00'))).toBe(false);
   });
 });
