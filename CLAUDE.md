@@ -45,10 +45,10 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   不是 React 分頁）
 - 路徑常數 `DRAW_PATH` 放在 `src/lib/site.ts`（與 `TIER_PATH` 同一處）
 - **資料**：`data/draw/`（`source-links.txt` 正本／`mapping.tsv` lin.ee→liff／`stores.tsv` 座標與
-  上游店名對照／`anchors.tsv` 排序錨點／`store_order.tsv` 縣市內指定先後／`start_times.tsv` 晚開始時間／`voom.tsv` 各店 VOOM 帳號／`official.tsv` 官方給的
+  上游店名對照／`anchors.tsv` 排序錨點／`store_order.tsv` 縣市內指定先後／`start_times.tsv` 晚開始時間／`official.tsv` 官方給的
   各店粉專＋LINE 官方帳號 ID）。`data/draw/source.local.json`（上游彙整頁網址）**不進版控**
 - **`official.tsv` 的用途是「去哪查」，不是自動抓**：上游彙整頁常慢半拍，各店會先發在自己的
-  FB 粉專或 LINE VOOM。`draw:sync` 乾跑會列出「上游還沒收、但查得到官方管道」的店與連結，
+  FB 粉專（LINE VOOM 已於 2026-09-30 終止服務，`draw:voom` 直掃已移除）。`draw:sync` 乾跑會列出「上游還沒收、但查得到官方管道」的店與連結，
   查到有抽選就人工補進正本（sync 是增量合併，人工補的不會被覆寫）。
   **FB 未登入抓不到貼文**，所以自動掃描只能借用真實登入狀態——見 `draw:fb`
 - **`npm run draw:fb`**（`scripts/draw-fb-scan.mjs`，**只能在本機跑**，雲端容器連不到 facebook.com）：
@@ -56,15 +56,6 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   （含 FB 登入 cookie，已 gitignore），逐一看待查店家的粉專，抓「抽選／抽籤／購買券」等字樣、
   日期與 `lin.ee` 連結。第一次跑會開視窗要你手動登入，之後可無頭。
   **只讀不寫**：印出線索，補不補進正本由人決定。純函式 `extractLeads` 有測試覆蓋
-- **`npm run draw:voom`**（`scripts/draw-voom.mjs`）：掃 `voom.tsv` 裡各店的 LINE VOOM 帳號頁——
-  未登入純 HTTP 就吃得到（貼文埋在 SSR 的 `__NEXT_DATA__`），不需要 Playwright、雲端也能跑，
-  是 draw:fb 的輕量姊妹作。各店券連結常比上游早半天發在 VOOM（2026-08-28 實測收到 3 家隔日券）。
-  只讀不寫：印出「品項×lin.ee」配對並標 🆕（正本沒有的 code），補檔照 draw:fb 的 SOP。
-  涵蓋限制：homeId 反查不到（@LINE-ID 版 SSR 不帶貼文、getPosts API 未登入拿不到），
-  `voom.tsv` 只能人工擴充；「頁面有回但解析不到貼文」是 VOOM 改版警訊，不是沒新貼文。
-  另一種是「帳號目前沒有公開貼文（postCount 0）」——帳號活著、SSR 有回首頁資訊，只是店家把
-  舊貼文刪光了（2026-09-03 板橋大遠百、南港LaLaport），這家本批得靠上游或 FB 粉專，不是警訊；
-  兩者用 `parseVoomPostCount` 分開（@LINE-ID 頁 pages=[null] 連貼文數都沒有 → null → 警訊）
 - **TG 通知**：`scripts/draw-notify.mjs`——站上多了新的「店×品項×券」就發一則到戰鬥陀螺補貨群
   （與 funbox-bot 專案共用 bot 與群組；token/chat_id 的唯一來源是 funbox-bot 的 config.json，
   本 repo 只放 gitignored 指標檔 `data/draw/notify.local.json`）。狀態檔 `.notify-state.json` 記
@@ -80,7 +71,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **sync 是增量合併，不是覆寫**：各店逐日陸續公布，覆寫會把還沒公布的店整批抹掉。
   規則：①上游店名用正規化鍵模糊比對（上游每批都會微調 `Funbox`／`FunBox Toys-`／空格／尾綴「店」）；
   ②同一批次（**比開始日**，因為上游常先只給開始日、之後才補結束日）取聯集，
-  保留人工從 VOOM 補進、上游還沒收的品項，**且同批已存在的連結品名以正本為準**（上游偶爾把型號
+  保留人工補進、上游還沒收的品項，**且同批已存在的連結品名以正本為準**（上游偶爾把型號
   打錯，人工改對後不能被下一輪洗回去；新連結才用上游品名）；③換批才整店換掉；④上游沒列的店原封不動
 - **cache-busting 必要**：LINE 內建瀏覽器快取極黏，不換 `data.js?v=` 使用者會停在舊清單（實測踩過）。
   注意 `?v=` **只保護 `data.js`**；改 `index.html` 裡的 CSS／JS 沒有任何換 URL 機制，
@@ -182,7 +173,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **換批清場 `npm run draw:expire`**（`scripts/draw-expire.mjs`，`-- --write` 才改檔）：把結束日已過的店
   整塊清成 `@待公布`。`draw:sync` 是增量合併、只換上游這批有列的店，上游還沒公布的店會留著上一批
   連結——點得開卻抽不到，頁面只能掛「已結束」＋紅色橫幅。**換批時 sync 之後、build 之前要跑這支**
-  （抽選當天不算過期，判定與 index.html 的 `statusOf()` 對齊）。店家重新公布時 sync／voom 會把
+  （抽選當天不算過期，判定與 index.html 的 `statusOf()` 對齊）。店家重新公布時 sync 會把
   `@待公布` 換回 `@日期`，不必回頭復原
 
 ## SEO

@@ -157,11 +157,11 @@ console.log(
     ` / 正本已收錄 ${currentWithItems.length} 家`,
 );
 if (missing.length) console.log(`  上游有、正本還沒收（跑 --write 就會進來）: ${missing.join('、')}`);
-if (goneFromUpstream.length) console.log(`  正本有、上游這批沒列（可能是人工從 VOOM 補的）: ${goneFromUpstream.join('、')}`);
+if (goneFromUpstream.length) console.log(`  正本有、上游這批沒列（可能是人工補的）: ${goneFromUpstream.join('、')}`);
 if (!missing.length && !goneFromUpstream.length) console.log('  兩邊的店家名單一致');
 
 // --- 待查清單：上游還沒收的店，去官方粉專／LINE 官方帳號看它是不是自己發了 -----
-// 上游彙整頁常慢半拍，各店會先發在自己的 FB 粉專或 LINE VOOM。
+// 上游彙整頁常慢半拍，各店會先發在自己的 FB 粉專。
 // 這裡只產出「去哪看」的清單交給人工——FB 未登入抓不到貼文，機器掃不了。
 {
   const official = new Map(
@@ -173,16 +173,9 @@ if (!missing.length && !goneFromUpstream.length) console.log('  兩邊的店家�
       .filter((r) => r[0])
       .map(([mine, , fb, oa]) => [mine, { fb, oa }]),
   );
-  const voom = new Map(
-    readFileSync(join(root, `${DATA}/voom.tsv`), 'utf8')
-      .split('\n')
-      .map((l) => l.trim())
-      .filter((l) => l && !l.startsWith('#'))
-      .map((l) => l.split('\t')),
-  );
   // @整修中 的店不列進待查清單：它不是「上游慢半拍」，是這家店這批本來就不會有抽選。
   const pending = [...currentStores]
-    .filter(([n, v]) => !v.items && v.mark !== '@整修中' && (official.has(n) || voom.has(n)))
+    .filter(([n, v]) => !v.items && v.mark !== '@整修中' && official.has(n))
     .map(([n]) => n);
   if (pending.length) {
     console.log(`\n上游還沒收的店（${pending.length} 家）——各店可能已自己公布，去這裡看:`);
@@ -191,7 +184,6 @@ if (!missing.length && !goneFromUpstream.length) console.log('  兩邊的店家�
       console.log(
         `   ${n}` +
           (o.oa ? ` ｜ LINE ${o.oa}` : '') +
-          (voom.has(n) ? ` ｜ VOOM ${voom.get(n)}` : '') +
           (o.fb ? `\n      FB ${o.fb}` : ''),
       );
     }
@@ -251,7 +243,7 @@ for (const s of picked) {
 
 // --- 合併回正本（只換上游這批有列的店，其餘原封不動） ---
 // 為什麼是合併不是覆寫：各店是逐日陸續公布的，覆寫會把還沒公布的店整批抹掉，
-// 也會蓋掉手動從 VOOM 補進來的資料。
+// 也會蓋掉手動補進來的資料。
 const lines = readFileSync(join(root, `${DATA}/source-links.txt`), 'utf8').split('\n');
 
 /** 從上游的「抽選日期：2026/08/28 ～ 2026/08/29」取出 @起訖 標記 */

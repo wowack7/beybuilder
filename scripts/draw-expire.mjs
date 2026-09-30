@@ -3,7 +3,7 @@
 // 為什麼需要這支：draw-sync 是增量合併，只換上游這批有列的店；上游還沒公布的店會原封不動
 // 留著上一批的連結。那些連結點得開卻抽不到（頁面掛「已結束」＋紅色橫幅），對使用者是錯的資訊。
 // 頁面對這些店的正解是 @待公布（「上一批已結束，連結先移除；等各店公布後補上」）。
-// 店家重新公布時 draw-sync／draw-voom 會把 @待公布 換回 @日期，不必回頭手動復原。
+// 店家重新公布時 draw-sync 會把 @待公布 換回 @日期，不必回頭手動復原。
 //
 // 用法：node scripts/draw-expire.mjs           只列出要清的店，不改檔
 //      node scripts/draw-expire.mjs --write    寫回 data/draw/source-links.txt

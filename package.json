@@ -18,7 +18,6 @@
     "draw:sync": "node scripts/draw-sync.mjs",
     "draw:expire": "node scripts/draw-expire.mjs",
     "draw:fb": "node scripts/draw-fb-scan.mjs",
-    "draw:voom": "node scripts/draw-voom.mjs",
     "draw:notify": "node scripts/draw-notify.mjs"
   },
   "dependencies": {
