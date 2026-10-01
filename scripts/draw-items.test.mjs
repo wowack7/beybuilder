@@ -169,10 +169,25 @@ describe('item_names.tsv 正本', () => {
   // 全名鍵（純中文原文，tagOf 抽不出型號）本來就不可能前綴相等，
   // 改為要求它指向的標準品名必須落在某個已收錄的型號鍵上，避免全名鍵指到沒人管的名字。
   it('型號鍵：標準品名的型號前綴要跟鍵一致', () => {
-    for (const [tag, std] of rows) {
+    for (const [tag, std, kind] of rows) {
       const key = tag.trim().toUpperCase();
       if (tagOf(key) === null) continue; // 全名鍵，下一個 it 檢查
+      if (kind?.trim() === '別名') continue; // 別名列，下下個 it 檢查
       expect(tagOf(std)).toBe(key);
+    }
+  });
+
+  it('別名列：標準品名要落在一般型號鍵上，且鍵本身抽得出型號', () => {
+    const modelKeys = new Set(
+      rows
+        .filter(([t, , k]) => tagOf(t.trim().toUpperCase()) !== null && k?.trim() !== '別名')
+        .map(([t]) => t.trim().toUpperCase()),
+    );
+    const aliases = rows.filter(([, , k]) => k?.trim() === '別名');
+    expect(aliases.length).toBeGreaterThan(0);
+    for (const [tag, std] of aliases) {
+      expect(tagOf(tag.trim().toUpperCase())).not.toBeNull();
+      expect(modelKeys).toContain(tagOf(std));
     }
   });
 
