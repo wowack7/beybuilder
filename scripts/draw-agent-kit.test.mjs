@@ -56,6 +56,16 @@ describe('技能包與網站版本一致', () => {
     const zips = readdirSync(join(root, 'public/draw')).filter((n) => /^iphone-beyblade-draw-.*\.zip$/.test(n));
     expect(zips).toEqual([`iphone-beyblade-draw-${version}.zip`]);
   });
+  it('網站「複製開始提示詞」與教學文件的開始提示詞一字不差', () => {
+    const html = readFileSync(join(root, 'public/draw/index.html'), 'utf8');
+    const block = html.match(/var AGENT_START_PROMPT = \[([\s\S]*?)\]\.join/);
+    expect(block, 'index.html 找不到 AGENT_START_PROMPT').not.toBeNull();
+    const lines = [...block[1].matchAll(/'((?:[^'\\]|\\.)*)'/g)]
+      .flatMap((m) => m[1].replace(/\\n/g, '\n').replace(/\\'/g, "'").split('\n'));
+    const guide = readFileSync(join(KIT, GUIDE), 'utf8');
+    expect(lines.length).toBeGreaterThan(3);
+    for (const line of lines) expect(guide, line).toContain(`> ${line}`);
+  });
   it('zip 是用目前的文件打包的（改了文件要 npm run draw:agent-kit）', () => {
     const fresh = buildZip(
       [SKILL, GUIDE].sort().map((name) => ({ name, data: readFileSync(join(KIT, name)) })),

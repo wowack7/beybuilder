@@ -874,12 +874,10 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       <li>
         <span class="step-n">2</span>
         <div class="step-body">
-          <p class="step-title">準備助手</p>
-          <p class="step-why">下載技能，讓 AI 確認可以操作鏡像視窗。第一次先測 3 項。技能包請在電腦上下載（LINE 內建瀏覽器通常存不了檔）。</p>
+          <p class="step-title">下載技能包</p>
+          <p class="step-why">請在電腦上下載（LINE 內建瀏覽器通常存不了檔），不用解壓縮，AI 會自己裝。</p>
           <div class="agent-actions">
             <a class="agent-btn" id="agentKitLink" download>下載技能包</a>
-            <button class="agent-btn ghost" type="button" data-copy="env">複製環境檢查提示詞</button>
-            <button class="agent-btn ghost" type="button" data-copy="test3">複製測試 3 項提示詞</button>
           </div>
         </div>
       </li>
@@ -887,9 +885,9 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
         <span class="step-n">3</span>
         <div class="step-body">
           <p class="step-title">開始處理</p>
-          <p class="step-why">選好地區與店家，複製開始提示詞到 AI。操作時保持鏡像連線，避免同時點擊手機。</p>
+          <p class="step-why">選好地區與店家，複製開始提示詞貼給 AI。一段就夠：AI 會自己檢查工具、裝技能、先試 3 項，沒問題就接著跑完。操作時保持鏡像連線，避免同時點擊手機。</p>
           <div class="agent-actions">
-            <button class="agent-btn ghost" type="button" data-copy="batch">複製整批開始提示詞</button>
+            <button class="agent-btn primary" type="button" data-copy="start">複製開始提示詞</button>
           </div>
         </div>
       </li>
@@ -3473,7 +3471,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   var AGENT_SEEN_KEY = 'funbox:seen-agent-howto:v1';
   // 技能包與提示詞的版本：教學、下載檔名、提示詞都吃這一個值（需求書：三者必須一致）。
   // 換版本：改這裡＋data/draw/agent-kit/ 兩份文件的「版本：」，再 npm run draw:agent-kit
-  var AGENT_KIT_VERSION = '2026-10-03b';
+  var AGENT_KIT_VERSION = '2026-10-03c';
   var AGENT_KIT_FILE = 'iphone-beyblade-draw-' + AGENT_KIT_VERSION + '.zip';
   var OPEN_TIMEOUT_MS = 8000;   // 點了抽獎、這麼久都沒有任何離開訊號 → 當成沒打開
   // 離開了卻一直沒有返回訊號、人又明明看著目錄（可見且有焦點）這麼久 → 當成卡住，讓抽獎鈕能重開同一項。
@@ -3483,17 +3481,16 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   var AGENT_LOG_MAX = 60;
   var AGENT_RETURNS_MAX = 100;
 
-  var AGENT_PROMPTS = {
-    env: '請檢查我提供的 iphone-beyblade-draw 技能包，並安裝成你能使用的個人技能。先確認你有能讀取與操作本機 Mac「iPhone 鏡像輸出」的工具。如果沒有，請告訴我缺少哪項能力，不要聲稱能操作。完成安裝後先不要抽獎，告訴我準備結果與技能名稱。',
-    test3: '請使用 iphone-beyblade-draw 技能。我已連接 iPhone 鏡像、登入 LINE，並選好地區與店家。請確認目前篩選和按鈕位置，先測試 3 項：開啟抽獎頁，點「參加抽獎」（按鈕寫「加入好友並參加抽獎」也一樣，直接按），確定按到後就關閉抽獎彈窗（不必確認結果），回來處理下一項。按鈕未出現時使用當前瀏覽器重整同一頁，不以關閉重開代替；找不到重整入口就停在該項說明。不要更改篩選、購買或核銷優惠券。完成後回報實際處理數與異常。',
-    batch: [
-      '請使用 iphone-beyblade-draw 技能，處理目前篩選的全部剩餘項目，不要更改範圍。若網站已有 👾 Agent 模式，使用單一品項介面；若還是一般清單，依目前畫面操作，不假設新版已上線。',
-      '先確認畫面與按鈕位置，再連續執行：開啟抽獎 → 點參加抽獎（寫「加入好友並參加抽獎」也直接按）→ 確定按到就打叉，不必確認結果 → 下一項。不等中獎結果；已明確顯示先前未中獎就直接關閉。',
-      '按鈕未出現時，先短暫等候，再使用當前瀏覽器重整同一抽獎頁。未確認點到參加前，不關閉、不跳下一項。找不到重整入口、畫面不明或斷線時停止點擊並保留位置。',
-      '使用可中斷的連續迴圈，不要每 8 或 10 項停下等我指示。工具若必須分段，立即自動接續。減少模型往返與不必要的固定等待，但保留必要的畫面狀態確認。我說「停止」時立刻停止。',
-      '最後確認目前篩選的未抽數量為 0，並回報處理數及未完成項目。不要購買、付款、核銷，或把清單清空說成全部中獎。'
-    ].join('\n\n'),
-  };
+  // 一段提示詞搞定：檢查工具 → 安裝技能 → 試跑 3 項 → 沒問題就接著跑完。
+  // 原本拆成三段要分三次複製貼上，用起來很笨（用戶 2026-10-03）；分步驟版留在技能包的教學文件裡給出問題時用。
+  // 文字與 data/draw/agent-kit/朋友使用提示詞與網站教學.md 的「開始提示詞」一致（draw-agent-kit.test.mjs 檢查）
+  var AGENT_START_PROMPT = [
+    '請用 iphone-beyblade-draw 技能（還沒安裝就先裝）幫我處理戰鬥陀螺抽選目錄「目前篩選」的全部剩餘項目，不要更改範圍。以下步驟自己接著做，不必每一步回來問我：',
+    '1. 檢查：確認你有能看見並點擊本機 Mac「iPhone 鏡像輸出」視窗的工具。沒有就告訴我缺少哪項能力並停止，不要聲稱能操作。\n2. 安裝：若還沒有這個技能，從我下載的技能包（檔名 iphone-beyblade-draw-版本.zip，通常在「下載項目」）安裝成你能使用的個人技能。\n3. 試跑：確認畫面、篩選與按鈕位置後先處理 3 項。三項都正常就直接接著做；有異常就停下來回報。\n4. 整批：開啟抽獎 → 點參加抽獎（寫「加入好友並參加抽獎」也直接按）→ 確定按到就打叉，不必確認結果 → 下一項。網站有 👾 Agent 模式就用單一品項介面。已明確顯示先前未中獎就直接關閉。',
+    '按鈕未出現時，先短暫等候，再用當前瀏覽器重整同一抽獎頁。未確認點到參加前，不關閉、不跳下一項。找不到重整入口、畫面不明或斷線時停止點擊並保留位置。',
+    '使用可中斷的連續迴圈，不要每 8 或 10 項停下等我；工具若必須分段，立即自動接續。我說「停止」時立刻停止。',
+    '最後確認目前篩選的未抽數量為 0，回報處理數及未完成項目。不要購買、付款、核銷，或把清單清空說成全部中獎。'
+  ].join('\n\n');
 
   // 活動 ID＝券網址（liff 連結全站唯一）。少數連結兩家店共用（同一個 LINE 帳號），隊列裡只走一次
   var byUrl = {};
@@ -3905,13 +3902,14 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     try { return !!localStorage.getItem(AGENT_SEEN_KEY); } catch (err) { return false; }
   }
 
-  /** 整批提示詞帶上目前範圍與筆數，讓 AI 開工前能對一次畫面；不放任何帳號或裝置資訊 */
-  function batchPrompt() {
+  /** 開始提示詞帶上目前範圍、筆數與技能包檔名，讓 AI 開工前能對一次畫面；不放任何帳號或裝置資訊 */
+  function startPrompt() {
     var n = agent.on && agentPhase() !== 'complete'
       ? agent.queue.length - agent.pos
       : pendingUrls().length;
-    return AGENT_PROMPTS.batch + '\n\n目前網站範圍：' + (agent.on ? agent.scope : scopeLabel()) +
-      '；未抽 ' + n + ' 項（提示詞版本 ' + AGENT_KIT_VERSION + '）。開始前先確認畫面上的範圍與筆數一致，不一致就先停下來問我。';
+    return AGENT_START_PROMPT + '\n\n目前網站範圍：' + (agent.on ? agent.scope : scopeLabel()) +
+      '；未抽 ' + n + ' 項。技能包檔名 ' + AGENT_KIT_FILE + '（提示詞版本 ' + AGENT_KIT_VERSION + '）。' +
+      '開始前先確認畫面上的範圍與筆數一致，不一致就先停下來問我。';
   }
 
   function copyText(text, btn) {
@@ -3963,8 +3961,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   });
   Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'), function (btn) {
     btn.addEventListener('click', function () {
-      var kind = btn.getAttribute('data-copy');
-      copyText(kind === 'batch' ? batchPrompt() : AGENT_PROMPTS[kind], btn);
+      copyText(startPrompt(), btn);
     });
   });
 
