@@ -47,10 +47,12 @@
   --color-bolt: oklch(86% 0.17 95);
   --color-bolt-soft: oklch(95% 0.07 100);
   --color-bolt-ink: oklch(48% 0.11 80);
-  /* 藍＝👾 Agent 模式專用（開關、單品項卡、教學）。抽籤動作本身仍是綠 */
-  --color-agent: oklch(58% 0.17 255);
-  --color-agent-soft: oklch(95% 0.035 255);
-  --color-agent-ink: oklch(42% 0.16 255);
+  /* 橘＝👾 Agent 模式（開關、單品項卡、教學；用戶 2026-10-03 由藍改橘）。抽籤動作本身仍是綠。
+     實心橘底上的字用深色 --color-agent-on：白字在橘上對比不夠 */
+  --color-agent: oklch(72% 0.16 60);
+  --color-agent-soft: oklch(96% 0.05 75);
+  --color-agent-ink: oklch(46% 0.13 55);
+  --color-agent-on: oklch(22% 0.04 55);
   --radius-card: 14px;
   --space-gutter: clamp(0.75rem, 3vw, 1.5rem);
   --text-base: 0.9375rem;
@@ -78,9 +80,10 @@
     --color-bolt: oklch(86% 0.17 95);
     --color-bolt-soft: oklch(34% 0.07 95);
     --color-bolt-ink: oklch(80% 0.16 92);
-    --color-agent: oklch(68% 0.15 255);
-    --color-agent-soft: oklch(30% 0.06 255);
-    --color-agent-ink: oklch(85% 0.1 255);
+    --color-agent: oklch(74% 0.15 62);
+    --color-agent-soft: oklch(29% 0.05 65);
+    --color-agent-ink: oklch(85% 0.11 72);
+    --color-agent-on: oklch(20% 0.04 55);
   }
 }
 * { box-sizing: border-box; margin: 0; }
@@ -710,7 +713,7 @@ body.agent-on .masthead { flex-wrap: nowrap; align-items: center; height: 2rem; 
 }
 .agent-btn[hidden] { display: none; }
 .agent-btn.ghost { background: transparent; border-color: var(--color-line); color: var(--color-text-dim); }
-.agent-btn.primary { color: #fff; background: var(--color-agent); }
+.agent-btn.primary { color: var(--color-agent-on); background: var(--color-agent); }
 .agent-btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
 .agent-btn:active { transform: scale(0.98); }
 
@@ -720,7 +723,7 @@ body.agent-on .masthead { flex-wrap: nowrap; align-items: center; height: 2rem; 
 .agent-warn { margin-top: 0.5rem; font-size: 0.78rem; line-height: 1.55; color: var(--color-warn-ink); }
 .agent-ver { margin-top: 0.8rem; font-size: 0.72rem; color: var(--color-text-dim); }
 .agent-modal .agent-actions { margin-top: 0.4rem; }
-.agent-modal .modal-ok { color: #fff; background: var(--color-agent); border-color: var(--color-agent); }
+.agent-modal .modal-ok { color: var(--color-agent-on); background: var(--color-agent); border-color: var(--color-agent); }
 .agent-log {
   margin-top: 0.6rem;
   max-height: 50vh;
