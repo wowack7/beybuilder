@@ -544,6 +544,8 @@ main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
    座標點擊最怕東西會動，所以這一區每一列都是固定高度，會變長的字一律截斷，
    狀態文字放在按鈕「下面」——出錯訊息冒出來也推不動按鈕 */
 #agentBtn { font-size: 1.05rem; }
+/* 👾 預設隱藏（用戶 2026-10-03：還要測試）；開過 ?agent=1 的瀏覽器才顯示，見 agentEnabled() */
+#agentBtn[hidden], .tip[hidden] { display: none; }
 #agentBtn[aria-pressed="true"] { background: var(--color-agent-soft); box-shadow: inset 0 0 0 2px var(--color-agent); }
 #agentHelpBtn { display: none; color: var(--color-agent-ink); background: var(--color-agent-soft); font-weight: 800; }
 body.agent-on #agentHelpBtn { display: grid; margin-left: auto; }
@@ -764,7 +766,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11.5 2 L4.5 11.2 H9.6 L8.5 18 L15.5 8.6 H10.4 Z"/></svg>
     </button>
     <button class="icon-btn" id="agentHelpBtn" type="button" aria-label="Agent 模式教學">?</button>
-    <button class="icon-btn" id="agentBtn" type="button" aria-label="Agent 模式" aria-pressed="false" title="開啟 Agent 模式">👾</button>
+    <button class="icon-btn" id="agentBtn" type="button" aria-label="Agent 模式" aria-pressed="false" title="開啟 Agent 模式" hidden>👾</button>
     <span class="meta" id="meta"></span>
     <button class="clear-done" id="clearDone" type="button" hidden></button>
   </div>
@@ -841,7 +843,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       <p class="step-why">點右上角的閃電，變<b>黃色</b>就是開啟：點過「抽獎」的品項會自動藏起來，畫面只留還沒抽的，不用一路往下找。再點一次關閉，全部顯示回來。</p>
     </section>
 
-    <section class="tip" aria-labelledby="agentTipTitle">
+    <section class="tip" id="agentTip" aria-labelledby="agentTipTitle" hidden>
       <p class="tip-title" id="agentTipTitle">
         <span class="tip-agent" aria-hidden="true">👾</span>
         Agent 模式（給 AI 助手用）
@@ -4034,7 +4036,27 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     }
   }
 
+  // 👾 先不對外（用戶 2026-10-03：還有得測試）。網址帶 ?agent=1 開一次，這個瀏覽器就記住並顯示 👾；
+  // ?agent=0 關掉。沒開的瀏覽器即使 storage 裡留著 Agent 模式開著，也照一般清單顯示（隊列與進度不刪）
+  var AGENT_FLAG_KEY = 'funbox:agent-enabled:v1';
+  function agentEnabled() {
+    var q = params.get('agent');
+    try {
+      if (q === '1') localStorage.setItem(AGENT_FLAG_KEY, '1');
+      if (q === '0') localStorage.removeItem(AGENT_FLAG_KEY);
+      return q === '1' || (q !== '0' && localStorage.getItem(AGENT_FLAG_KEY) === '1');
+    } catch (err) {
+      return q === '1';
+    }
+  }
+
   function initAgent() {
+    if (!agentEnabled()) {
+      agent.on = false;   // 只改記憶體：不寫回 storage，之後重新開放時進度還在
+      return;
+    }
+    agentBtn.hidden = false;
+    document.getElementById('agentTip').hidden = false;
     if (!agent.on) return;
     pruneQueue();
     var p = agent.pending;

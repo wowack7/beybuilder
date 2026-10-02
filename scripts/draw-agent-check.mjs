@@ -56,6 +56,7 @@ await ctx.addInitScript(() => {
   // 跳過兩個首次教學；Agent 狀態每個情境自己決定
   localStorage.setItem('funbox:seen-howto:v1', '1');
   localStorage.setItem('funbox:seen-agent-howto:v1', '1');
+  localStorage.setItem('funbox:agent-enabled:v1', '1');   // 👾 預設隱藏，測試時打開
 });
 const page = await ctx.newPage();
 const errors = [];

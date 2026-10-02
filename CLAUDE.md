@@ -120,6 +120,8 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **站頭只有四顆圓鈕**（右上角）：**ⓘ**＝使用說明、**🔍**＝搜尋＋篩選、**⚡**＝全力抽選模式、**👾**＝Agent 模式。
   這頁的主角是清單，任何常駐的操作列都在跟它搶畫面；篩選與說明都不常駐
 - **👾 Agent 模式**（`#agentBtn`，`aria-pressed`；需求書 v2.0，用戶 2026-10-02）：給「用電腦操作 iPhone 鏡像」的 AI 助手用。
+  **目前預設隱藏**（用戶 2026-10-03：還要測試）：網址帶 `?agent=1` 開一次，該瀏覽器記住（`funbox:agent-enabled:v1`）並顯示 👾 與說明裡的介紹；
+  `?agent=0` 關掉。沒開的瀏覽器就算 storage 留著模式開著也只顯示一般清單，隊列與進度不刪。要正式開放就把 `agentEnabled()` 改成預設 true。
   開啟時沿用目前篩選，把**還沒抽的**活動排成隊列（順序＝一般清單的顯示順序，同網址只走一次），畫面只剩
   進度、一張品項卡、一顆固定位置的「抽獎」（`data-testid="agent-draw"`）與常駐輕提示；站頭縮成標題＋「?」（Agent 教學）＋👾。
   `#agent` 的 `data-state`＝ready／opening／waiting-return／error／complete。**按鈕位置不能動**：每一列固定高度、
