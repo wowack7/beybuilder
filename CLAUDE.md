@@ -79,8 +79,8 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **GA4**：與主站同一個串流，ID 由 `draw-build` 從 `src/lib/analytics.ts` 併進 `data.js` 的 `ga`
   （不在 index.html 抄第二份）。gtag.js 排在 `requestIdleCallback` 才載——這頁的賣點是搶券時秒開，
   一百多 KB 不能跟清單搶頻寬；`location.protocol !== 'https:'` 或 localhost 一律不送（本機開檔不污染資料）。
-  除 page_view 外兩個自訂事件：`draw_open`（點抽選：store/city/item/model/tier/repeat，
-  同分頁導航靠 gtag 的 sendBeacon 送達）與 `filter_use`（filter_kind＝city/store/item/search/preset/focus
+  除 page_view 外三個自訂事件：`draw_open`（點抽選：store/city/item/model/tier/repeat，
+  從 👾 Agent 模式點的多帶 `agent: 1`；同分頁導航靠 gtag 的 sendBeacon 送達）、`agent_mode`（state＝on/off）與 `filter_use`（filter_kind＝city/store/item/search/preset/focus
   ＋ filter_value，focus 的值是 on/off；連點與打字有去抖動）。`track()` 在 gtag 不存在時靜默跳過，追蹤壞掉不影響抽券
 - **品名一致化**：各店貼文各自打字，同一商品有大量寫法差異（價格尾綴 `850元`／全半形括號／
   `vol.4` vs `Vol.04`／錯字「子彈獅鳶」「炫風發射器」）。`data/draw/item_names.tsv`
@@ -117,8 +117,31 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **晚開始的店**：`start_times.tsv`（店名／開始日／HH:MM）→ data.js 店家的 `t`，店名旁掛紅色時間籤、到點前取代「進行中」
   （用戶 2026-09-11：北車地下街 12:00）。開始日要等於正本 `@` 的開始日才生效，換批自動失效。
   上游其實每家都有 `data-draw-start-time`（10:00～12:00），sync 沒接，目前只人工列要提醒的店
-- **站頭只有三顆圓鈕**（右上角）：**ⓘ**＝使用說明、**🔍**＝搜尋＋篩選、**⚡**＝全力抽選模式。
+- **站頭只有四顆圓鈕**（右上角）：**ⓘ**＝使用說明、**🔍**＝搜尋＋篩選、**⚡**＝全力抽選模式、**👾**＝Agent 模式。
   這頁的主角是清單，任何常駐的操作列都在跟它搶畫面；篩選與說明都不常駐
+- **👾 Agent 模式**（`#agentBtn`，`aria-pressed`；需求書 v2.0，用戶 2026-10-02）：給「用電腦操作 iPhone 鏡像」的 AI 助手用。
+  開啟時沿用目前篩選，把**還沒抽的**活動排成隊列（順序＝一般清單的顯示順序，同網址只走一次），畫面只剩
+  進度、一張品項卡、一顆固定位置的「抽籤」（`data-testid="agent-draw"`）與常駐輕提示；站頭縮成標題＋「?」（Agent 教學）＋👾。
+  `#agent` 的 `data-state`＝ready／opening／waiting-return／error／complete。**按鈕位置不能動**：每一列固定高度、
+  長字截斷、狀態字在按鈕下方、⋯ 選單開在左邊且開著時按鈕不接點擊、完成畫面的按鈕壓在原抽籤鈕位置以下
+  （AI 照舊座標多點一下只會點到字）。
+  **自動下一項**：點抽籤記一筆 pending（活動網址＋開啟識別碼）→ 看到離開訊號（hidden／pagehide／beforeunload／
+  window blur）→ 看到返回訊號（visible／pageshow／window focus／整頁重載）才推進，推進與清 pending 同一次寫入，
+  重複事件只推一次；離開不到 1.2 秒就回來不算；點了 8 秒都沒離開＝開啟失敗（error：留在原品項、可再按）；
+  離開後 20 秒沒有返回訊號、人卻看著目錄（可見且有焦點）＝卡住，同樣轉 error；**error 之後的離開／返回都不推進**，
+  要重按抽籤。**整頁載入若是重新整理（`performance` navigation type＝reload）一律不推進**——重整自己就會發
+  beforeunload，不擋的話手機上載入超過 1.2 秒的重整會被當成返回（審查抓到）。**不靠固定倒數換項**。
+  沒點過抽籤的切 App／重整一律不推進；關掉模式會丟掉 pending（位置照留）。
+  **已知限制（未實機驗證）**：WebView 沒有「官方頁被關掉」的專屬事件，「點完抽籤後切去別的 App 再回來」會被當成一輪；
+  誤推進時用 ⋯ 的「上一項」找回同一個活動。LINE 關 LIFF 時實際發哪些事件**還沒在實機確認**——⋯ →「返回訊號紀錄」
+  記著每次的生命週期事件，實測看那裡。
+  狀態存 `funbox:agent:v1`（隊列／位置／開啟紀錄／返回紀錄／待重試；**不存參加結果**，「已走訪」只代表點過並返回）；
+  換篩選才重排隊列，同範圍進出模式不清進度。點抽籤時照樣寫一般清單的「已抽」（AI 收尾看的「未抽 0 項」吃它）。
+  首次點 👾 先跳教學（`funbox:seen-agent-howto:v1`），內有技能包下載（`public/draw/iphone-beyblade-draw-<版本>.zip`）
+  與三段可複製提示詞；**教學、檔名、提示詞共用 index.html 的 `AGENT_KIT_VERSION`**，換技能包要三者一起換
+  （zip 用 Python zipfile 打包才有 UTF-8 檔名旗標，macOS 的 zip 打出來中文檔名在 Windows 會亂碼）。
+  開教學時 HEAD 一次 zip，沒部署到就顯示「準備中」而不是假的下載鈕。
+  驗收腳本 `npm run draw:agent-check`（本機 Chrome，不進 CI）跑需求書驗收 1–10＋疊層模擬，改這塊就跑
 - **⚡ 全力抽選模式**（`#focusBtn`，`aria-pressed`；用戶 2026-09-11）：開啟時閃電塗黃，清單**不畫已抽的品項**，
   只留還沒抽的——搶券時不用每次回來都往下找下一個。項數改寫成「未抽 N 項」；篩選範圍內全抽完時空白處寫
   「都抽過了，關掉閃電看回來」。狀態存 `funbox:focus:v1`（點「抽籤」同分頁跳走、回來可能整頁重載，
@@ -153,7 +176,8 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
 - **配色是語意，改色前先問這東西屬於哪一類**：篩選相關（🔍 鈕、「篩選中」那行、
   三組標題／勾選框／選中列／清除鈕、搜尋框 focus 圈）**一律紫**；**綠**只給動作
   （列上的「抽籤」鈕）與批次狀態籤；**橘**只給說明與警示（先設定 badge、已抽清除鈕）；
-  **黃**（`--color-bolt*`）只給全力抽選模式的閃電；**紅**（stale 系）只給時間警示（「還是上一批」橫幅、晚開始的時間籤）。
+  **黃**（`--color-bolt*`）只給全力抽選模式的閃電；**藍**（`--color-agent*`）只給 👾 Agent 模式（開關、品項卡、教學；
+  Agent 畫面裡的「抽籤」仍是綠＝動作）；**紅**（stale 系）只給時間警示（「還是上一批」橫幅、晚開始的時間籤）。
   一度縣市／店家用綠、品項用紫，等於同一個綠既表示「正在篩選」又表示「這裡可以點去抽」
 - 列上的按鈕字是**「抽籤」**（說明彈窗那句「點『抽籤』…」引用的是它，改名要一起改）；
   篩選比對：搜尋吃品名，品項只認型號編號（名字要靠搜尋），型號由品名前綴自動抓

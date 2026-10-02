@@ -18,7 +18,8 @@
     "draw:sync": "node scripts/draw-sync.mjs",
     "draw:expire": "node scripts/draw-expire.mjs",
     "draw:fb": "node scripts/draw-fb-scan.mjs",
-    "draw:notify": "node scripts/draw-notify.mjs"
+    "draw:notify": "node scripts/draw-notify.mjs",
+    "draw:agent-check": "node scripts/draw-agent-check.mjs"
   },
   "dependencies": {
     "react": "^19.2.7",

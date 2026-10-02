@@ -47,6 +47,10 @@
   --color-bolt: oklch(86% 0.17 95);
   --color-bolt-soft: oklch(95% 0.07 100);
   --color-bolt-ink: oklch(48% 0.11 80);
+  /* 藍＝👾 Agent 模式專用（開關、單品項卡、教學）。抽籤動作本身仍是綠 */
+  --color-agent: oklch(58% 0.17 255);
+  --color-agent-soft: oklch(95% 0.035 255);
+  --color-agent-ink: oklch(42% 0.16 255);
   --radius-card: 14px;
   --space-gutter: clamp(0.75rem, 3vw, 1.5rem);
   --text-base: 0.9375rem;
@@ -74,6 +78,9 @@
     --color-bolt: oklch(86% 0.17 95);
     --color-bolt-soft: oklch(34% 0.07 95);
     --color-bolt-ink: oklch(80% 0.16 92);
+    --color-agent: oklch(68% 0.15 255);
+    --color-agent-soft: oklch(30% 0.06 255);
+    --color-agent-ink: oklch(85% 0.1 255);
   }
 }
 * { box-sizing: border-box; margin: 0; }
@@ -100,7 +107,7 @@ h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em; }
 h1 em { font-style: normal; color: var(--color-accent-ink); }
 .meta { font-size: 0.75rem; color: var(--color-text-dim); }
 
-/* 站頭只留兩顆 icon：ⓘ（說明）與 🔍（搜尋＋篩選）。
+/* 站頭只留圓鈕：ⓘ（說明）、🔍（搜尋＋篩選）、⚡（全力抽選）、👾（Agent 模式）。
    這頁的主角是清單，任何常駐的操作列都在跟它搶畫面 */
 .icon-btn {
   flex: 0 0 auto;
@@ -528,6 +535,214 @@ main { max-width: 640px; margin: 0 auto; padding: 0.9rem var(--space-gutter); }
 .pending li b { font-weight: 700; color: var(--color-text); }
 
 .empty { text-align: center; color: var(--color-text-dim); padding: 3rem 0; }
+
+/* ---- 👾 Agent 模式 --------------------------------------------------------
+   給「用電腦操作手機鏡像」的 AI 助手用：一次一個品項、抽籤鈕永遠在同一個位置。
+   座標點擊最怕東西會動，所以這一區每一列都是固定高度，會變長的字一律截斷，
+   狀態文字放在按鈕「下面」——出錯訊息冒出來也推不動按鈕 */
+#agentBtn { font-size: 1.05rem; }
+#agentBtn[aria-pressed="true"] { background: var(--color-agent-soft); box-shadow: inset 0 0 0 2px var(--color-agent); }
+#agentHelpBtn { display: none; color: var(--color-agent-ink); background: var(--color-agent-soft); font-weight: 800; }
+body.agent-on #agentHelpBtn { display: grid; margin-left: auto; }
+/* 站頭在 Agent 模式只剩標題＋說明＋👾，高度固定一行：上面一動，下面的按鈕就跟著動 */
+body.agent-on #howtoBtn,
+body.agent-on #filterBtn,
+body.agent-on #focusBtn,
+body.agent-on .meta,
+body.agent-on .clear-done,
+body.agent-on .active-filter,
+body.agent-on .stale,
+body.agent-on .panel,
+body.agent-on main { display: none; }
+body.agent-on .masthead { flex-wrap: nowrap; align-items: center; height: 2rem; }
+
+.agent { max-width: 440px; margin: 0 auto; padding: 0.9rem var(--space-gutter) 0; }
+.agent[hidden] { display: none; }
+.agent-progress,
+.agent-scope {
+  height: 1.5rem;
+  line-height: 1.5rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.agent-progress { font-size: 0.95rem; font-weight: 800; color: var(--color-agent-ink); font-variant-numeric: tabular-nums; }
+.agent-scope { font-size: 0.76rem; color: var(--color-text-dim); }
+
+.agent-card {
+  position: relative;
+  height: 8.6rem;
+  margin-top: 0.5rem;
+  padding: 0.8rem 3rem 0.8rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-left: 4px solid var(--color-agent);
+  border-radius: var(--radius-card);
+}
+.agent-store,
+.agent-code { height: 1.5rem; line-height: 1.5rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.agent-store { font-size: 0.85rem; font-weight: 700; color: var(--color-text-dim); }
+.agent-code { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.02em; }
+/* 名稱最多兩行、高度寫死：長名稱換行也不會把按鈕往下推 */
+.agent-name {
+  height: 2.9rem;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  font-size: 0.92rem;
+  line-height: 1.45rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.agent-more {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+.agent-more[aria-expanded="true"] { color: var(--color-agent-ink); background: var(--color-agent-soft); }
+/* 次要選單浮在卡片上、開在 ⋯ 左邊（往下開會蓋到抽籤鈕），不佔版面 */
+.agent-menu {
+  position: absolute;
+  top: 0.45rem;
+  right: 2.9rem;
+  z-index: 5;
+  min-width: 11rem;
+  padding: 0.3rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  box-shadow: 0 12px 24px -8px rgb(0 0 0 / 0.35);
+}
+.agent-menu[hidden] { display: none; }
+.agent-menu button {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: left;
+  color: var(--color-text);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.agent-menu button:active { background: var(--color-chip); }
+.agent-menu button:disabled { color: var(--color-text-dim); opacity: 0.55; cursor: default; }
+.agent-menu hr { border: 0; border-top: 1px solid var(--color-line); margin: 0.15rem 0.4rem; }
+/* 選單開著時抽籤鈕不接點擊：點那個位置只會收起選單，不會誤開抽籤頁或點到選單項 */
+.agent.menu-open .agent-draw { pointer-events: none; }
+
+/* 唯一的主要操作。外觀、尺寸、文字固定；不能按時只變灰，不換字也不消失（消失＝位置沒了） */
+.agent-draw {
+  display: grid;
+  place-items: center;
+  height: 4rem;
+  margin-top: 1rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  color: #fff;
+  text-decoration: none;
+  background: var(--color-accent);
+  border-radius: 999px;
+  box-shadow: 0 6px 16px -6px color-mix(in oklab, var(--color-accent) 70%, transparent);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--duration-fast) ease, opacity var(--duration-fast) ease;
+}
+.agent-draw:active { transform: scale(0.97); }
+.agent-draw[aria-disabled="true"] {
+  color: var(--color-text-dim);
+  background: var(--color-chip);
+  box-shadow: none;
+  pointer-events: none;
+}
+.agent-status {
+  height: 2.6rem;
+  margin-top: 0.55rem;
+  overflow: hidden;
+  font-size: 0.8rem;
+  line-height: 1.3rem;
+  text-align: center;
+  color: var(--color-text-dim);
+}
+.agent[data-state="error"] .agent-status { color: var(--color-stale-ink); font-weight: 700; }
+.agent[data-state="waiting-return"] .agent-status { color: var(--color-agent-ink); font-weight: 700; }
+.agent-hint {
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--color-agent-ink);
+  background: var(--color-agent-soft);
+  border-radius: 10px;
+}
+
+.agent-done { margin-top: 0.5rem; padding: 1.1rem 1rem; background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-card); }
+.agent-done[hidden] { display: none; }
+.agent-done h2 { font-size: 1.05rem; font-weight: 800; }
+.agent-done p { margin-top: 0.4rem; font-size: 0.82rem; line-height: 1.55; color: var(--color-text-dim); }
+.agent-done p b { color: var(--color-text); }
+.agent-done .note { font-size: 0.74rem; }
+/* 說明區撐高：按鈕一律落在原本抽籤鈕的位置以下。AI 照舊座標多點一下，只會點到字，
+   不會誤按「上一項」或「重試」 */
+.agent-done-info { min-height: 14rem; }
+.agent-actions { display: grid; gap: 0.45rem; margin-top: 0.9rem; }
+.agent-btn {
+  display: block;
+  width: 100%;
+  padding: 0.6rem;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  color: var(--color-agent-ink);
+  background: var(--color-agent-soft);
+  border: 1.5px solid var(--color-agent);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.agent-btn[hidden] { display: none; }
+.agent-btn.ghost { background: transparent; border-color: var(--color-line); color: var(--color-text-dim); }
+.agent-btn.primary { color: #fff; background: var(--color-agent); }
+.agent-btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+.agent-btn:active { transform: scale(0.98); }
+
+/* 教學彈窗（首次點 👾）與返回訊號紀錄 */
+.agent-modal .step-n { color: var(--color-agent-ink); background: var(--color-agent-soft); border-color: var(--color-agent); }
+.agent-lead { margin-top: 0.5rem; font-size: 0.84rem; line-height: 1.6; }
+.agent-warn { margin-top: 0.5rem; font-size: 0.78rem; line-height: 1.55; color: var(--color-warn-ink); }
+.agent-ver { margin-top: 0.8rem; font-size: 0.72rem; color: var(--color-text-dim); }
+.agent-modal .agent-actions { margin-top: 0.4rem; }
+.agent-modal .modal-ok { color: #fff; background: var(--color-agent); border-color: var(--color-agent); }
+.agent-log {
+  margin-top: 0.6rem;
+  max-height: 50vh;
+  overflow: auto;
+  padding: 0.5rem 0.6rem;
+  font: 0.72rem/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+}
+.tip-agent {
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  background: var(--color-agent-soft);
+  border-radius: 999px;
+}
 footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-size: 0.75rem; color: var(--color-text-dim); }
 </style>
 </head>
@@ -544,6 +759,8 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     <button class="icon-btn" id="focusBtn" type="button" aria-label="全力抽選模式（隱藏已抽）" aria-pressed="false">
       <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11.5 2 L4.5 11.2 H9.6 L8.5 18 L15.5 8.6 H10.4 Z"/></svg>
     </button>
+    <button class="icon-btn" id="agentHelpBtn" type="button" aria-label="Agent 模式教學">?</button>
+    <button class="icon-btn" id="agentBtn" type="button" aria-label="Agent 模式" aria-pressed="false" title="開啟 Agent 模式">👾</button>
     <span class="meta" id="meta"></span>
     <button class="clear-done" id="clearDone" type="button" hidden></button>
   </div>
@@ -620,9 +837,114 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
       <p class="step-why">點右上角的閃電，變<b>黃色</b>就是開啟：點過「抽籤」的品項會自動藏起來，畫面只留還沒抽的，不用一路往下找。再點一次關閉，全部顯示回來。</p>
     </section>
 
+    <section class="tip" aria-labelledby="agentTipTitle">
+      <p class="tip-title" id="agentTipTitle">
+        <span class="tip-agent" aria-hidden="true">👾</span>
+        Agent 模式（給 AI 助手用）
+      </p>
+      <p class="step-why">點右上角的 👾，畫面一次只顯示一個品項、「抽籤」鈕固定在同一個位置；從官方抽獎頁關閉回來就自動換下一項。第一次點會先看到設定教學。</p>
+    </section>
+
     <button class="modal-ok" id="howtoOk" type="button">知道了</button>
   </div>
 </div>
+
+<!-- 👾 首次開啟時的教學。關掉之後不再自動出現（不能每一項都跳出來擋住抽籤鈕），
+     由 👾 旁的「?」重開。文案與技能包同一版本（AGENT_KIT_VERSION），改一邊要改另一邊 -->
+<div class="modal-back agent-modal" id="agentHowtoModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="agentHowtoTitle">
+    <button class="icon-btn modal-close" id="agentHowtoClose" type="button" aria-label="關閉">✕</button>
+    <h2 class="modal-title" id="agentHowtoTitle">讓你的 AI 幫你逐項抽籤</h2>
+    <p class="agent-lead">Agent 模式一次只顯示一個品項，操作位置固定。關閉官方抽獎頁回來後，會自動換下一項。</p>
+    <p class="agent-warn">你需要先準備能控制本機畫面的 AI 工具；只有貼提示詞不會自動取得手機控制能力。這個開關只切換網站畫面，不代表 AI 已連線。</p>
+
+    <ol class="steps">
+      <li>
+        <span class="step-n">1</span>
+        <div class="step-body">
+          <p class="step-title">準備環境</p>
+          <p class="step-why">在 Mac 連接 iPhone 鏡像，並在手機完成 LINE 登入。</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-n">2</span>
+        <div class="step-body">
+          <p class="step-title">準備助手</p>
+          <p class="step-why">下載技能，讓 AI 確認可以操作鏡像視窗。第一次先測 3 項。技能包請在電腦上下載（LINE 內建瀏覽器通常存不了檔）。</p>
+          <div class="agent-actions">
+            <a class="agent-btn" id="agentKitLink" download>下載技能包</a>
+            <button class="agent-btn ghost" type="button" data-copy="env">複製環境檢查提示詞</button>
+            <button class="agent-btn ghost" type="button" data-copy="test3">複製測試 3 項提示詞</button>
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="step-n">3</span>
+        <div class="step-body">
+          <p class="step-title">開始處理</p>
+          <p class="step-why">選好地區與店家，複製開始提示詞到 AI。操作時保持鏡像連線，避免同時點擊手機。</p>
+          <div class="agent-actions">
+            <button class="agent-btn ghost" type="button" data-copy="batch">複製整批開始提示詞</button>
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <p class="agent-ver" id="agentKitVer"></p>
+    <button class="modal-ok" id="agentHowtoOk" type="button">我知道了，進入 Agent 模式</button>
+  </div>
+</div>
+
+<!-- 返回訊號紀錄：LINE 關掉官方頁回來時到底會發哪些事件，目前沒實機確認過（需求書「待工程實測」），
+     這裡把每次的生命週期事件留下來，實測時打開就看得到 -->
+<div class="modal-back agent-modal" id="agentLogModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="agentLogTitle">
+    <button class="icon-btn modal-close" id="agentLogClose" type="button" aria-label="關閉">✕</button>
+    <h2 class="modal-title" id="agentLogTitle">返回訊號紀錄</h2>
+    <p class="agent-lead">最近的開啟／離開／返回事件（新的在上）。實測 LINE 關閉官方頁時用：看關掉回來那一下出現哪些事件。</p>
+    <pre class="agent-log" id="agentLogText"></pre>
+    <div class="agent-actions">
+      <button class="agent-btn ghost" type="button" id="agentLogCopy">複製紀錄</button>
+    </div>
+  </div>
+</div>
+
+<!-- 👾 Agent 模式的單品項畫面。data-state：ready／opening／waiting-return／complete／error -->
+<section class="agent" id="agent" hidden data-state="ready" aria-label="Agent 模式">
+  <p class="agent-progress" id="agentProgress"></p>
+  <p class="agent-scope" id="agentScope"></p>
+  <div id="agentStage">
+    <article class="agent-card" id="agentCard">
+      <p class="agent-store" id="agentStore"></p>
+      <p class="agent-code" id="agentCode"></p>
+      <p class="agent-name" id="agentName"></p>
+      <button class="icon-btn agent-more" id="agentMoreBtn" type="button" aria-label="更多操作" aria-haspopup="menu" aria-expanded="false" aria-controls="agentMenu">⋯</button>
+      <div class="agent-menu" id="agentMenu" role="menu" hidden>
+        <button type="button" role="menuitem" id="agentPrev">上一項</button>
+        <button type="button" role="menuitem" id="agentRetry">重試本項</button>
+        <button type="button" role="menuitem" id="agentSkip">跳過，稍後重試</button>
+        <hr>
+        <button type="button" role="menuitem" id="agentLogBtn">返回訊號紀錄</button>
+      </div>
+    </article>
+    <a class="agent-draw" id="agentDraw" data-testid="agent-draw" href="#">抽籤</a>
+    <p class="agent-status" id="agentStatus" role="status" aria-live="polite"></p>
+    <p class="agent-hint">已點參加才關閉；按鈕沒出現先重整。說「停止」可隨時暫停助手。</p>
+  </div>
+  <div class="agent-done" id="agentDone" hidden>
+    <div class="agent-done-info">
+      <h2 id="agentDoneTitle"></h2>
+      <p id="agentDoneBody"></p>
+      <p class="note">「已走訪」＝點過抽籤並回到目錄，不代表官方已確認參加，也不是中獎結果。</p>
+    </div>
+    <div class="agent-actions">
+      <button class="agent-btn primary" type="button" id="agentRetryAll" hidden></button>
+      <button class="agent-btn" type="button" id="agentRebuild" hidden></button>
+      <button class="agent-btn ghost" type="button" id="agentDonePrev" hidden>上一項</button>
+      <button class="agent-btn ghost" type="button" id="agentExit">回一般清單</button>
+    </div>
+  </div>
+</section>
 
 <main id="list" aria-live="polite"><!--seo-->
 <section class="store">
@@ -3154,9 +3476,608 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     }, 1200);
   });
 
+  // --- 👾 Agent 模式 -------------------------------------------------------
+  // 給「用電腦操作手機鏡像」的 AI 助手：一次一個品項、抽籤鈕位置固定，
+  // 從官方抽獎頁關閉回來就自動換下一項（需求書 v2.0，2026-10-02）。
+  //
+  // 「回來」怎麼認：點抽籤時記一筆 pending（活動網址＋開啟識別碼），
+  // 看到「離開」訊號（hidden／pagehide／beforeunload／blur）才進入等待返回，
+  // 之後看到「返回」訊號（visible／pageshow／focus／整頁重載）才推進——而且只推進一次：
+  // 推進時同一次寫入就把 pending 清掉，重複的返回事件看到的是 null。
+  // 沒點過抽籤的切 App、切分頁、重整都不會有 pending，不推進。
+  //
+  // 已知限制（待 LINE 實機確認，見 CLAUDE.md）：WebView 沒有「官方頁被關掉」的專屬事件，
+  // 「切去別的 App 再回來」和「關掉官方頁回來」在這裡長得一樣。所以點完抽籤後的任何
+  // 離開→返回都會被當成一輪，誤推進時用 ⋯ 的「上一項」找回同一個活動。
+  // 每次的生命週期事件都記在 ⋯ →「返回訊號紀錄」，實測時看那裡。
+  //
+  // 「已走訪」只代表點過抽籤並回到目錄；參加有沒有成功、有沒有中獎，這頁不知道也不記。
+  var AGENT_KEY = 'funbox:agent:v1';
+  var AGENT_SEEN_KEY = 'funbox:seen-agent-howto:v1';
+  // 技能包與提示詞的版本：教學、下載檔名、提示詞都吃這一個值（需求書：三者必須一致）
+  var AGENT_KIT_VERSION = '2026-10-02';
+  var AGENT_KIT_FILE = 'iphone-beyblade-draw-' + AGENT_KIT_VERSION + '.zip';
+  var OPEN_TIMEOUT_MS = 8000;   // 點了抽籤、這麼久都沒有任何離開訊號 → 當成沒打開
+  // 離開了卻一直沒有返回訊號、人又明明看著目錄（可見且有焦點）這麼久 → 當成卡住，讓抽籤鈕能重開同一項。
+  // 比開啟逾時長：同分頁慢速導航時，beforeunload 之後舊頁還會被看見好幾秒
+  var WAIT_STUCK_MS = 20000;
+  var MIN_AWAY_MS = 1200;       // 離開不到這麼久就回來（系統彈窗、短暫失焦）不算一輪：沒人能在 1 秒內點完參加
+  var AGENT_LOG_MAX = 60;
+  var AGENT_RETURNS_MAX = 100;
+
+  var AGENT_PROMPTS = {
+    env: '請檢查我提供的 iphone-beyblade-draw 技能包，並安裝成你能使用的個人技能。先確認你有能讀取與操作本機 Mac「iPhone 鏡像輸出」的工具。如果沒有，請告訴我缺少哪項能力，不要聲稱能操作。完成安裝後先不要抽獎，告訴我準備結果與技能名稱。',
+    test3: '請使用 iphone-beyblade-draw 技能。我已連接 iPhone 鏡像、登入 LINE，並選好地區與店家。請確認目前篩選和按鈕位置，先測試 3 項：開啟抽籤頁，點「參加抽獎」，確認已觸發後只關閉抽獎彈窗，回來處理下一項。按鈕未出現時使用當前瀏覽器重整同一頁，不以關閉重開代替；找不到重整入口就停在該項說明。不要更改篩選、購買或核銷優惠券。完成後回報實際處理數與異常。',
+    batch: [
+      '請使用 iphone-beyblade-draw 技能，處理目前篩選的全部剩餘項目，不要更改範圍。若網站已有 👾 Agent 模式，使用單一品項介面；若還是一般清單，依目前畫面操作，不假設新版已上線。',
+      '先確認畫面與按鈕位置，再連續執行：開啟抽籤 → 點參加抽獎 → 確認已觸發 → 確認仍是抽獎彈窗才打叉 → 下一項。不等中獎結果；已明確顯示先前未中獎就直接關閉。',
+      '按鈕未出現時，先短暫等候，再使用當前瀏覽器重整同一抽獎頁。未確認點到參加前，不關閉、不跳下一項。找不到重整入口、畫面不明或斷線時停止點擊並保留位置。',
+      '使用可中斷的連續迴圈，不要每 8 或 10 項停下等我指示。工具若必須分段，立即自動接續。減少模型往返與不必要的固定等待，但保留必要的畫面狀態確認。我說「停止」時立刻停止。',
+      '最後確認目前篩選的未抽數量為 0，並回報處理數及未完成項目。不要購買、付款、核銷，或把清單清空說成全部中獎。'
+    ].join('\n\n'),
+  };
+
+  // 活動 ID＝券網址（liff 連結全站唯一）。少數連結兩家店共用（同一個 LINE 帳號），隊列裡只走一次
+  var byUrl = {};
+  DATA.items.forEach(function (it) { (byUrl[it.u] = byUrl[it.u] || []).push(it); });
+
+  function emptyAgent() {
+    return {
+      on: false,
+      sig: '',          // 建隊列當下的篩選（JSON），換篩選才重建
+      scope: '',        // 給人看的範圍
+      queue: [],        // 活動網址，順序＝一般清單的顯示順序
+      pos: 0,           // 隊列位置：下一個要顯示的品項
+      pass: 1,          // 第幾輪（重試未完成項目會 +1）
+      opens: {},        // 開啟紀錄 { 網址: { n: 次數, t: 最後開啟時間 } }
+      returns: [],      // 返回紀錄 [{ id, u, t, adv }]，新的在前
+      visited: {},      // 本隊列已走訪（返回並推進過）的網址
+      retry: [],        // 待重試
+      pending: null,    // 這次開啟 { id, u, pos, t, phase: 'opening'|'left', left?, back?, timedOut? }
+      log: [],          // 生命週期事件（實測用）
+    };
+  }
+
+  /** 讀不到（無痕／擋 site data）回 null：沿用記憶體裡的，降級為本次瀏覽有效 */
+  function loadAgent() {
+    try {
+      var raw = localStorage.getItem(AGENT_KEY);
+      var base = emptyAgent();
+      if (!raw) return base;
+      var v = JSON.parse(raw);
+      if (!v || !Array.isArray(v.queue)) return base;
+      Object.keys(base).forEach(function (k) { if (v[k] !== undefined) base[k] = v[k]; });
+      return base;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function saveAgent() {
+    try { localStorage.setItem(AGENT_KEY, JSON.stringify(agent)); } catch (err) { /* 降級為本次瀏覽有效 */ }
+  }
+
+  var agent = loadAgent() || emptyAgent();
+
+  function agentLog(e, id) {
+    var p = agent.pending;
+    agent.log.unshift({ t: Date.now(), e: e, id: id || (p && p.id) || '', ph: p ? (p.timedOut ? 'timeout' : p.phase) : '-' });
+    if (agent.log.length > AGENT_LOG_MAX) agent.log.length = AGENT_LOG_MAX;
+  }
+
+  /** 同一組條件不管勾選先後都要是同一個簽章，不然換個順序勾就重排隊列、進度不見 */
+  function currentSig() {
+    var sorted = function (a) { return a.slice().sort(); };
+    return JSON.stringify({ c: sorted(state.c), s: sorted(state.s), i: sorted(state.i), q: state.q });
+  }
+
+  function scopeLabel() {
+    var on = [].concat(state.c, state.s, state.i);
+    if (state.q) on.push('「' + state.q + '」');
+    return on.length ? on.join('、') : '全部店家與品項';
+  }
+
+  /** 目前篩選裡還沒抽的活動，依一般清單的順序（店家距離 → 店內順序），同網址只留一筆 */
+  function pendingUrls() {
+    var seen = {};
+    var out = [];
+    storeOrder.forEach(function (s) {
+      DATA.items.forEach(function (it) {
+        if (it.s !== s || seen[it.u] || done[it.u] || !matches(it)) return;
+        seen[it.u] = 1;
+        out.push(it.u);
+      });
+    });
+    return out;
+  }
+
+  // 往後推進時跳過：資料換批後已下架的、這段期間在一般清單抽過的（Agent 自己開過的不跳——那是「上一項」回來重試的）
+  function skippable(u) { return !byUrl[u] || (done[u] && !agent.opens[u]); }
+  function firstPos(p) {
+    while (p < agent.queue.length && skippable(agent.queue[p])) p += 1;
+    return p;
+  }
+  function nextPos(p) { return firstPos(p + 1); }
+
+  /** 資料換批後把已下架的活動拿掉，位置跟著平移（不算推進） */
+  function pruneQueue() {
+    var kept = [];
+    var pos = 0;
+    agent.queue.forEach(function (u, idx) {
+      if (!byUrl[u]) return;
+      if (idx < agent.pos) pos += 1;
+      kept.push(u);
+    });
+    agent.queue = kept;
+    agent.pos = Math.min(pos, kept.length);
+    agent.retry = agent.retry.filter(function (u) { return !!byUrl[u]; });
+    if (agent.pending && !byUrl[agent.pending.u]) agent.pending = null;
+    Object.keys(agent.opens).forEach(function (u) { if (!byUrl[u]) delete agent.opens[u]; });
+  }
+
+  /** keepScope：重試未完成項目是同一個範圍的子集，範圍標籤沿用原本的 */
+  function startQueue(urls, pass, keepScope) {
+    if (!keepScope) {
+      agent.sig = currentSig();
+      agent.scope = scopeLabel();
+      agent.retry = [];
+    }
+    agent.queue = urls;
+    agent.pos = 0;
+    agent.pass = pass;
+    agent.visited = {};
+    agent.pending = null;
+    clearTimeout(openTimer);
+  }
+
+  function agentPhase() {
+    if (agent.pos >= agent.queue.length) return 'complete';
+    var p = agent.pending;
+    if (!p) return 'ready';
+    if (p.timedOut) return 'error';
+    return notGone(p) ? 'opening' : 'waiting-return';
+  }
+
+  /** 還沒真正離開：從沒看到離開訊號，或離開一下就馬上回來（back） */
+  function notGone(p) { return p.phase === 'opening' || !!p.back; }
+
+  // 逾時：①點了抽籤卻一直沒離開（連結沒反應、被擋），或只閃了一下就回來而且一直停在目錄；
+  // ②離開了、卻一直沒有返回訊號，而人就看著目錄。兩種都不推進，只讓抽籤鈕能重開同一項（error）。
+  // 逾時之後的任何離開／返回都不再推進——要推進得重新點一次抽籤
+  var openTimer = null;
+  function armOpenTimer() {
+    clearTimeout(openTimer);
+    var p = agent.pending;
+    if (!p || p.timedOut) return;
+    var waiting = !notGone(p);
+    var from = waiting ? p.left : (p.back || p.t);
+    var limit = waiting ? WAIT_STUCK_MS : OPEN_TIMEOUT_MS;
+    openTimer = setTimeout(function () {
+      openTimer = null;
+      var cur = agent.pending;
+      if (!cur || cur.id !== p.id || cur.timedOut) return;
+      // 等待返回時，頁面被蓋著（看不見或沒焦點）＝人還在官方頁，繼續等
+      if (!notGone(cur) && (document.visibilityState !== 'visible' || !document.hasFocus())) {
+        armOpenTimer();
+        return;
+      }
+      cur.timedOut = true;
+      agentLog(notGone(cur) ? 'open-timeout' : 'wait-timeout');
+      saveAgent();
+      renderAgent();
+    }, Math.max(1000, limit - (Date.now() - from)));
+  }
+
+  function agentOpen(e) {
+    var phase = agentPhase();
+    // 開啟中／等待返回時不接受第二下：雙擊、連點只開一次
+    if (!agent.on || (phase !== 'ready' && phase !== 'error')) { e.preventDefault(); return; }
+    var u = agent.queue[agent.pos];
+    var it = byUrl[u][0];
+    var now = Date.now();
+    var prev = agent.opens[u];
+    agent.pending = { id: now.toString(36) + Math.random().toString(36).slice(2, 6), u: u, pos: agent.pos, t: now, phase: 'opening' };
+    agent.opens[u] = { n: (prev ? prev.n : 0) + 1, t: now };
+    agentLog('click');
+    saveAgent();
+    track('draw_open', {
+      store: it.s, city: it.c, item: it.n, model: tagOf(it.n) || '(none)',
+      tier: TIERS[tagOf(it.n)] || '(none)', repeat: done[u] ? 1 : 0, agent: 1,
+    });
+    // 一般清單的「已抽」照樣記：AI 收尾時看的「未抽 0 項」吃的是它（它的意思本來就是「點過」）
+    if (!done[u]) { done[u] = 1; saveDone(); }
+    armOpenTimer();
+    // 不能在這裡拿掉 href：導航是 click 事件跑完之後才讀 href 的
+    renderAgent();
+  }
+
+  function agentLeave(name) {
+    if (!agent.on) return;
+    var p = agent.pending;
+    agentLog(name);
+    // 逾時（error）之後的離開不算：已經請人重按抽籤了，這時切 App 再回來不能推進
+    if (p && notGone(p) && !p.timedOut) {
+      p.phase = 'left';
+      p.left = Date.now();
+      delete p.back;
+      armOpenTimer();
+    }
+    saveAgent();
+    renderAgent();
+  }
+
+  function agentReturn(name) {
+    if (!agent.on || document.visibilityState === 'hidden') return;
+    var p = agent.pending;
+    agentLog(name);
+    if (p && p.phase === 'left' && !p.back && !p.timedOut) {
+      if (Date.now() - p.left < MIN_AWAY_MS) {
+        // 一閃而過：不推進，但「離開過」這件事留著——同分頁導航途中偶爾會冒出這種訊號，
+        // 頁面接著真的卸載、重載回來時仍要推進。一直停在目錄就交給逾時判斷
+        p.back = Date.now();
+        agentLog('too-quick');
+        armOpenTimer();
+      } else {
+        advanceFrom(p);
+      }
+    }
+    saveAgent();
+    renderAgent();
+  }
+
+  function advanceFrom(p) {
+    var now = Date.now();
+    agent.visited[p.u] = now;
+    agent.retry = agent.retry.filter(function (u) { return u !== p.u; });
+    agent.returns.unshift({ id: p.id, u: p.u, t: now, adv: 1 });
+    if (agent.returns.length > AGENT_RETURNS_MAX) agent.returns.length = AGENT_RETURNS_MAX;
+    agent.pending = null;   // 跟位置在同一次寫入：之後重複的返回事件看到 null，不會再推
+    agent.pos = nextPos(agent.pos);
+    agentLog('advance', p.id);
+  }
+
+  // 次要選單：異常復原用，不是每輪的步驟
+  function agentPrev() {
+    var from = Math.min(agent.pos, agent.queue.length);
+    if (from <= 0) return;
+    clearTimeout(openTimer);
+    agent.pending = null;
+    agent.pos = from - 1;
+    agentLog('prev');
+    saveAgent();
+    showAgentMenu(false);
+    renderAgent();
+  }
+
+  function agentRetry() {
+    clearTimeout(openTimer);
+    agent.pending = null;
+    agentLog('retry');
+    saveAgent();
+    showAgentMenu(false);
+    renderAgent();
+  }
+
+  function agentSkip() {
+    if (agent.pos >= agent.queue.length) return;
+    var u = agent.queue[agent.pos];
+    if (agent.retry.indexOf(u) === -1) agent.retry.push(u);
+    clearTimeout(openTimer);
+    agent.pending = null;
+    agent.pos = nextPos(agent.pos);
+    agentLog('skip');
+    saveAgent();
+    showAgentMenu(false);
+    renderAgent();
+  }
+
+  var agentEl = document.getElementById('agent');
+  var agentBtn = document.getElementById('agentBtn');
+  var agentDraw = document.getElementById('agentDraw');
+  var agentMenu = document.getElementById('agentMenu');
+  var agentMoreBtn = document.getElementById('agentMoreBtn');
+
+  var AGENT_STATUS = {
+    ready: '點「抽籤」開啟官方抽獎頁',
+    opening: '開啟中…',
+    'waiting-return': '等待返回：在官方頁點完「參加抽獎」再按右上叉叉',
+    error: '沒偵測到抽籤頁打開或返回。可再按「抽籤」重開本項；已完成就從 ⋯ 選「跳過」',
+  };
+
+  function setText(id, text) { document.getElementById(id).textContent = text; }
+
+  function renderAgent() {
+    if (!agent.on) return;
+    var phase = agentPhase();
+    var total = agent.queue.length;
+    var complete = phase === 'complete';
+    agentEl.setAttribute('data-state', phase);
+    document.getElementById('agentStage').hidden = complete;
+    document.getElementById('agentDone').hidden = !complete;
+    setText('agentScope', '範圍：' + agent.scope + (agent.pass > 1 ? '（重試第 ' + (agent.pass - 1) + ' 輪）' : ''));
+
+    if (complete) {
+      // 完成畫面不留可點的抽籤鈕：整個區塊收起來，連結也拿掉
+      agentDraw.removeAttribute('href');
+      agentDraw.setAttribute('aria-disabled', 'true');
+      showAgentMenu(false);
+      setText('agentProgress', '已走訪 ' + Object.keys(agent.visited).length + '／' + total + ' 項');
+      renderAgentDone();
+      return;
+    }
+
+    var u = agent.queue[agent.pos];
+    var items = byUrl[u];
+    var stores = [];
+    items.forEach(function (it) { if (stores.indexOf(it.s) === -1) stores.push(it.s); });
+    setText('agentProgress', '第 ' + (agent.pos + 1) + '／' + total + ' 項 · 剩 ' + (total - agent.pos) + ' 項');
+    document.getElementById('agentCard').setAttribute('data-activity-id', u.split('/').pop());
+    setText('agentStore', stores.join('／') + ' · ' + items[0].c);
+    var tag = tagOf(items[0].n);
+    setText('agentCode', tag || '—');
+    // 型號已經大字寫在上一行，名稱不再重複一次
+    setText('agentName', tag && items[0].n.indexOf(tag) === 0 ? items[0].n.slice(tag.length).trim() || items[0].n : items[0].n);
+    if (agentDraw.getAttribute('href') !== u) agentDraw.setAttribute('href', u);
+    var busy = phase === 'opening' || phase === 'waiting-return';
+    agentDraw.setAttribute('aria-disabled', busy ? 'true' : 'false');
+    agentDraw.tabIndex = busy ? -1 : 0;
+
+    var status = AGENT_STATUS[phase];
+    var last = agent.returns[0];
+    if (phase === 'ready' && agent.opens[u]) status = '這項開過 ' + agent.opens[u].n + ' 次；要再抽就點「抽籤」';
+    else if (phase === 'ready' && last && last.adv && last.u !== u && Date.now() - last.t < 60000) status = '上一項已返回，換到這一項';
+    setText('agentStatus', status);
+    document.getElementById('agentPrev').disabled = agent.pos === 0;
+  }
+
+  function renderAgentDone() {
+    var total = agent.queue.length;
+    var visited = Object.keys(agent.visited).length;
+    var queued = {};
+    agent.queue.forEach(function (u) { queued[u] = 1; });
+    var extra = pendingUrls().filter(function (u) { return !queued[u]; }).length;
+    setText('agentDoneTitle', total ? '本次隊列已走訪完畢' : '這個範圍沒有未抽的品項');
+    var body = document.getElementById('agentDoneBody');
+    body.textContent = '';
+    body.appendChild(document.createTextNode('範圍：' + agent.scope + ' · 共 '));
+    body.appendChild(el('b', '', String(total)));
+    body.appendChild(document.createTextNode(' 項，已走訪 '));
+    body.appendChild(el('b', '', String(visited)));
+    body.appendChild(document.createTextNode(' 項' + (agent.retry.length ? '，待重試 ' + agent.retry.length + ' 項' : '') + '。'));
+
+    var retryAll = document.getElementById('agentRetryAll');
+    retryAll.hidden = agent.retry.length === 0;
+    retryAll.textContent = '重試未完成項目（' + agent.retry.length + ' 項）';
+    var rebuild = document.getElementById('agentRebuild');
+    rebuild.hidden = extra === 0;
+    rebuild.textContent = '還有 ' + extra + ' 項未抽，排成新隊列';
+    document.getElementById('agentDonePrev').hidden = total === 0;
+  }
+
+  function applyAgentMode() {
+    document.body.classList.toggle('agent-on', agent.on);
+    agentEl.hidden = !agent.on;
+    agentBtn.setAttribute('aria-pressed', agent.on ? 'true' : 'false');
+    agentBtn.title = agent.on ? '關閉 Agent 模式' : '開啟 Agent 模式';
+    if (agent.on) {
+      showPanel(false);
+      renderAgent();
+    } else {
+      showAgentMenu(false);
+    }
+  }
+
+  function enterAgent() {
+    var stored = loadAgent();
+    if (stored) agent = stored;
+    pruneQueue();
+    // 換了篩選＝換了範圍，重排隊列；同一個範圍就從原位置接著走（進出模式不清進度）
+    if (agent.sig !== currentSig() || !agent.queue.length) startQueue(pendingUrls(), 1);
+    else if (!agent.pending) agent.pos = firstPos(agent.pos);
+    agent.on = true;
+    agentLog('enter');
+    saveAgent();
+    track('agent_mode', { state: 'on' });
+    applyAgentMode();
+  }
+
+  function exitAgent() {
+    clearTimeout(openTimer);
+    // 模式關著時不聽離開／返回訊號，留著 pending 回來會卡在等待返回；位置照留
+    agent.pending = null;
+    agent.on = false;
+    agentLog('exit');
+    saveAgent();
+    track('agent_mode', { state: 'off' });
+    applyAgentMode();
+    refreshList();
+  }
+
+  function showAgentMenu(on) {
+    agentMenu.hidden = !on;
+    agentEl.classList.toggle('menu-open', on);
+    agentMoreBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
+  }
+
+  // 教學：第一次點 👾 先看教學，按「進入」才進模式；之後由 👾 旁的「?」重開
+  var agentHowto = document.getElementById('agentHowtoModal');
+  var kitChecked = false;
+  function showAgentHowto(on) {
+    agentHowto.hidden = !on;
+    if (!on) return;
+    document.getElementById('agentHowtoOk').textContent = agent.on ? '我知道了' : '我知道了，進入 Agent 模式';
+    var kit = document.getElementById('agentKitLink');
+    setText('agentKitVer', '技能包與提示詞版本 ' + AGENT_KIT_VERSION);
+    if (kitChecked) return;
+    kitChecked = true;
+    kit.setAttribute('href', AGENT_KIT_FILE);
+    // 檔案沒部署到就不能顯示成可下載（需求書）：開教學時才問一次，不拖慢首頁
+    if (!window.fetch) return;
+    fetch(AGENT_KIT_FILE, { method: 'HEAD', cache: 'no-store' }).then(function (res) {
+      if (res.ok) return;
+      throw new Error(String(res.status));
+    }).catch(function () {
+      kit.removeAttribute('href');
+      kit.setAttribute('aria-disabled', 'true');
+      kit.textContent = '技能包準備中，暫時無法下載';
+    });
+  }
+
+  function agentHowtoSeen() {
+    try { return !!localStorage.getItem(AGENT_SEEN_KEY); } catch (err) { return false; }
+  }
+
+  /** 整批提示詞帶上目前範圍與筆數，讓 AI 開工前能對一次畫面；不放任何帳號或裝置資訊 */
+  function batchPrompt() {
+    var n = agent.on && agentPhase() !== 'complete'
+      ? agent.queue.length - agent.pos
+      : pendingUrls().length;
+    return AGENT_PROMPTS.batch + '\n\n目前網站範圍：' + (agent.on ? agent.scope : scopeLabel()) +
+      '；未抽 ' + n + ' 項（提示詞版本 ' + AGENT_KIT_VERSION + '）。開始前先確認畫面上的範圍與筆數一致，不一致就先停下來問我。';
+  }
+
+  function copyText(text, btn) {
+    var label = btn.textContent;
+    var ok = function () {
+      btn.textContent = '已複製 ✓';
+      setTimeout(function () { btn.textContent = label; }, 1500);
+    };
+    var fallback = function () {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var copied = false;
+      try { copied = document.execCommand('copy'); } catch (err) { copied = false; }
+      document.body.removeChild(ta);
+      if (copied) ok();
+      else window.prompt('自動複製失敗，請全選後手動複製：', text);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(ok, fallback);
+    else fallback();
+  }
+
+  function pad(n, w) { return String(n).padStart(w || 2, '0'); }
+  function renderAgentLog() {
+    var lines = agent.log.map(function (x) {
+      var d = new Date(x.t);
+      return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + '.' + pad(d.getMilliseconds(), 3) +
+        '  ' + x.e + '  [' + x.ph + ']' + (x.id ? '  #' + x.id : '');
+    });
+    setText('agentLogText', lines.length ? lines.join('\n') : '（還沒有紀錄）');
+  }
+
+  agentBtn.addEventListener('click', function () {
+    if (agent.on) exitAgent();
+    else if (!agentHowtoSeen()) showAgentHowto(true);
+    else enterAgent();
+  });
+  document.getElementById('agentHelpBtn').addEventListener('click', function () { showAgentHowto(true); });
+  document.getElementById('agentHowtoClose').addEventListener('click', function () { showAgentHowto(false); });
+  agentHowto.addEventListener('click', function (e) { if (e.target === agentHowto) showAgentHowto(false); });
+  document.getElementById('agentHowtoOk').addEventListener('click', function () {
+    try { localStorage.setItem(AGENT_SEEN_KEY, '1'); } catch (err) { /* 無痕模式：下次再看一次教學 */ }
+    showAgentHowto(false);
+    if (!agent.on) enterAgent();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'), function (btn) {
+    btn.addEventListener('click', function () {
+      var kind = btn.getAttribute('data-copy');
+      copyText(kind === 'batch' ? batchPrompt() : AGENT_PROMPTS[kind], btn);
+    });
+  });
+
+  agentDraw.addEventListener('click', agentOpen);
+  agentMoreBtn.addEventListener('click', function () { showAgentMenu(agentMenu.hidden); });
+  document.getElementById('agentPrev').addEventListener('click', agentPrev);
+  document.getElementById('agentRetry').addEventListener('click', agentRetry);
+  document.getElementById('agentSkip').addEventListener('click', agentSkip);
+  document.getElementById('agentDonePrev').addEventListener('click', agentPrev);
+  document.getElementById('agentExit').addEventListener('click', exitAgent);
+  document.getElementById('agentRetryAll').addEventListener('click', function () {
+    var urls = agent.retry.filter(function (u) { return !!byUrl[u]; });
+    var pass = agent.pass + 1;
+    agent.retry = [];
+    startQueue(urls, pass, true);
+    agent.pos = firstPos(0);
+    agentLog('retry-all');
+    saveAgent();
+    renderAgent();
+  });
+  document.getElementById('agentRebuild').addEventListener('click', function () {
+    startQueue(pendingUrls(), 1);
+    agentLog('rebuild');
+    saveAgent();
+    renderAgent();
+  });
+
+  var agentLogModal = document.getElementById('agentLogModal');
+  document.getElementById('agentLogBtn').addEventListener('click', function () {
+    showAgentMenu(false);
+    renderAgentLog();
+    agentLogModal.hidden = false;
+  });
+  document.getElementById('agentLogClose').addEventListener('click', function () { agentLogModal.hidden = true; });
+  agentLogModal.addEventListener('click', function (e) { if (e.target === agentLogModal) agentLogModal.hidden = true; });
+  document.getElementById('agentLogCopy').addEventListener('click', function () {
+    copyText(document.getElementById('agentLogText').textContent, this);
+  });
+
+  document.addEventListener('click', function (e) {
+    if (agentMenu.hidden) return;
+    if (agentMenu.contains(e.target) || agentMoreBtn.contains(e.target)) return;
+    showAgentMenu(false);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    showAgentMenu(false);
+    showAgentHowto(false);
+    agentLogModal.hidden = true;
+  });
+
+  // 離開／返回訊號。focus／blur 只認 window 本身（元素的 focus 不算）
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') agentLeave('hidden');
+    else agentReturn('visible');
+  });
+  window.addEventListener('pagehide', function () { agentLeave('pagehide'); });
+  window.addEventListener('beforeunload', function () { agentLeave('beforeunload'); });
+  window.addEventListener('blur', function (e) { if (e.target === window) agentLeave('blur'); });
+  window.addEventListener('focus', function (e) { if (e.target === window) agentReturn('focus'); });
+  window.addEventListener('pageshow', function (e) { agentReturn(e.persisted ? 'pageshow-bfcache' : 'pageshow'); });
+
+  function navType() {
+    try {
+      var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      if (nav && nav.type) return nav.type;
+      return performance.navigation && performance.navigation.type === 1 ? 'reload' : 'navigate';
+    } catch (err) {
+      return 'navigate';
+    }
+  }
+
+  function initAgent() {
+    if (!agent.on) return;
+    pruneQueue();
+    var p = agent.pending;
+    // 這次載入是「重新整理」：不論卸載前記到什麼離開訊號（重整本身就會發 beforeunload），
+    // 都不是從官方頁回來——不推進，改顯示異常讓人自己決定
+    if (p && navType() === 'reload') { p.timedOut = true; agentLog('reload'); }
+    // 整頁載入時還停在「開啟中」＝點了抽籤卻沒記到離開就重載了：同上
+    if (p && p.phase === 'opening') p.timedOut = true;
+    // 離開後閃回過一下、接著頁面真的卸載了：那一下不算數，這次載入就是返回
+    if (p && p.phase === 'left' && p.back && !p.timedOut) delete p.back;
+    applyAgentMode();
+    agentReturn('load');
+  }
+
   initHowto();
   renderFocus();
   update();
+  initAgent();
   initGa();
 })();
 </script>
