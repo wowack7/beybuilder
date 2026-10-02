@@ -3,7 +3,8 @@
 //   npm run draw:agent-kit
 //
 // 版本的唯一來源是 public/draw/index.html 的 AGENT_KIT_VERSION（教學、檔名、提示詞都吃它）。
-// 需求書要求三者一致，所以這支會檢查技能包裡的兩份文件都寫著同一個「版本：YYYY-MM-DD」，
+// 版本格式 YYYY-MM-DD，同一天再改加字母尾碼（2026-10-03b），讓已下載的人看得出要重抓。
+// 需求書要求三者一致，所以這支會檢查技能包裡的兩份文件都寫著同一個「版本：…」，
 // 對不上就 throw——改了網站版本卻忘了改文件（或反過來）會在這裡被擋下。
 //
 // 不用 macOS 的 zip 指令：它不設 UTF-8 檔名旗標，中文檔名在 Windows 解開是亂碼。
@@ -18,9 +19,19 @@ const KIT_DIR = join(root, 'data/draw/agent-kit');
 const OUT_DIR = join(root, 'public/draw');
 
 export function kitVersion(html) {
-  const m = html.match(/var AGENT_KIT_VERSION = '(\d{4}-\d{2}-\d{2})'/);
+  const m = html.match(/var AGENT_KIT_VERSION = '(\d{4}-\d{2}-\d{2}[a-z]?)'/);
   if (!m) throw new Error('index.html 找不到 AGENT_KIT_VERSION');
   return m[1];
+}
+
+/** zip 內的檔案時間＝版本的日期部分（尾碼字母不算） */
+export function kitDate(version) {
+  return new Date(`${version.slice(0, 10)}T00:00:00`);
+}
+
+/** 文件寫的是不是「剛好」這個版本：2026-10-03 不能被 2026-10-03b 冒充，反之亦然 */
+export function docHasVersion(text, version) {
+  return new RegExp(`版本：${version}(?![0-9a-z])`).test(text);
 }
 
 function listFiles(dir) {
@@ -88,12 +99,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const files = listFiles(KIT_DIR).filter((f) => f.endsWith('.md'));
   if (!files.length) throw new Error(`${KIT_DIR} 沒有任何 .md`);
   for (const f of files) {
-    if (!readFileSync(f, 'utf8').includes(`版本：${version}`)) {
+    if (!docHasVersion(readFileSync(f, 'utf8'), version)) {
       throw new Error(`${relative(root, f)} 沒寫「版本：${version}」——網站與技能包版本必須一致`);
     }
   }
   const entries = files.map((f) => ({ name: relative(KIT_DIR, f).split(sep).join('/'), data: readFileSync(f) }));
-  const zip = buildZip(entries, new Date(`${version}T00:00:00`));
+  const zip = buildZip(entries, kitDate(version));
   const outName = `iphone-beyblade-draw-${version}.zip`;
   writeFileSync(join(OUT_DIR, outName), zip);
   // 舊版本的 zip 拿掉：教學只會連到目前版本，留著只是讓人下載到過期的技能

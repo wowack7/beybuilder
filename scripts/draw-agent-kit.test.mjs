@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildZip, kitVersion } from './draw-agent-kit.mjs';
+import { buildZip, docHasVersion, kitDate, kitVersion } from './draw-agent-kit.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const KIT = join(root, 'data/draw/agent-kit');
@@ -14,6 +14,15 @@ const zipPath = join(root, `public/draw/iphone-beyblade-draw-${version}.zip`);
 describe('kitVersion', () => {
   it('讀出 index.html 的 AGENT_KIT_VERSION', () => {
     expect(kitVersion("var AGENT_KIT_VERSION = '2026-10-03';")).toBe('2026-10-03');
+  });
+  it('接受同日改版的字母尾碼', () => {
+    expect(kitVersion("var AGENT_KIT_VERSION = '2026-10-03b';")).toBe('2026-10-03b');
+    expect(kitDate('2026-10-03b').getDate()).toBe(3);
+  });
+  it('文件版本要完全相符：尾碼不同不算', () => {
+    expect(docHasVersion('版本：2026-10-03b（…）', '2026-10-03b')).toBe(true);
+    expect(docHasVersion('版本：2026-10-03b（…）', '2026-10-03')).toBe(false);
+    expect(docHasVersion('版本：2026-10-03（…）', '2026-10-03b')).toBe(false);
   });
   it('找不到就 throw，不靜默給空字串', () => {
     expect(() => kitVersion('nothing here')).toThrow();
@@ -39,7 +48,7 @@ describe('buildZip', () => {
 describe('技能包與網站版本一致', () => {
   it('兩份文件都寫著網站的版本', () => {
     for (const f of [SKILL, GUIDE]) {
-      expect(readFileSync(join(KIT, f), 'utf8'), f).toContain(`版本：${version}`);
+      expect(docHasVersion(readFileSync(join(KIT, f), 'utf8'), version), f).toBe(true);
     }
   });
   it('教學連到的 zip 存在，且只留目前版本', () => {
@@ -50,7 +59,7 @@ describe('技能包與網站版本一致', () => {
   it('zip 是用目前的文件打包的（改了文件要 npm run draw:agent-kit）', () => {
     const fresh = buildZip(
       [SKILL, GUIDE].sort().map((name) => ({ name, data: readFileSync(join(KIT, name)) })),
-      new Date(`${version}T00:00:00`),
+      kitDate(version),
     );
     expect(fresh.equals(readFileSync(zipPath))).toBe(true);
   });

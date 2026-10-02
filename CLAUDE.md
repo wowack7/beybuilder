@@ -140,7 +140,7 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   首次點 👾 先跳教學（`funbox:seen-agent-howto:v1`），內有技能包下載（`public/draw/iphone-beyblade-draw-<版本>.zip`）
   與三段可複製提示詞；**教學、檔名、提示詞共用 index.html 的 `AGENT_KIT_VERSION`**。技能包原稿在
   `data/draw/agent-kit/`（`SKILL.md`＋朋友教學 md，**工具中立版**：流程規則共用，Codex／Claude 的工具差異只寫在附錄；
-  Codex 已實測、Claude computer use 未實測）。換版本：改 `AGENT_KIT_VERSION`＋兩份文件的「版本：」→
+  Codex 已實測、Claude computer use 未實測）。換版本（格式 `YYYY-MM-DD`，同一天再改就加字母尾碼如 `2026-10-03b`，已下載的人才看得出要重抓）：改 `AGENT_KIT_VERSION`＋兩份文件的「版本：」→
   `npm run draw:agent-kit`（自寫 zip 打包：UTF-8 檔名旗標、固定時間戳、刪掉舊版 zip；版本對不上就 throw）。
   `draw-agent-kit.test.mjs` 在 CI 擋：文件版本≠網站版本、zip 不存在或留著舊版、改了文件沒重新打包。
   開教學時 HEAD 一次 zip，沒部署到就顯示「準備中」而不是假的下載鈕。
