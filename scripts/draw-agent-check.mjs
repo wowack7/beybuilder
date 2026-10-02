@@ -115,7 +115,7 @@ async function overlayRound(kind) {
 }
 
 try {
-  // --- 1. 開關：只剩一個品項＋一顆抽籤鈕；關掉恢復清單 ---
+  // --- 1. 開關：只剩一個品項＋一顆抽獎鈕；關掉恢復清單 ---
   await page.goto(BASE + '?c=' + encodeURIComponent('台北市'));
   await page.evaluate(() => localStorage.removeItem('funbox:agent:v1'));
   await page.reload();
@@ -126,7 +126,7 @@ try {
     listVisible: !!document.getElementById('list').offsetParent,
     pressed: document.getElementById('agentBtn').getAttribute('aria-pressed'),
   }));
-  check('1 開啟後只有一顆抽籤、清單隱藏、aria-pressed=true', one.draws === 1 && !one.listVisible && one.pressed === 'true', JSON.stringify(one));
+  check('1 開啟後只有一顆抽獎、清單隱藏、aria-pressed=true', one.draws === 1 && !one.listVisible && one.pressed === 'true', JSON.stringify(one));
   await page.click('#agentBtn');
   const off = await page.evaluate(() => ({ list: !!document.getElementById('list').offsetParent, items: document.querySelectorAll('#list .item').length }));
   check('1 關閉後恢復一般清單', off.list && off.items > 0, JSON.stringify(off));
@@ -159,7 +159,7 @@ try {
     window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
     document.dispatchEvent(new Event('visibilitychange'));
   });
-  check('4 沒點抽籤時的返回事件不推進', (await snap()).pos === p0);
+  check('4 沒點抽獎時的返回事件不推進', (await snap()).pos === p0);
   const hits0 = liffHits;
   const before4 = await snap();
   await page.dblclick(DRAW);
@@ -244,7 +244,7 @@ try {
   const a5 = await snap();
   const err = await page.textContent('#agentStatus');
   check('5 開啟失敗停在原品項並顯示錯誤', a5.id === b5.id && a5.pos === b5.pos && /沒偵測到/.test(err), err);
-  check('5 錯誤後抽籤鈕可再按', (await page.getAttribute(DRAW, 'aria-disabled')) === 'false');
+  check('5 錯誤後抽獎鈕可再按', (await page.getAttribute(DRAW, 'aria-disabled')) === 'false');
   // 錯誤狀態下切 App 再回來：沒有新的點擊，不推進
   await page.evaluate(async () => {
     const set = (v) => {
@@ -272,7 +272,7 @@ try {
   const a6 = await snap();
   check('6 官方頁重整多次後返回只推進一次', a6.pos === a5.pos + 1, `${a5.pos} → ${a6.pos}`);
 
-  // --- 7. 沒點抽籤時切 App（hidden→visible）不推進 ---
+  // --- 7. 沒點抽獎時切 App（hidden→visible）不推進 ---
   const b7 = await snap();
   await page.evaluate(async () => {
     const set = (v) => {
@@ -284,7 +284,7 @@ try {
     set('visible');
     delete document.visibilityState;
   });
-  check('7 沒點抽籤的 App 切換不推進', (await snap()).pos === b7.pos);
+  check('7 沒點抽獎的 App 切換不推進', (await snap()).pos === b7.pos);
 
   // --- 8. 目錄重整、重開後保留位置與範圍 ---
   await page.reload();
@@ -318,7 +318,7 @@ try {
   const back = await snap();
   check('9 重試前一項後回到原位置、已走訪不重複計數', back.pos === cur.pos && back.id === cur.id && back.visited === prevVisited, `visited ${prevVisited} → ${back.visited}`);
 
-  // --- 10. 最後一項返回後顯示完成畫面，不留可點的抽籤鈕 ---
+  // --- 10. 最後一項返回後顯示完成畫面，不留可點的抽獎鈕 ---
   // 先關模式再清：模式開著時離開頁面會把記憶體裡的狀態寫回 storage
   await page.click('#agentBtn');
   await page.evaluate(() => localStorage.removeItem('funbox:agent:v1'));
@@ -340,7 +340,7 @@ try {
   const fin = await snap();
   const doneText = await page.textContent('#agentDoneTitle');
   check('10 完成畫面', fin.state === 'complete' && /走訪完畢/.test(doneText), `${total} 項、跑了 ${rounds} 輪 · ${doneText}`);
-  check('10 完成後抽籤鈕不可見也沒有連結', !fin.visible && fin.href === null);
+  check('10 完成後抽獎鈕不可見也沒有連結', !fin.visible && fin.href === null);
   const listCount = await page.evaluate(() => {
     document.getElementById('agentBtn').click();
     return document.querySelectorAll('#list .item:not(.done)').length;
