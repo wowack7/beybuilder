@@ -145,6 +145,13 @@ BeyBuilder X — Beyblade X 配裝模擬器（Vite + React 19 + TypeScript）。
   `draw-agent-kit.test.mjs` 在 CI 擋：文件版本≠網站版本、網站開始提示詞與教學文件不一致、zip 不存在或留著舊版、改了文件沒重新打包。
   開教學時 HEAD 一次 zip，沒部署到就顯示「準備中」而不是假的下載鈕。
   驗收腳本 `npm run draw:agent-check`（本機 Chrome，不進 CI）跑需求書驗收 1–10＋疊層模擬，改這塊就跑
+- **Python 自動抽獎迴圈 `scripts/draw_agent_loop.py`（原型，2026-10-03）**：不經過 AI，直接操作 Mac 的「iPhone 鏡像輸出」——
+  `screencapture -l` 截視窗 → Apple Vision 文字辨識 → 依畫面判斷（目錄進度「第 N／M 項」、抽獎鈕、「參加抽獎」／
+  「加入好友並參加抽獎」／「解除封鎖並參加抽獎」、未中獎、×）→ Quartz CGEvent 點擊。**只在 👾 Agent 模式下跑**；
+  看不懂的畫面一律停下來存截圖（`~/Library/Caches/draw-agent-loop/stop-*.png`）交給人或 AI。
+  `probe`（只看）／`peek`（只點開一項不按參加）／`run --max N`。需要 pyobjc-framework-Quartz＋Vision
+  （本機 venv：`~/Library/Caches/draw-agent-loop/venv`），執行它的程式要有「螢幕錄製」＋「輔助使用」權限。
+  實測 3 項約 17 秒（每項約 6 秒）。坑見 lessons L16。尚未併進技能包
 - **⚡ 全力抽選模式**（`#focusBtn`，`aria-pressed`；用戶 2026-09-11）：開啟時閃電塗黃，清單**不畫已抽的品項**，
   只留還沒抽的——搶券時不用每次回來都往下找下一個。項數改寫成「未抽 N 項」；篩選範圍內全抽完時空白處寫
   「都抽過了，關掉閃電看回來」。狀態存 `funbox:focus:v1`（點「抽獎」同分頁跳走、回來可能整頁重載，
