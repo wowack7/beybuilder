@@ -860,6 +860,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     <h2 class="modal-title" id="agentHowtoTitle">讓你的 AI 幫你逐項抽籤</h2>
     <p class="agent-lead">Agent 模式一次只顯示一個品項，操作位置固定。關閉官方抽獎頁回來後，會自動換下一項。</p>
     <p class="agent-warn">你需要先準備能控制本機畫面的 AI 工具；只有貼提示詞不會自動取得手機控制能力。這個開關只切換網站畫面，不代表 AI 已連線。</p>
+    <p class="agent-lead">技能是工具中立的：Codex（Computer Use）已實測；Claude 等能操作 Mac 畫面的 AI 也能裝，但還沒實測，第一次一定先測 3 項。只能聊天的網頁版 GPT／Claude 做不到。</p>
 
     <ol class="steps">
       <li>
@@ -3469,8 +3470,9 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
   // 「已走訪」只代表點過抽籤並回到目錄；參加有沒有成功、有沒有中獎，這頁不知道也不記。
   var AGENT_KEY = 'funbox:agent:v1';
   var AGENT_SEEN_KEY = 'funbox:seen-agent-howto:v1';
-  // 技能包與提示詞的版本：教學、下載檔名、提示詞都吃這一個值（需求書：三者必須一致）
-  var AGENT_KIT_VERSION = '2026-10-02';
+  // 技能包與提示詞的版本：教學、下載檔名、提示詞都吃這一個值（需求書：三者必須一致）。
+  // 換版本：改這裡＋data/draw/agent-kit/ 兩份文件的「版本：」，再 npm run draw:agent-kit
+  var AGENT_KIT_VERSION = '2026-10-03';
   var AGENT_KIT_FILE = 'iphone-beyblade-draw-' + AGENT_KIT_VERSION + '.zip';
   var OPEN_TIMEOUT_MS = 8000;   // 點了抽籤、這麼久都沒有任何離開訊號 → 當成沒打開
   // 離開了卻一直沒有返回訊號、人又明明看著目錄（可見且有焦點）這麼久 → 當成卡住，讓抽籤鈕能重開同一項。
