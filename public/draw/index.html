@@ -720,6 +720,7 @@ body.agent-on .masthead { flex-wrap: nowrap; align-items: center; height: 2rem; 
 /* 教學彈窗（首次點 👾）與返回訊號紀錄 */
 .agent-modal .step-n { color: var(--color-agent-ink); background: var(--color-agent-soft); border-color: var(--color-agent); }
 .agent-lead { margin-top: 0.5rem; font-size: 0.84rem; line-height: 1.6; }
+.agent-lead b { font-weight: 800; color: var(--color-agent-ink); }
 .agent-warn { margin-top: 0.5rem; font-size: 0.78rem; line-height: 1.55; color: var(--color-warn-ink); }
 .agent-ver { margin-top: 0.8rem; font-size: 0.72rem; color: var(--color-text-dim); }
 .agent-modal .agent-actions { margin-top: 0.4rem; }
@@ -860,7 +861,7 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 var(--space-gutter); font-
     <h2 class="modal-title" id="agentHowtoTitle">讓你的 AI 幫你逐項抽籤</h2>
     <p class="agent-lead">Agent 模式一次只顯示一個品項，操作位置固定。關閉官方抽獎頁回來後，會自動換下一項。</p>
     <p class="agent-warn">你需要先準備能控制本機畫面的 AI 工具；只有貼提示詞不會自動取得手機控制能力。這個開關只切換網站畫面，不代表 AI 已連線。</p>
-    <p class="agent-lead">技能是工具中立的：Codex（Computer Use）已實測；Claude 等能操作 Mac 畫面的 AI 也能裝，但還沒實測，第一次一定先測 3 項。只能聊天的網頁版 GPT／Claude 做不到。</p>
+    <p class="agent-lead"><b>推薦用 Codex（Computer Use）</b>：已實測過整批，而且能連續點擊、速度最快。Claude 等能操作 Mac 畫面的 AI 也能裝同一份技能，但還沒實測、一次只做一個動作會慢一些，第一次一定先測 3 項。只能聊天的網頁版 GPT／Claude 做不到。</p>
 
     <ol class="steps">
       <li>
